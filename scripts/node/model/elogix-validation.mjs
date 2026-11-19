@@ -121,7 +121,15 @@ export const VALIDATION_RULES = {
 
     Quotation_Line__c: [
         chargeSignRule('QTL'),
-        rule('QTL_Quantity_Positive', 'Quantity__c', 'AND(NOT(ISBLANK(Quantity__c)), Quantity__c <= 0)', 'Quantity must be greater than zero.')
+        rule('QTL_Quantity_Positive', 'Quantity__c', 'AND(NOT(ISBLANK(Quantity__c)), Quantity__c <= 0)', 'Quantity must be greater than zero.'),
+        // Phase 3 (decision Q18): lines are locked once the quotation leaves Draft. Deletes are locked by
+        // QuotationDomain, because the Line_Total__c roll-up re-saves the parent quotation.
+        rule(
+            'QTL_Locked_Unless_Draft',
+            null,
+            'NOT(ISPICKVAL(Quotation__r.Status__c, "Draft"))',
+            'Quotation lines can only be added or changed while the quotation is in Draft.'
+        )
     ],
 
     Shipment__c: [

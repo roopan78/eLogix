@@ -9,12 +9,236 @@
         <value>You do not have access to perform this operation.</value>
     </labels>
     <labels>
+        <fullName>eLogix_Pricing_Input_Invalid</fullName>
+        <categories>eLogix,Pricing</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Pricing Input Invalid</shortDescription>
+        <value>Freight cannot be calculated because the {0} is missing or invalid.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Already_Converted</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Already Converted</shortDescription>
+        <value>Quotation {0} has already been converted to a shipment.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Approval_Required</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Approval Required</shortDescription>
+        <value>The discount exceeds {0} percent of gross freight, so the quotation must be approved before it can be {1}.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Approver_Only</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Approver Only</shortDescription>
+        <value>Only quotation approvers can approve or reject a quotation that is pending approval.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Locked</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Locked</shortDescription>
+        <value>This quotation is no longer in Draft, so its charges, discount, lines and validity date cannot be changed.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Must_Start_Draft</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Must Start Draft</shortDescription>
+        <value>A new quotation must start in Draft without approval details.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Not_Convertible</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Not Convertible</shortDescription>
+        <value>Quotation {0} must be Accepted and still valid before it can be converted to a shipment.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Not_Draft</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Not Draft</shortDescription>
+        <value>Quotation {0} is not in Draft.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Not_Found</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Not Found</shortDescription>
+        <value>Quotation {0} does not exist or you do not have access to it.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Not_Pending</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Not Pending</shortDescription>
+        <value>Quotation {0} is not pending approval.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Not_Priced</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Not Priced</shortDescription>
+        <value>Create quotations from a shipment request so that they are priced from the applicable rate card.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Reason_Required</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Reason Required</shortDescription>
+        <value>Enter a reason when rejecting a quotation.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Rejection_Note</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Rejection Note</shortDescription>
+        <value>Approval rejected: {0}</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Request_Immutable</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Request Immutable</shortDescription>
+        <value>A quotation stays linked to the shipment request it was priced for. Create a quotation from the other request instead.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Self_Approval</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Self Approval</shortDescription>
+        <value>You cannot approve your own quotation.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Stamp_Invalid</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Stamp Invalid</shortDescription>
+        <value>Approval details can only be recorded when an approver who does not own the quotation approves it from Pending Approval.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Quotation_Transition_Not_Allowed</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Quotation Transition Not Allowed</shortDescription>
+        <value>A quotation cannot move from {0} to {1}.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Rate_Card_Ambiguous</fullName>
+        <categories>eLogix,Pricing</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Rate Card Ambiguous</shortDescription>
+        <value>More than one rate card applies equally to vehicle type {0} on {1}. Ask your administrator to adjust the rate card priorities.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Rate_Card_Not_Found</fullName>
+        <categories>eLogix,Pricing</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Rate Card Not Found</shortDescription>
+        <value>No active rate card for vehicle type {0} is effective on {1}.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Request_Customer_Inactive</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Request Customer Inactive</shortDescription>
+        <value>The customer on shipment request {0} is inactive, so it cannot be quoted.</value>
+    </labels>
+    <labels>
         <fullName>eLogix_Request_Invalid</fullName>
         <categories>eLogix,Common</categories>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>eLogix Request Invalid</shortDescription>
         <value>Request {0} is incomplete or contains an invalid value.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Request_Not_Approved</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Request Not Approved</shortDescription>
+        <value>The quotation cannot be converted because shipment request {0} is {1}, not Approved.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Request_Not_Found</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Request Not Found</shortDescription>
+        <value>Shipment request {0} does not exist or you do not have access to it.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Request_Not_Quotable</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Request Not Quotable</shortDescription>
+        <value>Shipment request {0} cannot be quoted in status {1}. Only Submitted or Under Review requests can be quoted, once.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Request_Not_Quoted</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Request Not Quoted</shortDescription>
+        <value>The quotation cannot be accepted because shipment request {0} is {1}, not Quoted.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Request_Route_Required</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Request Route Required</shortDescription>
+        <value>Shipment request {0} needs a route with a distance before it can be quoted or converted.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Request_Update_Failed</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Request Update Failed</shortDescription>
+        <value>Shipment request {0} could not be updated: {1}</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Request_Vehicle_Type_Required</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Request Vehicle Type Required</shortDescription>
+        <value>Shipment request {0} needs a requested vehicle type before it can be quoted.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Request_Weight_Required</fullName>
+        <categories>eLogix,Quotation</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Request Weight Required</shortDescription>
+        <value>Shipment request {0} needs a total weight greater than zero before it can be quoted.</value>
     </labels>
     <labels>
         <fullName>eLogix_Setting_Missing</fullName>

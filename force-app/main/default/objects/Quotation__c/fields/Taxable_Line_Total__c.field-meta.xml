@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Taxable_Line_Total__c</fullName>
+    <inlineHelpText>Sum of quotation lines marked taxable. Only these lines are included in the tax base.</inlineHelpText>
+    <label>Taxable Additional Charges</label>
+    <summarizedField>Quotation_Line__c.Amount__c</summarizedField>
+    <summaryFilterItems>
+        <field>Quotation_Line__c.Is_Taxable__c</field>
+        <operation>equals</operation>
+        <value>true</value>
+    </summaryFilterItems>
+    <summaryForeignKey>Quotation_Line__c.Quotation__c</summaryForeignKey>
+    <summaryOperation>sum</summaryOperation>
+    <type>Summary</type>
+</CustomField>

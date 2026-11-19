@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>QTL_Locked_Unless_Draft</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    NOT(ISPICKVAL(Quotation__r.Status__c, &quot;Draft&quot;))
+)</errorConditionFormula>
+    <errorMessage>Quotation lines can only be added or changed while the quotation is in Draft.</errorMessage>
+</ValidationRule>

@@ -60,7 +60,13 @@ try {
     if (err == null) failures++;
 
     // --- Quotation: roll-up of lines and formula totals
-    Quotation__c qt = new Quotation__c(Shipment_Request__c = sr.Id, Base_Freight__c = 5000, Weight_Charge__c = 1200, Distance_Charge__c = 3500,
+    // Phase 3 rules (QuotationDomain): a quotation must be priced (rate card set) and its request must be
+    // Submitted or Under Review. The formula components below are still set directly to test the formulas.
+    update new Shipment_Request__c(Id = sr.Id, Status__c = 'Submitted');
+    Rate_Card__c qtCard = new Rate_Card__c(Name = 'Smoke Quote Card', Rate_Card_Code__c = 'SMK-RC-QT', Vehicle_Type__c = 'LCV',
+        Base_Freight__c = 5000, Rate_Per_KG__c = 1, Rate_Per_KM__c = 10, Effective_From__c = Date.today());
+    insert qtCard;
+    Quotation__c qt = new Quotation__c(Shipment_Request__c = sr.Id, Rate_Card__c = qtCard.Id, Base_Freight__c = 5000, Weight_Charge__c = 1200, Distance_Charge__c = 3500,
         Fuel_Surcharge__c = 485, Insurance_Charge__c = 100, Discount__c = 285, Tax_Percent__c = 12);
     insert qt;
     insert new Quotation_Line__c(Quotation__c = qt.Id, Charge_Type__c = 'Loading', Amount__c = 500);

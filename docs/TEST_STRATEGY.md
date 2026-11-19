@@ -27,6 +27,14 @@
 
 - **Follow-up F1 to F3 (deploy `0Afg700000KOZcDCAX`):** 79 of 79 tests passed; coverage 98.5%. Both verification scripts passed again: 12/12 and 19/19.
 
+## 2b. Phase 3 results (2026-11-19, `eLogixDev`)
+
+- **Apex tests:** 132 of 132 passed in deploy `0Afg700000KRoekCAD` (79 from Phase 2, 53 from Phase 3). Phase 3 classes have 96.0% coverage; the org has 97.2%. Scenarios are in [APEX_TEST_MATRIX.md](APEX_TEST_MATRIX.md) section 5.
+- **Two-layer security tests:** in this org, field-level security is enforced on DML even in test context, so direct writes to protected fields are proven blocked twice: by FLS for a Sales user, and by the trigger for an administrator-level user with field access.
+- **Verification scripts:** Phase 1 19/19, Phase 2 12/12, Phase 3 18/18.
+- **Follow-up A1 to A3 (deploy `0Afg700000KRt9mCAD`):** 135 of 135 tests passed (3 new), coverage 97.6%; verification scripts Phase 1 19/19, Phase 2 12/12, Phase 3 19/19 (one A1 check added).
+- **Follow-up A4 (deploy `0Afg700000KRUWMCA5`):** 136 of 136 tests passed (1 new; the conversion validity test was reworked), coverage 97.6%; verification scripts 19/19, 12/12 and 19/19.
+
 ## 3. Phase 1 results (2026-11-19, `eLogixDev`)
 
 **Model validation.** It passes. Three deliberately injected faults (an unknown cross-object field, a misspelled picklist value and a broken View All dependency) were each reported by the validator.

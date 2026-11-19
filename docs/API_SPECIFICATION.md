@@ -17,9 +17,10 @@ Status: **conventions defined; no Apex API is deployed yet.** Signatures are add
 
 | Service | Operation | Required access | Phase |
 |---|---|---|---|
-| `ShipmentService` | `createFromRequest(List<Id> requestIds)`, `changeStatus(List<StatusChangeRequest>)` | Shipment create/edit; transition permission from metadata | P2 |
+| `ShipmentService` | `changeStatus(List<StatusChangeRequest>)` (live). Creating a shipment from a request is `QuotationService.convertToShipment` (P3), from an accepted quotation only. | Shipment edit; transition permission from metadata | P2 |
 | `TrackingService` | `recordEvents(List<TrackingEventRequest>)` | Tracking Event create | P2 |
-| `FreightCalculationService` | `quote(List<FreightRequest>) → List<FreightBreakdown>`, `applyToQuotations(List<Id>)` | Quotation create/edit | P3 |
+| `FreightCalculationService` | `quote(List<FreightRequest>) → List<FreightBreakdown>`; static `quotationTotals(...)`, `isDiscountWithinThreshold(...)`, `discountThresholdPercent()` (live) | Rate Card read | P3 |
+| `QuotationService` | `createFromRequests(List<Id>)`, `recalculate(List<Id>)` (the planned `applyToQuotations`), `submitForApproval(List<Id>)`, `approve(List<Id>)`, `reject(List<Id>, String reason)`, `convertToShipment(List<Id>)` → `ServiceResult` (live) | Quotation create/edit; `eLogix_Approve_Quotation` (approve, reject); Shipment create (convert) | P3 |
 | `FleetAllocationService` | `allocate(List<AllocationRequest>)`, `release(List<Id> assignmentIds)` | `eLogix_Allocate_Fleet` | P4 |
 | `InventoryService` | `postMovements(List<MovementRequest>)`, `reserve(...)`, `release(...)` | Stock Movement create; `eLogix_Adjust_Inventory` for adjustments | P5 |
 | `DeliveryService` | `completeDelivery(List<DeliveryResult>)` | Delivery edit | P5 |

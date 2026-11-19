@@ -70,6 +70,33 @@ Every test that depends on permissions runs as a role user with real permission-
 
 The summary-update rollback branch in `TrackingService.recordEvents` is covered (follow-up F2) through a supported production path: data loaded under `eLogix_Data_Migration` that breaks `SHP_Delivery_After_Pickup`. No production failure switch was added.
 
+## 5. Phase 3 scenarios (deploy `0Afg700000KRUWMCA5`: 136/136 tests, 57 for Phase 3)
+
+| Scenario | Test(s) |
+|---|---|
+| Reference lane components and totals (9,745.00 / 1,169.40 / 10,914.40) | `FreightCalculationServiceTest.referenceLaneComponents`, `QuotationServiceTest.createsPricedDraftQuotationAndMovesRequestToQuoted` |
+| Minimum freight uplift into base; fuel after uplift; insurance on declared value | `minimumFreightUpliftIsRecordedInBaseAndRaisesFuel`, `minimumBelowLineHaulChangesNothing`, `blankDeclaredValueAndPercentagesGiveZero` |
+| HALF_UP rounding; percentages divided once | `componentsRoundHalfUpToTwoDecimals`, `percentagesAreDividedByOneHundredExactlyOnce` |
+| Rate card eligibility, inclusive dates on the pickup date, specificity, priority, latest effective, ambiguity, not found | `ineligibleCardsAreIgnored`, `effectiveDatesAreInclusiveOnThePricingDate`, `specificityBeatsPriority`, `priorityThenLatestEffectiveFromBreakTies`, `equalTopCandidatesFailAsAmbiguous` |
+| Configuration fails closed / drives values | `missingTaxSettingFailsClosed`, `thresholdComesFromConfiguration`, `recalculateRepricesDraftQuotationsOnly` |
+| Taxable vs non-taxable lines; Apex mirror equals formulas | `totalsMirrorHonoursTaxableLinesAndNeverTaxesBelowZero`; live script check 6 |
+| Threshold boundary (exactly 10% vs 10.01%, discount lines counted) | `discountThresholdBoundary`, `submitWithinThresholdApprovesAutomatically`, `submitAboveThresholdWaitsForApproval` |
+| **Bulk**: pricing 200 → 1 SOQL / 0 DML; create 200 → 3 SOQL / 2 DML; convert 200 → 4 SOQL / 3 DML (includes the A3 request lock); no-change save 200 → 0 SOQL / 1 DML | `quotingTwoHundredRequestsUsesOneQuery`, `createFromTwoHundredRequestsIsBulkSafe`, `twoHundredQuotationsConvertInBulk`, `savesWithoutARelevantChangeCostNothing` |
+| Per-record failures (request eligibility, inactive customer, missing route or vehicle type, no card, duplicates) | `requestProblemsAreReportedPerRecord`, `aQuotedRequestCannotBeQuotedAgain` |
+| **Per-record compensation**: a request that cannot move fails only its quotation; a shipment whose request cannot move is removed | `aRequestThatCannotMoveFailsOnlyItsOwnQuotation`, `aFailedRequestUpdateRemovesOnlyItsOwnShipment` |
+| Access: Operations / Customer Service cannot quote; another user's private request is not found; Sales cannot convert | `usersWithoutQuotationCreateAccessAreDenied`, `anotherUsersPrivateRequestIsNotFound`, `usersWhoCannotCreateShipmentsAreDenied` |
+| Approval: manager stamp verified and time-stamped; permission required; no self-approval; only pending; rejection to Draft with reason | `managerApprovalWritesAVerifiedStamp`, `approvalNeedsThePermission`, `ownersCannotApproveTheirOwnQuotation`, `onlyPendingQuotationsCanBeDecided`, `rejectionReturnsToDraftWithTheReason` |
+| **Direct DML bypass attempts** (two layers: FLS for Sales, trigger for an administrator): creation rules, transitions, stamp forgery/self-approval/backdate/clear, status-label approval, discount/charge lock, line insert/update/delete lock, approver-only rejection | `QuotationTriggerHandlerTest` (12 tests) |
+| Acceptance moves the request to Approved; fails if the request is no longer Quoted | `aboveThresholdWithAValidStampCanBeSentAndAccepted`, `acceptanceFailsWhenTheRequestIsNoLongerQuoted` |
+| Conversion: Quoted shipment with the Phase 2 Created event, freight = total, request Converted; once only (also within one call); accepted and valid only | `QuotationConversionTest` (7 tests) |
+| Request sync refuses to run outside the trigger | `requestSyncOnlyRunsInsideTheQuotationTrigger` |
+| **A1**: a quotation cannot be re-pointed to another request, in Draft or later, by Sales or an administrator | `QuotationTriggerHandlerTest.aQuotationCannotBeMovedToAnotherRequest`; live script check 6 |
+| **A2**: an owner change in the same save cannot hide a self-approval (the owner change alone is allowed) | `QuotationTriggerHandlerTest.anOwnerChangeCannotHideASelfApproval` |
+| **A3**: a request changed after acceptance (Cancelled) is re-read under a row lock, reported, and not overwritten; the other quotation converts | `QuotationConversionTest.aRequestChangedBeforeConversionIsNotOverwritten` |
+| **A4**: the validity date is editable in Draft, locked in Pending Approval, Approved, Sent and Accepted, and editable again after a rejected approval returns the quotation to Draft; an accepted quotation cannot be back-dated to expire | `QuotationTriggerHandlerTest.validityIsLockedOnceTheQuotationLeavesDraft`, `QuotationConversionTest.onlyAcceptedValidQuotationsConvert` |
+
+Coverage of Phase 3 classes: `QuotationDomain`, `QuotationTriggerHandler`, `RateCardSelector`, `FreightBreakdown` 100%; `FreightCalculationService` 99.3%; `QuotationService` 94.4%; `QuotationSelector`, `ShipmentRequestSelector` 90.9%; combined 96.9%. Org-wide 97.6%.
+
 ## 4. How to run
 
 ```bash

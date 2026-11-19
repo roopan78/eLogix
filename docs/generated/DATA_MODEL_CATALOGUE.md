@@ -100,9 +100,10 @@ Standard object - eLogix custom fields only.
 | `Discount__c` | Currency(16,2) |  |  |
 | `Tax_Percent__c` | Percent |  | Protected (service-written) |
 | `Line_Total__c` | Roll-up SUM of Quotation_Line__c.Amount__c (Quotation_Line__c.Quotation__c) |  |  |
+| `Taxable_Line_Total__c` | Roll-up SUM of Quotation_Line__c.Amount__c (Quotation_Line__c.Quotation__c) where Quotation_Line__c.Is_Taxable__c equals "true" |  | Sum of quotation lines marked taxable. Only these lines are included in the tax base. |
 | `Subtotal__c` | Formula(Currency): `Base_Freight__c + Weight_Charge__c + Distance_Charge__c + Fuel_Surcharge__c + Insurance_Charge__c + Line_Total__c - Discount__c` |  |  |
-| `Tax_Amount__c` | Formula(Currency): `(Base_Freight__c + Weight_Charge__c + Distance_Charge__c + Fuel_Surcharge__c + Insurance_Charge__c + Line_Total__c - Discount__c) * Tax_Percent__c` |  |  |
-| `Total_Amount__c` | Formula(Currency): `(Base_Freight__c + Weight_Charge__c + Distance_Charge__c + Fuel_Surcharge__c + Insurance_Charge__c + Line_Total__c - Discount__c) * (1 + Tax_Percent__c)` |  |  |
+| `Tax_Amount__c` | Formula(Currency): `MAX(0, Base_Freight__c + Weight_Charge__c + Distance_Charge__c + Fuel_Surcharge__c + Insurance_Charge__c + Taxable_Line_Total__c - Discount__c) * Tax_Percent__c` |  |  |
+| `Total_Amount__c` | Formula(Currency): `(Base_Freight__c + Weight_Charge__c + Distance_Charge__c + Fuel_Surcharge__c + Insurance_Charge__c + Line_Total__c - Discount__c) + MAX(0, Base_Freight__c + Weight_Charge__c + Distance_Charge__c + Fuel_Surcharge__c + Insurance_Charge__c + Taxable_Line_Total__c - Discount__c) * Tax_Percent__c` |  |  |
 | `Valid_Until__c` | Date |  |  |
 | `Status__c` | Picklist: Draft, Pending Approval, Approved, Sent, Accepted, Rejected, Expired, Superseded |  |  |
 | `Version__c` | Number(3,0) |  | Protected (service-written) |
@@ -143,6 +144,7 @@ Standard object - eLogix custom fields only.
 |---|---|---|
 | `QTL_Amount_Sign_Matches_Type` | Yes | Amount must be non-zero. Discount lines must be negative and all other charge types positive. |
 | `QTL_Quantity_Positive` | Yes | Quantity must be greater than zero. |
+| `QTL_Locked_Unless_Draft` | Yes | Quotation lines can only be added or changed while the quotation is in Draft. |
 
 ## Shipment (`Shipment__c`)
 

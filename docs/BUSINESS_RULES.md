@@ -46,12 +46,18 @@ Status legend: **Live** = deployed and verified in `eLogixDev`. **Planned (Pn)**
 
 | Rule | Owner | Component | Status |
 |---|---|---|---|
-| Freight = base + weight × rate + distance × rate + fuel + insurance + additional − discount + tax | Apex | `FreightCalculationService` writes components; quotation formulas total them | Formulas live and verified; service planned (P3) |
+| Freight = base + weight × rate + distance × rate + fuel + insurance + additional − discount + tax | Apex | `FreightCalculationService` writes the components; quotation formulas total them (non-taxable lines excluded from tax, decision Q14) | Live, tested (P3) |
 | No hardcoded pricing | Data | `Rate_Card__c` records; tax default in `eLogix_Setting__mdt.Default_Tax_Percent` | Live |
-| Pricing is date-aware and uses the applicable rate card | Apex | Rate card selection: vehicle type, active, effective dates, lowest `Selection_Priority__c` | Planned (P3) |
+| Pricing is date-aware and uses the applicable rate card | Apex | `FreightCalculationService`: active, vehicle type, effective on the requested pickup date, business-unit/region specificity, lowest `Selection_Priority__c`, latest `Effective_From__c`; ties fail closed | Live, tested (P3) |
 | Rates non-negative; percentages within 0-100; effective range valid | Validation rule | `RC_Rates_Non_Negative`, `RC_Percentages_In_Range`, `RC_Effective_Range_Valid` | Live, verified |
 | Discount cannot exceed charges | Validation rule | `QT_Discount_Within_Charges` | Live |
-| Discount above threshold needs approval | Flow + custom permission | Quotation Approval Flow using `Max_Discount_Percent_No_Approval` (10%); approvers hold `eLogix_Approve_Quotation` | Planned (P5) |
+| Discount above threshold needs approval | Apex (enforcement) + Flow (routing, P5) | `QuotationDomain`: above `Max_Discount_Percent_No_Approval` (10% of gross freight, header discount + discount lines), Approved/Sent/Accepted need a verified stamp from a non-owner holding `eLogix_Approve_Quotation`; `QuotationService.approve`/`reject` write it. The Quotation Approval Flow (P5) only routes. | Live, tested (P3) |
+| Quotation status follows the approved transitions | Apex | `QuotationDomain`: Draft → Pending Approval/Approved; Pending Approval → Approved/Draft; Approved → Sent; Sent → Accepted/Rejected (terminal) | Live, tested (P3) |
+| Discount, lines and validity date locked once a quotation leaves Draft (validity date: A4) | Apex + validation rule | `QuotationDomain` (discount, components, line roll-ups, including line deletes) and `QTL_Locked_Unless_Draft` (line insert/update) | Live, tested (P3) |
+| Only Submitted / Under Review requests are quoted; request moves to Quoted, Approved (on acceptance), Converted (on conversion) | Apex | `QuotationDomain` (trigger) and `QuotationService.convertToShipment` | Live, tested (P3) |
+| One shipment per accepted quotation | Apex | `QuotationService.convertToShipment`: quotation row lock + existing-shipment check; request row lock with its status re-read under the lock, so a changed request is never overwritten (A3) | Live, tested (P3) |
+| A quotation stays linked to the request it was priced for | Apex | `QuotationDomain`: `Shipment_Request__c` cannot change after creation, in any status (A1) | Live, tested (P3) |
+| Customer rejection of a quotation | None yet (known limitation A5) | The request stays at `Quoted`; re-quoting arrives with quotation revisions | Deferred |
 | Expired quotations cannot be accepted | Validation rule | `QT_Cannot_Accept_Expired` | Live |
 | Charge sign matches type (Discount negative, others positive) | Validation rule | `QTL_`, `FC_`, `INL_Amount_Sign_Matches_Type` | Live, verified |
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Phase 1 (metadata foundation) and Phase 2 (Apex foundation, status policy, tracking) deployed and verified on 2026-11-19 |
+| Status | Phases 1 (metadata), 2 (Apex foundation, status policy, tracking) and 3 (pricing, quotation, approval, conversion) deployed and verified on 2026-11-19 |
 | Target org | `eLogixDev` - Developer Edition, instance API 68.0 |
 | Source API version | 67.0 (`sfdx-project.json`; kept per CLAUDE.md section 18) |
 | Related | [DATA_MODEL.md](DATA_MODEL.md) · [BUSINESS_RULES.md](BUSINESS_RULES.md) · [SECURITY_DESIGN.md](SECURITY_DESIGN.md) · [SHIPMENT_LIFECYCLE.md](SHIPMENT_LIFECYCLE.md) |
@@ -101,13 +101,24 @@ force-app/main/default/triggers/   ShipmentTrigger
 force-app/main/default/labels/     CustomLabels (hand-maintained)
 ```
 
+Built in Phase 3 ([PRICING_IMPLEMENTATION.md](PRICING_IMPLEMENTATION.md)):
+
+```
+force-app/main/default/classes/
+  pricing/     FreightCalculationService, FreightRequest, FreightBreakdown
+  crm/         QuotationService, QuotationDomain
+  selectors/   + RateCardSelector, ShipmentRequestSelector, QuotationSelector
+  handlers/    + QuotationTriggerHandler
+force-app/main/default/triggers/   + QuotationTrigger
+```
+
 The original plan listed a `BaseSelector` and an `IdempotencyKeys` class. Neither was built. Selectors are small enough not to need a base class, and idempotency keys belong to the service that owns each record type (for example, tracking keys in `TrackingService`).
 
 Planned for later phases:
 
 ```
 force-app/main/default/classes/
-  pricing/     FreightCalculationService, RateCardSelector
+  (pricing/ and crm/ are built: see PRICING_IMPLEMENTATION.md)
   fleet/       FleetAllocationService, VehicleAvailabilityService
   warehouse/   WarehouseService, InventoryService
   tracking/    DeliveryService
@@ -124,7 +135,7 @@ Salesforce DX source format allows nested folders inside a package directory. Th
 ```mermaid
 flowchart LR
     P1[Phase 1<br/>Metadata foundation<br/>DONE] --> P2[Phase 2<br/>Apex foundation +<br/>status policy + tracking<br/>DONE]
-    P2 --> P3[Phase 3<br/>Pricing + quotation]
+    P2 --> P3[Phase 3<br/>Pricing + quotation<br/>DONE]
     P2 --> P4[Phase 4<br/>Fleet allocation]
     P3 --> P5[Phase 5<br/>Inventory, delivery,<br/>invoicing, payments + flows]
     P4 --> P5

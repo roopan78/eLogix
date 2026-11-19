@@ -307,10 +307,18 @@ export const OBJECTS = [
                 summarizedField: 'Quotation_Line__c.Amount__c',
                 label: 'Additional Charges'
             }),
+            // Phase 3 (decision Q14): only lines marked Is_Taxable__c enter the tax base.
+            rollup('Taxable_Line_Total__c', 'Quotation_Line__c.Quotation__c', 'sum', {
+                summarizedField: 'Quotation_Line__c.Amount__c',
+                label: 'Taxable Additional Charges',
+                filters: [{ field: 'Quotation_Line__c.Is_Taxable__c', operation: 'equals', value: 'true' }],
+                helpText: 'Sum of quotation lines marked taxable. Only these lines are included in the tax base.'
+            }),
             formula('Subtotal__c', 'Currency', 'Base_Freight__c + Weight_Charge__c + Distance_Charge__c + Fuel_Surcharge__c + Insurance_Charge__c + Line_Total__c - Discount__c'),
             // Percent fields evaluate as fractions in formulas (12% -> 0.12), so no division by 100.
-            formula('Tax_Amount__c', 'Currency', '(Base_Freight__c + Weight_Charge__c + Distance_Charge__c + Fuel_Surcharge__c + Insurance_Charge__c + Line_Total__c - Discount__c) * Tax_Percent__c'),
-            formula('Total_Amount__c', 'Currency', '(Base_Freight__c + Weight_Charge__c + Distance_Charge__c + Fuel_Surcharge__c + Insurance_Charge__c + Line_Total__c - Discount__c) * (1 + Tax_Percent__c)'),
+            // Tax base (decision Q14) = freight components + taxable lines - discount, never below zero.
+            formula('Tax_Amount__c', 'Currency', 'MAX(0, Base_Freight__c + Weight_Charge__c + Distance_Charge__c + Fuel_Surcharge__c + Insurance_Charge__c + Taxable_Line_Total__c - Discount__c) * Tax_Percent__c'),
+            formula('Total_Amount__c', 'Currency', '(Base_Freight__c + Weight_Charge__c + Distance_Charge__c + Fuel_Surcharge__c + Insurance_Charge__c + Line_Total__c - Discount__c) + MAX(0, Base_Freight__c + Weight_Charge__c + Distance_Charge__c + Fuel_Surcharge__c + Insurance_Charge__c + Taxable_Line_Total__c - Discount__c) * Tax_Percent__c'),
             date('Valid_Until__c'),
             pick('Status__c', [
                 { name: 'Draft', default: true },

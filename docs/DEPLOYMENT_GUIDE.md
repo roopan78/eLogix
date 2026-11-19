@@ -72,6 +72,13 @@ sf apex run --file scripts/apex/verify-phase2-apex.apex --target-org eLogixDev
 
 Expect `SMOKE SUMMARY checks=12 failures=0`.
 
+```bash
+# Verify pricing, quotation approval and conversion against live configuration (rolled back; run as a user with eLogix_Administrator)
+sf apex run --file scripts/apex/verify-phase3-pricing.apex --target-org eLogixDev
+```
+
+Expect `SMOKE SUMMARY checks=19 failures=0`. The script also prints `SMOKE INFO rate card region after insert without a region = South`; see PRICING_IMPLEMENTATION section 1.
+
 For data seeding (Phase 9), temporarily assign `eLogix_Data_Migration` so that historical dates pass the bypassable validation rules. Remove it afterwards:
 
 ```bash
@@ -105,6 +112,10 @@ Do this **before** loading demo data. Changing the currency locale relabels amou
 | 2026-11-19 04:10 | `0Afg700000KLxb3CAD` | Page layouts, compact layouts, Account/Contact layout extensions | 621 / 621 | Succeeded |
 | 2026-11-19 09:49 | `0Afg700000KNnfeCAD` | Phase 2: 33 Apex classes, `ShipmentTrigger`, 18 custom labels (`RunLocalTests`: 77/77 passed, coverage 97.5%) | 674 / 674 | Succeeded |
 | 2026-11-19 10:59 | `0Afg700000KOZcDCAX` | Phase 2 follow-up F1 to F3: `recordStatusEvents` restricted to the shipment trigger, rollback test, `ShipmentService` comment (`RunLocalTests`: 79/79 passed, coverage 98.5%) | 674 / 674 | Succeeded |
+| 2026-11-19 ~11:53 | `0Afg700000KOim0CAD` | Phase 3 model change: `Quotation__c.Taxable_Line_Total__c`, tax/total formulas (Q14), `QTL_Locked_Unless_Draft` (Q18), layout, FLS (`RunLocalTests`: 79/79) | 55 / 55 | Succeeded |
+| 2026-11-19 17:41 | `0Afg700000KRoekCAD` | Phase 3 Apex: pricing, quotation, approval, conversion; `QuotationTrigger`; 27 labels (`RunLocalTests`: 132/132 passed, coverage 97.2%) | 717 / 717 | Succeeded |
+| 2026-11-19 18:03 | `0Afg700000KRt9mCAD` | Phase 3 follow-up A1 to A3: request link immutable, self-approval check against previous owner, request lock on conversion; 1 label (`RunLocalTests`: 135/135 passed, coverage 97.6%) | 718 / 718 | Succeeded |
+| 2026-11-19 18:13 | `0Afg700000KRUWMCA5` | Phase 3 follow-up A4: quotation validity date locked after Draft; lock label wording (`RunLocalTests`: 136/136 passed, coverage 97.6%) | 718 / 718 | Succeeded |
 
 Each deploy was preceded by a successful `--dry-run`. The only dry-run failure in the phase was the first one: `isNavAutomaticallyAdded` is not a valid `CustomApplication` element. The writer now copies the element set of a Lightning app retrieved from the org.
 

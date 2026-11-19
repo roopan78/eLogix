@@ -80,7 +80,7 @@ Master-detail chains go at most three levels deep (`Warehouse → Inventory → 
    | `Integration_Log__c.Idempotency_Key__c` | Outbound request key | Duplicate callouts on retry |
    | `Inventory__c.Inventory_Key__c` | `<Warehouse Code>:<SKU>` | Two stock records for one SKU in one warehouse |
 3. **Derived values are never typed.** Totals are roll-ups and formulas:
-   - Quotation: `Subtotal = base + weight + distance + fuel + insurance + additional lines - discount`; `Tax = Subtotal × Tax %`; `Total = Subtotal × (1 + Tax %)`.
+   - Quotation (Phase 3, decision Q14): `Subtotal = base + weight + distance + fuel + insurance + all lines - discount`; `Tax = MAX(0, base + weight + distance + fuel + insurance + taxable lines - discount) × Tax %`; `Total = Subtotal + Tax` (computed unrounded, as one formula). `Taxable_Line_Total__c` is a roll-up of lines with `Is_Taxable__c = true`.
    - Invoice: `Subtotal` = Σ line amounts, `Tax` = Σ line tax, `Paid` = Σ **Completed** payments only, `Balance` = `Subtotal + Tax − Paid`.
    - Shipment: `Item_Count__c`, `Total_Item_Weight__c`, `Total_Declared_Value__c`, `Additional_Charges__c`.
    - Inventory: `Net_Available_Quantity__c`, `Is_Below_Reorder__c`, `Stock_Value__c`; Warehouse totals roll up from inventory.

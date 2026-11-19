@@ -3,8 +3,8 @@
 | | |
 |---|---|
 | Last updated | 2026-11-19 |
-| Current phase | **Phase 2 - complete, including mandatory follow-up F1 to F5** (deployed and verified, `0Afg700000KOZcDCAX`). Phase 2 commit `1d6d61d`; follow-up changes uncommitted, awaiting your review |
-| Next phase | Phase 3 - pricing and quotation (not started; needs your review of the follow-up and explicit approval) |
+| Current phase | **Phase 3 - complete: deployed and verified, not committed** (pricing, quotation, approval, conversion; deploy `0Afg700000KRoekCAD`, follow-ups A1 to A3 `0Afg700000KRt9mCAD` and A4 `0Afg700000KRUWMCA5`) |
+| Next phase | Phase 4 (fleet allocation) or Phase 5 (inventory, delivery, invoicing, Flows), not started; needs your review of Phase 3 and approval |
 | Target org | `eLogixDev` - Developer Edition, instance API 68.0, source API 67.0 |
 
 ## Phase plan
@@ -13,7 +13,7 @@
 |---|---|---|
 | 1 | Project inspection, architecture docs, data model, security, configuration and app metadata | **Done - deployed and verified** |
 | 2 | Apex foundation (trigger handler, result/exception pattern, logger, settings and permission services, selectors), `ShipmentStatusPolicy`, `ShipmentService`, `TrackingService`, triggers, tests | **Done - deployed and verified** (`0Afg700000KNnfeCAD`, 77/77 tests, 97.5% coverage). Commit pending your review. |
-| 3 | `FreightCalculationService`, rate card selection, quotation service, tests | Not started |
+| 3 | `FreightCalculationService`, rate card selection, quotation service, tests | **Done - deployed and verified** (`0Afg700000KRUWMCA5` after follow-ups A1 to A4, 136/136 tests, 97.6% coverage). Commit pending your review. |
 | 4 | `FleetAllocationService`, `VehicleAvailabilityService` (capacity, validity, overlap, row locking), tests | Not started |
 | 5 | Inventory and stock movements, delivery, invoicing, payments; Flows (request, quotation approval, delivery completion, invoice generation, payment status, SLA) | Not started |
 | 6 | Returns and claims; integration interfaces and mocks; platform events; log purge | Not started |
@@ -27,12 +27,12 @@
 - [x] Project inspection and setup (CLI 2.140.6, org edition and limits, API versions, existing metadata)
 - [x] Architecture and documentation (12 documents in `docs/`, generated catalogue)
 - [x] Data model and metadata (deployed: 621 components; 674 with the Phase 2 Apex)
-- [ ] Shipment and quotation services (shipment service done in P2; quotation in P3)
-- [ ] Freight calculation (P3)
+- [x] Shipment and quotation services (shipment service P2; quotation, approval and conversion P3)
+- [x] Freight calculation (P3)
 - [ ] Fleet allocation (P4)
 - [x] Status transition policy (P2)
 - [x] Tracking history (P2)
-- [ ] Initial Apex tests (P2 done: 77 tests; P3 and P4 to follow)
+- [ ] Initial Apex tests (P2: 79 tests, P3: 53 tests; P4 to follow)
 
 **Day 2**
 - [ ] Warehouse and inventory essentials (P5)
@@ -44,6 +44,40 @@
 - [ ] Regression tests, deployment validation, demo rehearsal (P9)
 
 ---
+
+## Phase 3 report
+
+Full report: [docs/PHASE3_IMPLEMENTATION_REPORT.md](docs/PHASE3_IMPLEMENTATION_REPORT.md). Plan and approved decisions: [docs/PHASE3_PLAN.md](docs/PHASE3_PLAN.md). Design: [docs/PRICING_IMPLEMENTATION.md](docs/PRICING_IMPLEMENTATION.md).
+
+| Step | ID | Result |
+|---|---|---|
+| Model change Q14/Q18, check-only | `0Afg700000KOurxCAD` | Succeeded, 55/55, 79/79 tests |
+| **Model change Q14/Q18, deploy** | **`0Afg700000KOim0CAD`** | **Succeeded, 55/55, 79/79 tests**; Phase 1 19/19 and Phase 2 12/12 afterwards |
+| Apex check-only, final run | `0Afg700000KREzSCAX` | Succeeded, 717/717, 132/132 tests (runs 1 to 4 found test-only defects, fixed) |
+| **Apex deploy + `RunLocalTests`** | **`0Afg700000KRoekCAD`** | **Succeeded, 717/717, 132/132 tests, coverage 97.2%** |
+| Verification scripts | n/a | Phase 1 **19/19**, Phase 2 **12/12**, Phase 3 **18/18**; no rows left behind |
+| Pre-commit audit follow-up A1 to A3, check-only | `0Afg700000KQcR8CAL` | Succeeded, 718/718, 135/135 tests |
+| **Pre-commit audit follow-up A1 to A3, deploy** | **`0Afg700000KRt9mCAD`** | **Succeeded, 718/718, 135/135 tests, coverage 97.6%**; scripts Phase 1 19/19, Phase 2 12/12, Phase 3 19/19; all 48 Apex classes and triggers match the repository |
+| Follow-up A4, check-only | `0Afg700000KRMCFCA5` | Succeeded, 718/718, 136/136 tests |
+| **Follow-up A4 (validity date locked after Draft), deploy** | **`0Afg700000KRUWMCA5`** | **Succeeded, 718/718, 136/136 tests, coverage 97.6%**; scripts 19/19, 12/12, 19/19; all 48 Apex classes and triggers match the repository |
+
+Audit follow-up (report section 9):
+- **A1:** a quotation's request link is now immutable.
+- **A2:** self-approval is checked against the previous owner too.
+- **A3:** conversion locks the request and re-checks its status under the lock.
+
+Built: 10 production classes (`pricing/`, `crm/`, selectors, handler), `QuotationTrigger`, 27 labels, 53 tests, `verify-phase3-pricing.apex`, the approved Q14 (taxable lines) and Q18 (line lock) model changes. No Phase 2 production class changed.
+
+**Known issues** (report section 7):
+1. New rate cards default to Region = South (value-set default), so they are region-specific unless cleared.
+2. Narrow `without sharing` writers for approval, request status and conversion compensation, until Phase 9 roles exist (documented deviation from the plan).
+3. Conversion is available to the Logistics Manager or an administrator until Phase 9 sharing.
+4. A5: when the customer rejects a quotation, its request stays at Quoted. This is a known limitation until quotation revisions are implemented.
+
+**Source control:** nothing committed. All Phase 3 changes are uncommitted on `feature/phase-2-apex-foundation`, on top of `90751c6`; awaiting your review.
+
+---
+
 
 ## Phase 2 report
 

@@ -85,6 +85,87 @@ public class TestDataFactory {
         return items;
     }
 
+    /* ------------------------------------------------------------------ */
+    /* Phase 3: pricing and quotation builders                             */
+    /* ------------------------------------------------------------------ */
+
+    public static final String CUSTOMER_SERVICE = 'eLogix_Customer_Service_Executive';
+    public static final String APPROVE_QUOTATION_PERMISSION = 'eLogix_Approve_Quotation';
+
+    /** Reference lane: Chennai to Bangalore, 350 km. */
+    public static Route__c createRoute(String code, Decimal distanceKm) {
+        Route__c route = new Route__c(
+            Name = 'Chennai - Bangalore ' + code,
+            Route_Code__c = code,
+            Origin__c = 'Chennai',
+            Destination__c = 'Bangalore',
+            Distance__c = distanceKm,
+            Estimated_Transit_Hours__c = 9,
+            Status__c = 'Active'
+        );
+        insert route;
+        return route;
+    }
+
+    /**
+     * Reference LCV card used across the Phase 3 tests: base 2,000; 3.50 per kg; 12.00 per km;
+     * fuel 10%; insurance 0.5% of declared value; no minimum; effective from 30 days ago, open-ended.
+     * Not inserted, so tests can adjust it first.
+     */
+    public static Rate_Card__c buildRateCard(String code, String vehicleType) {
+        return new Rate_Card__c(
+            Name = 'Rate Card ' + code,
+            Rate_Card_Code__c = code,
+            Vehicle_Type__c = vehicleType,
+            Base_Freight__c = 2000,
+            Rate_Per_KG__c = 3.5,
+            Rate_Per_KM__c = 12,
+            Fuel_Surcharge_Percent__c = 10,
+            Insurance_Percent__c = 0.5,
+            Minimum_Freight__c = 0,
+            Effective_From__c = Date.today().addDays(-30),
+            Is_Active__c = true,
+            Selection_Priority__c = 10
+        );
+    }
+
+    /**
+     * A quotable request on the reference lane: 500 kg, declared value 200,000, LCV, pickup in 3 days.
+     * Not inserted.
+     */
+    public static Shipment_Request__c buildShipmentRequest(Id customerId, Id businessUnitId, Id routeId, String status) {
+        return new Shipment_Request__c(
+            Customer__c = customerId,
+            Business_Unit__c = businessUnitId,
+            Route__c = routeId,
+            Origin__c = 'Chennai',
+            Destination__c = 'Bangalore',
+            Requested_Pickup_Date__c = Date.today().addDays(3),
+            Expected_Delivery_Date__c = Date.today().addDays(5),
+            Total_Weight__c = 500,
+            Declared_Value__c = 200000,
+            Requested_Vehicle_Type__c = 'LCV',
+            Priority__c = 'Standard',
+            Status__c = status
+        );
+    }
+
+    public static List<Shipment_Request__c> buildShipmentRequests(Integer count, Id customerId, Id businessUnitId, Id routeId, String status) {
+        List<Shipment_Request__c> requests = new List<Shipment_Request__c>();
+        for (Integer i = 0; i < count; i++) {
+            requests.add(buildShipmentRequest(customerId, businessUnitId, routeId, status));
+        }
+        return requests;
+    }
+
+    public static List<Id> idsOf(List<SObject> records) {
+        List<Id> ids = new List<Id>();
+        for (SObject record : records) {
+            ids.add(record.Id);
+        }
+        return ids;
+    }
+
     /** A Standard Platform User with the given eLogix permission sets, inserted without mixed-DML errors. */
     public static User createUser(String lastName, List<String> permissionSetNames) {
         Profile platformProfile = [SELECT Id FROM Profile WHERE Name = 'Standard Platform User' LIMIT 1];

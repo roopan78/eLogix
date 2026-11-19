@@ -6,9 +6,9 @@ Status: **outline.** It is finalised in Phase 9, once demo data and LWCs exist. 
 |---|---|---|---|---|
 | 1 | Open the eLogix ERP app; show navigation, a customer with credit terms and GSTIN, and the business units | Admin | App, data model, layouts | Phase 1 (live) |
 | 2 | Try to raise a request for an inactive customer and get blocked; raise a valid request | Sales | Customer rules | Phase 1 (live) |
-| 3 | Build a quotation from the effective rate card: base + weight + distance + fuel + insurance − discount + GST | Sales | Freight engine, configurable pricing | Phase 3 |
-| 4 | A 15% discount routes for approval; the manager approves | Logistics Mgr | Approval flow, custom permission | Phase 5 |
-| 5 | Convert to a shipment, add items, confirm (blocked first with zero items) | Operations | Lifecycle policy, guards | Phase 2 |
+| 3 | Build a quotation from the effective rate card: base + weight + distance + fuel + insurance − discount + GST (a non-taxable loading line stays out of GST) | Sales | Freight engine, configurable pricing, `Is_Taxable__c` | Phase 3 (live) |
+| 4 | A 15% discount goes to Pending Approval; the Sales owner cannot approve it; the manager approves, and only then can it be sent | Logistics Mgr | Approval gate, verified stamp, custom permission | Phase 3 (gate, live); Phase 5 (routing Flow) |
+| 5 | Customer accepts; convert to a shipment (status Quoted, freight from the quotation), add items, confirm (blocked first with zero items) | Logistics Mgr / Operations | Conversion, lifecycle policy, guards | Phase 3 (conversion) + Phase 2 (live) |
 | 6 | Allocate a vehicle and driver: an expired-insurance truck and a double-booked driver are rejected | Fleet | Fleet rules, locking | Phase 4 |
 | 7 | Dispatch: stock is reserved and issued through stock movements; the timeline shows each tracking event | Warehouse / Ops | Inventory audit, tracking | Phase 5 |
 | 8 | Try to jump Delivered → Dispatched and get blocked; show the transition metadata | Operations | Configurable status policy | Phase 2 |
