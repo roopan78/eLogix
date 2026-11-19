@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SR_Pickup_Date_Not_In_Past</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    AND(
+        OR(ISNEW(), ISCHANGED(Requested_Pickup_Date__c)),
+        Requested_Pickup_Date__c &lt; TODAY()
+    )
+)</errorConditionFormula>
+    <errorDisplayField>Requested_Pickup_Date__c</errorDisplayField>
+    <errorMessage>Requested pickup date cannot be in the past.</errorMessage>
+</ValidationRule>

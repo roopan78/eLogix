@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>RET_Approval_Before_Pickup</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    AND(
+        OR(
+            ISPICKVAL(Status__c, &quot;Pickup Scheduled&quot;), ISPICKVAL(Status__c, &quot;In Transit&quot;),
+            ISPICKVAL(Status__c, &quot;Received&quot;), ISPICKVAL(Status__c, &quot;Under Inspection&quot;),
+            ISPICKVAL(Status__c, &quot;Inspection Passed&quot;), ISPICKVAL(Status__c, &quot;Inspection Failed&quot;),
+            ISPICKVAL(Status__c, &quot;Restocked&quot;)
+        ),
+        ISBLANK(Approval_Date__c)
+    )
+)</errorConditionFormula>
+    <errorDisplayField>Status__c</errorDisplayField>
+    <errorMessage>A return must be approved before pickup can be scheduled.</errorMessage>
+</ValidationRule>

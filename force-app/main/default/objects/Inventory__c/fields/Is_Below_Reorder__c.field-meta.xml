@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Below_Reorder__c</fullName>
+    <formula>(Available_Quantity__c - Reserved_Quantity__c) &lt;= Reorder_Level__c</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Is Below Reorder</label>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SR_Weight_Must_Be_Positive</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    OR(
+        AND(NOT(ISBLANK(Total_Weight__c)), Total_Weight__c &lt;= 0),
+        AND(
+            ISBLANK(Total_Weight__c),
+            NOT(ISPICKVAL(Status__c, &quot;Draft&quot;)),
+            NOT(ISPICKVAL(Status__c, &quot;Rejected&quot;)),
+            NOT(ISPICKVAL(Status__c, &quot;Cancelled&quot;))
+        )
+    )
+)</errorConditionFormula>
+    <errorDisplayField>Total_Weight__c</errorDisplayField>
+    <errorMessage>Total weight must be greater than zero, and is mandatory once the request leaves Draft.</errorMessage>
+</ValidationRule>

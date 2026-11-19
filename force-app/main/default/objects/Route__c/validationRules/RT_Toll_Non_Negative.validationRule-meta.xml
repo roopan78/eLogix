@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>RT_Toll_Non_Negative</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    Toll_Charges__c &lt; 0
+)</errorConditionFormula>
+    <errorDisplayField>Toll_Charges__c</errorDisplayField>
+    <errorMessage>Toll charges cannot be negative.</errorMessage>
+</ValidationRule>

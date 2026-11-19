@@ -12,6 +12,8 @@
     "test:unit:coverage": "sfdx-lwc-jest --coverage",
     "prettier": "prettier --write \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}\"",
     "prettier:verify": "prettier --check \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}\"",
+    "metadata:validate": "node scripts/node/scaffold-metadata.mjs --dry-run",
+    "metadata:generate": "node scripts/node/scaffold-metadata.mjs",
     "prepare": "husky || true",
     "precommit": "lint-staged"
   },

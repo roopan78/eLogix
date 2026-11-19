@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>CLM_Settlement_Details_Required</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    AND(
+        ISPICKVAL(Status__c, &quot;Settled&quot;),
+        OR(ISBLANK(Settlement_Date__c), ISBLANK(Approved_Amount__c), ISPICKVAL(Resolution__c, &quot;Pending&quot;))
+    )
+)</errorConditionFormula>
+    <errorDisplayField>Status__c</errorDisplayField>
+    <errorMessage>A settled claim must have an approved amount, a settlement date and a resolution.</errorMessage>
+</ValidationRule>

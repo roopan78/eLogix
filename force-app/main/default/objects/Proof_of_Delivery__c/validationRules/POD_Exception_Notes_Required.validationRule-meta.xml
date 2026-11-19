@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>POD_Exception_Notes_Required</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    AND(Has_Exception__c, ISBLANK(Exception_Notes__c))
+)</errorConditionFormula>
+    <errorDisplayField>Exception_Notes__c</errorDisplayField>
+    <errorMessage>Describe the exception when a proof of delivery is flagged with an exception.</errorMessage>
+</ValidationRule>

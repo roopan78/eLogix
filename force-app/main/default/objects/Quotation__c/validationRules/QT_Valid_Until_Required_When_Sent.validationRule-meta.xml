@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>QT_Valid_Until_Required_When_Sent</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    AND(
+        OR(ISPICKVAL(Status__c, &quot;Sent&quot;), ISPICKVAL(Status__c, &quot;Accepted&quot;)),
+        ISBLANK(Valid_Until__c)
+    )
+)</errorConditionFormula>
+    <errorDisplayField>Valid_Until__c</errorDisplayField>
+    <errorMessage>Set a Valid Until date before sending the quotation to the customer.</errorMessage>
+</ValidationRule>

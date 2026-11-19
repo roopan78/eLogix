@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>QT_Cannot_Accept_Expired</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    AND(
+        ISCHANGED(Status__c),
+        ISPICKVAL(Status__c, &quot;Accepted&quot;),
+        NOT(ISBLANK(Valid_Until__c)),
+        Valid_Until__c &lt; TODAY()
+    )
+)</errorConditionFormula>
+    <errorDisplayField>Status__c</errorDisplayField>
+    <errorMessage>This quotation has expired and cannot be accepted. Issue a revised quotation.</errorMessage>
+</ValidationRule>

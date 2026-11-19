@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Failure_Reason__c</fullName>
+    <label>Failure Reason</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Consignee Unavailable</fullName>
+                <default>false</default>
+                <label>Consignee Unavailable</label>
+            </value>
+            <value>
+                <fullName>Address Incorrect</fullName>
+                <default>false</default>
+                <label>Address Incorrect</label>
+            </value>
+            <value>
+                <fullName>Refused by Consignee</fullName>
+                <default>false</default>
+                <label>Refused by Consignee</label>
+            </value>
+            <value>
+                <fullName>Payment Not Ready</fullName>
+                <default>false</default>
+                <label>Payment Not Ready</label>
+            </value>
+            <value>
+                <fullName>Damaged Goods</fullName>
+                <default>false</default>
+                <label>Damaged Goods</label>
+            </value>
+            <value>
+                <fullName>Access Restricted</fullName>
+                <default>false</default>
+                <label>Access Restricted</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

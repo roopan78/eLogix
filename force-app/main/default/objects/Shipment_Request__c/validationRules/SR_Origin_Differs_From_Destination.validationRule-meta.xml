@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SR_Origin_Differs_From_Destination</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    TRIM(LOWER(Origin__c)) = TRIM(LOWER(Destination__c))
+)</errorConditionFormula>
+    <errorDisplayField>Destination__c</errorDisplayField>
+    <errorMessage>Origin and destination must be different locations.</errorMessage>
+</ValidationRule>

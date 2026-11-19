@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomPermission xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Approve or reject return requests. Approval is required before pickup can be scheduled.</description>
+    <isLicensed>false</isLicensed>
+    <label>eLogix: Approve Return</label>
+</CustomPermission>

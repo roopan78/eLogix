@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CompactLayout xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>eLogix_Compact</fullName>
+    <fields>Name</fields>
+    <fields>Original_Shipment__c</fields>
+    <fields>Customer__c</fields>
+    <fields>Return_Reason__c</fields>
+    <fields>Return_Type__c</fields>
+    <label>eLogix Compact</label>
+</CompactLayout>

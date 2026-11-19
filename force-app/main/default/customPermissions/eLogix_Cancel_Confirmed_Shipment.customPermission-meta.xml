@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomPermission xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Cancel a shipment after it has been confirmed, readied for dispatch or placed on hold.</description>
+    <isLicensed>false</isLicensed>
+    <label>eLogix: Cancel Confirmed Shipment</label>
+</CustomPermission>

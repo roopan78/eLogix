@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SM_Quantity_Sign_Valid</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    OR(
+        Quantity__c = 0,
+        AND(Quantity__c &lt; 0, NOT(ISPICKVAL(Movement_Type__c, &quot;Adjustment&quot;)))
+    )
+)</errorConditionFormula>
+    <errorDisplayField>Quantity__c</errorDisplayField>
+    <errorMessage>Quantity must be non-zero. Only Adjustment movements may be negative; every other movement type implies its direction.</errorMessage>
+</ValidationRule>

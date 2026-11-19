@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Created</fullName>
+        <default>true</default>
+        <label>Created</label>
+    </customValue>
+    <customValue>
+        <fullName>Requested</fullName>
+        <default>false</default>
+        <label>Requested</label>
+    </customValue>
+    <customValue>
+        <fullName>Quoted</fullName>
+        <default>false</default>
+        <label>Quoted</label>
+    </customValue>
+    <customValue>
+        <fullName>Confirmed</fullName>
+        <default>false</default>
+        <label>Confirmed</label>
+    </customValue>
+    <customValue>
+        <fullName>Ready for Dispatch</fullName>
+        <default>false</default>
+        <label>Ready for Dispatch</label>
+    </customValue>
+    <customValue>
+        <fullName>Dispatched</fullName>
+        <default>false</default>
+        <label>Dispatched</label>
+    </customValue>
+    <customValue>
+        <fullName>Picked Up</fullName>
+        <default>false</default>
+        <label>Picked Up</label>
+    </customValue>
+    <customValue>
+        <fullName>In Transit</fullName>
+        <default>false</default>
+        <label>In Transit</label>
+    </customValue>
+    <customValue>
+        <fullName>Hub Arrival</fullName>
+        <default>false</default>
+        <label>Hub Arrival</label>
+    </customValue>
+    <customValue>
+        <fullName>Hub Departure</fullName>
+        <default>false</default>
+        <label>Hub Departure</label>
+    </customValue>
+    <customValue>
+        <fullName>Location Update</fullName>
+        <default>false</default>
+        <label>Location Update</label>
+    </customValue>
+    <customValue>
+        <fullName>Out for Delivery</fullName>
+        <default>false</default>
+        <label>Out for Delivery</label>
+    </customValue>
+    <customValue>
+        <fullName>Delivered</fullName>
+        <default>false</default>
+        <label>Delivered</label>
+    </customValue>
+    <customValue>
+        <fullName>Failed Delivery</fullName>
+        <default>false</default>
+        <label>Failed Delivery</label>
+    </customValue>
+    <customValue>
+        <fullName>On Hold</fullName>
+        <default>false</default>
+        <label>On Hold</label>
+    </customValue>
+    <customValue>
+        <fullName>Delayed</fullName>
+        <default>false</default>
+        <label>Delayed</label>
+    </customValue>
+    <customValue>
+        <fullName>Damaged</fullName>
+        <default>false</default>
+        <label>Damaged</label>
+    </customValue>
+    <customValue>
+        <fullName>Lost</fullName>
+        <default>false</default>
+        <label>Lost</label>
+    </customValue>
+    <customValue>
+        <fullName>Cancelled</fullName>
+        <default>false</default>
+        <label>Cancelled</label>
+    </customValue>
+    <customValue>
+        <fullName>Return Initiated</fullName>
+        <default>false</default>
+        <label>Return Initiated</label>
+    </customValue>
+    <customValue>
+        <fullName>Closed</fullName>
+        <default>false</default>
+        <label>Closed</label>
+    </customValue>
+    <customValue>
+        <fullName>Exception</fullName>
+        <default>false</default>
+        <label>Exception</label>
+    </customValue>
+    <description>Every shipment status has a same-named event type so status transitions map 1:1; the remaining values are operational events that do not change status.</description>
+    <masterLabel>eLogix Tracking Event Type</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

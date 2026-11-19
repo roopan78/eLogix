@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>RS_Distance_Non_Negative</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    Distance_From_Origin__c &lt; 0
+)</errorConditionFormula>
+    <errorDisplayField>Distance_From_Origin__c</errorDisplayField>
+    <errorMessage>Distance from origin cannot be negative.</errorMessage>
+</ValidationRule>
