@@ -16,7 +16,7 @@
 | File storage | 20 MB | Enough for a handful of proof-of-delivery images; demo uses small files. |
 | Multi-currency | Not enabled (`CurrencyType` unsupported) | `CurrencyIsoCode` on Business Unit is not applicable. All currency fields use the corporate currency. |
 | Time zone | Org default and admin user: **Asia/Kolkata** (verified 2026-11-19) | Scheduled flows (SLA monitoring) and timestamps follow IST. |
-| Corporate currency | **USD** (`UserInfo.getDefaultCurrency()`); currency locale English (United States) | Must become English (India) → INR before demo data is seeded. The setting is not exposed through any API or metadata type in single-currency orgs, so it is a manual Setup step ([DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md#4-org-settings-for-the-indian-demo)). |
+| Corporate currency | **INR**, currency locale English (India) (verified 2026-11-19 via `UserInfo.getDefaultCurrency()`) | All currency fields display in rupees. In single-currency orgs this setting is UI-only; a fresh org needs the manual step in [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md#4-org-settings-for-the-indian-demo). |
 | Pre-existing custom metadata | None (clean org besides DE sample Account fields) | No naming collisions. |
 | Other CLI-authenticated orgs | Several, including a client sandbox | Every `sf` command passes `--target-org eLogixDev` explicitly. |
 
@@ -126,7 +126,6 @@ Critical path for the two-day plan: P1 → P2 → P3 → P5 → P8 → P9. Fleet
 | Risk / limitation | Impact | Mitigation |
 |---|---|---|
 | 5 MB data storage | Demo data, tracking events and logs compete for about 2,500 records. | Demo data sized at about 400 records. Integration logging records failures and samples successes. Tracking events are only written for meaningful changes. A purge batch is planned for logs. |
-| Org currency still USD | Indian scenarios would display `$`. | Time zone is already IST. The currency locale switch to English (India) / INR is a manual Setup step, required before seeding. The verification script prints the active currency. |
 | Validation rule messages cannot use Custom Labels | Partial deviation from CLAUDE.md rule 15. | Validation-rule messages are translatable via Translation Workbench; all Apex messages use Custom Labels. |
 | Roll-up recalculation fires parent validation rules | A child insert can fail on an unrelated parent rule. | Parent rules are pure invariants. Paid-invoice immutability is owned by Apex (it compares changed fields), not a validation rule. |
 | Percent fields evaluate as fractions in formulas | Found in Phase 1 verification: tax was 100x too small. | Fixed. The generator now rejects any percent field compared with or divided by 100. |

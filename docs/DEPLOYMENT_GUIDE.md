@@ -70,9 +70,9 @@ sf org assign permset --name eLogix_Data_Migration --target-org eLogixDev
 |---|---|---|---|
 | Org default time zone | Asia/Kolkata | Done (verified via `Organization.TimeZoneSidKey`) | Setup → Company Information, or `sf data update record --sobject Organization` |
 | Admin user time zone | Asia/Kolkata | Done (verified via `UserInfo.getTimeZone()`) | User settings |
-| Company currency locale | English (India) → INR | **Manual step pending** | See below |
+| Company currency locale | English (India) → INR | Done (verified: `SMOKE INFO org currency=INR`) | Manual, see below |
 
-The currency locale of a single-currency org is not exposed through the SOAP/REST API (`Organization` has no such field) or through any settings metadata type (`CompanySettings` and `CurrencySettings` were retrieved and checked). Change it in the UI:
+The currency locale of a single-currency org is not exposed through the SOAP/REST API (`Organization` has no such field) or through any settings metadata type (`CompanySettings` and `CurrencySettings` were retrieved and checked). On a fresh org, change it in the UI:
 
 1. Setup → Quick Find "Company Information" → **Edit**.
 2. **Currency Locale** → `English (India) - INR` → **Save**.

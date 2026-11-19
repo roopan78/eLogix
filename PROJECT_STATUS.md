@@ -107,29 +107,28 @@ Post-deploy: `eLogix_Administrator` assigned to the org admin user (needed for f
 | Setting | Status |
 |---|---|
 | Org default time zone, admin user time zone | **Asia/Kolkata**, verified (`Organization.TimeZoneSidKey`, `UserInfo.getTimeZone()`) |
-| Company currency locale | **Still USD. Manual step required**: Setup → Company Information → Edit → Currency Locale = *English (India) - INR*. This setting is not exposed through any API or metadata type in single-currency orgs; `Organization`, `CompanySettings` and `CurrencySettings` were all checked. Verify with the `SMOKE INFO` line of `scripts/apex/verify-phase1-metadata.apex`. |
+| Company currency locale | **English (India) / INR**, verified 2026-11-19 (`SMOKE INFO org currency=INR`). Changed manually in Setup → Company Information, because single-currency orgs expose this setting through no API or metadata type. |
 
 ### Source control
 
-Phase 1 is committed on branch `feature/phase-1-metadata-foundation` (local only, not pushed), in two commits:
+Phase 1 is committed on branch `feature/phase-1-metadata-foundation` (local only, not pushed):
 1. Your `CLAUDE.md` rename and `.gitignore` change, kept separate so it can be reviewed or dropped on its own.
 2. The Phase 1 metadata foundation, generator, verification script and documentation.
+3. Org settings follow-up: currency verified as INR, docs updated.
 
 ### Known issues and limitations
 
-1. **Org currency is still USD** until the manual Currency Locale step above is done. It must happen before demo data is seeded.
-2. **Roles and sharing rules are not deployed** (planned for Phase 9). Under Private org-wide defaults, non-manager roles currently see only records they own.
-3. **Validation rule messages are plain text**, not Custom Labels. This is a platform limitation; they are translatable via Translation Workbench, and all Apex messages will use labels.
-4. **Per-role access is designed and deployed but not yet exercised** with login-as test users (Phase 9).
-5. **The generator does not delete files.** Renamed or removed model items must be removed by hand, plus a destructive deploy if they were already deployed.
-6. **`node_modules` is not installed**, so the husky/lint-staged hooks (Prettier on XML) and LWC Jest are inactive. Once installed, Prettier may reformat the generated XML whitespace on commit.
-7. Only the `Account Layout` and `Contact Layout` used by System Administrator were extended. The Sales, Support and Marketing variants were not.
-8. The CLI session for `eLogixDev` still carries the admin user's previous username. It keeps working, but SOQL lookups on `User.Username` must use the current username.
+1. **Roles and sharing rules are not deployed** (planned for Phase 9). Under Private org-wide defaults, non-manager roles currently see only records they own.
+2. **Validation rule messages are plain text**, not Custom Labels. This is a platform limitation; they are translatable via Translation Workbench, and all Apex messages will use labels.
+3. **Per-role access is designed and deployed but not yet exercised** with login-as test users (Phase 9).
+4. **The generator does not delete files.** Renamed or removed model items must be removed by hand, plus a destructive deploy if they were already deployed.
+5. **`node_modules` is not installed**, so the husky/lint-staged hooks (Prettier on XML) and LWC Jest are inactive. Once installed, Prettier may reformat the generated XML whitespace on commit.
+6. Only the `Account Layout` and `Contact Layout` used by System Administrator were extended. The Sales, Support and Marketing variants were not.
+7. The CLI session for `eLogixDev` still carries the admin user's previous username. It keeps working, but SOQL lookups on `User.Username` must use the current username.
 
 ### Actions for you
 
-1. Change the Currency Locale to English (India) - INR (above).
-2. Push `feature/phase-1-metadata-foundation` and open a pull request when ready. Nothing has been pushed.
+1. Push `feature/phase-1-metadata-foundation` and open a pull request when ready. Nothing has been pushed.
 
 ### Recommended next phase
 
