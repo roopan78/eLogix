@@ -256,8 +256,9 @@ sequenceDiagram
 
 ```apex
 public with sharing class TrackingService {
-    // Called by ShipmentTriggerHandler in after context only.
-    public void recordStatusEvents(List<Shipment__c> newList, Map<Id, Shipment__c> oldById);
+    // Shipment__c after insert / after update trigger only. Reads Trigger.new and Trigger.oldMap itself and throws
+    // AuthorizationException (STATUS_EVENTS_TRIGGER_ONLY) anywhere else (Phase 2 follow-up F1).
+    public void recordStatusEvents();
 
     // Public API for manual and integration events (Location Update, Hub Arrival, Picked Up ...). Phase 6 GPS and Phase 7 console use it.
     public ServiceResult recordEvents(List<TrackingEventRequest> requests);
@@ -289,11 +290,11 @@ The writes themselves run in a private `without sharing` inner class (`TrackingS
 | `TrackingService.Writer` | A master-detail child needs edit access on the parent. A Logistics Manager has View All on shipments, but no edit access to another user's shipment, and must still be able to record tracking on it. | `recordEvents` checks Tracking_Event__c create access and reads every shipment in user mode first. Status events are only written after a shipment save the user was allowed to make. Only tracking events and the two summary fields are written. |
 | `TrackingEventSelector.KeyLookup` | Duplicate detection has to see every existing `Event_Key__c`. Otherwise the unique index rejects the insert instead of the service skipping it. | Returns key strings only, never record data. |
 
-**Residual exposure (pre-commit review, 2026-11-19).**
+**Residual exposure (pre-commit review, 2026-11-19; resolved by follow-up F1, deploy `0Afg700000KOZcDCAX`).**
 - Both classes are private inner classes. Only `TrackingService` and `TrackingEventSelector` can call them.
 - No eLogix class exposes an `@AuraEnabled` method, REST resource, invocable method or `global` member, so end users reach them only through a shipment DML they were already allowed to make (status events) or through `recordEvents` after its access checks.
-- `TrackingService.recordStatusEvents` is `public` and trusts the records it receives. Apex code that called it with fabricated old and new records could therefore write status history for a shipment that never changed. Today only users who can author Apex can do that, and they already run anonymous Apex in system context.
-- Before any controller, REST resource or invocable action is added (Phase 6 or 7), restrict the method to the shipment trigger context. See [PHASE2_IMPLEMENTATION_REPORT.md](PHASE2_IMPLEMENTATION_REPORT.md) section 9.
+- `TrackingService.recordStatusEvents` used to be `public` and accept caller-supplied old and new records, so code could have fabricated status history.
+- **F1 fix:** it now takes no arguments, reads `Trigger.new` and `Trigger.oldMap` itself, and throws `AuthorizationException` (`STATUS_EVENTS_TRIGGER_ONLY`) unless it runs inside a `Shipment__c` after insert or after update trigger. Calls from other code are refused, including fabricated records sent through the handler's test constructor, as `ShipmentTriggerHandlerTest.statusEventsCannotBeRecordedOutsideTheShipmentTrigger` proves. Status history can therefore only describe a status change that is actually being saved.
 
 ## 7. Custom labels (all Apex user-facing messages)
 
@@ -364,5 +365,6 @@ No public signature in sections 4 to 6 changed. These additions and corrections 
 | 6 | Test seams: `TrackingService.nowOverride` (clock), `PermissionService.testOverrides`, `SettingsService.testOverrides`. All are `@TestVisible private`. | `nowOverride` lets a test force a real validation failure on the tracking insert, which proves rollback without a production-only failure switch. |
 | 7 | `ServiceResult` gained `addRecordId` and `errorsFor(Integer)`. | Needed to build per-request results and to read them in tests. |
 | 8 | 12 test classes plus `TestDataFactory` (the plan said 11). `ShipmentStatusTransitionConfigTest` is separate from `ShipmentStatusPolicyTest`, as planned. `LoggerTest` and `ExceptionHandlerTest` are separate classes. | Smaller, focused classes. |
+| 9 | Follow-up F1 (deploy `0Afg700000KOZcDCAX`): `recordStatusEvents` changed from `(List<Shipment__c>, Map<Id, Shipment__c>)` to `()`. It reads the trigger context itself and is refused outside a `Shipment__c` after-save trigger. | Closes pre-commit finding S3: a public method that trusted caller-supplied records could have fabricated status history once an external entry point existed. |
 
 Implementation details: [APEX_FRAMEWORK.md](APEX_FRAMEWORK.md), [SHIPMENT_POLICY_IMPLEMENTATION.md](SHIPMENT_POLICY_IMPLEMENTATION.md), [TRACKING_IMPLEMENTATION.md](TRACKING_IMPLEMENTATION.md), [APEX_TEST_MATRIX.md](APEX_TEST_MATRIX.md), [PHASE2_IMPLEMENTATION_REPORT.md](PHASE2_IMPLEMENTATION_REPORT.md).

@@ -1,8 +1,8 @@
 /**
  * Shipment tracking history.
  *
- * recordStatusEvents (trigger, after context) writes one Tracking_Event__c per allowed status
- * change. It recomputes the decisions from Trigger.old and Trigger.new instead of receiving state
+ * recordStatusEvents (Shipment__c trigger, after context only) writes one Tracking_Event__c per
+ * allowed status change. It reads the trigger records itself and recomputes the decisions from Trigger.old and Trigger.new instead of receiving state
  * from the before-trigger, and suppresses duplicates with a deterministic Event_Key__c checked
  * against the database (docs/APEX_ARCHITECTURE.md section 5.3):
  *
@@ -24,6 +24,7 @@ public with sharing class TrackingService {
     public static final String STATUS_EVENT_NOT_ALLOWED = 'STATUS_EVENT_NOT_ALLOWED';
     public static final String SHIPMENT_NOT_FOUND = 'SHIPMENT_NOT_FOUND';
     public static final String OPERATION_FAILED = 'OPERATION_FAILED';
+    public static final String STATUS_EVENTS_TRIGGER_ONLY = 'STATUS_EVENTS_TRIGGER_ONLY';
     @TestVisible
     private static final String CREATION_CODE = 'NEW';
     @TestVisible
@@ -56,11 +57,32 @@ public with sharing class TrackingService {
     /* ------------------------------------------------------------------ */
 
     /**
-     * Records one event per allowed status change. Pass oldById = null for an insert. Costs no
-     * SOQL or DML when no status changed; otherwise 1 query and 1 insert for the whole batch.
+     * Records one event per allowed status change of the shipments in the current trigger. Costs
+     * no SOQL or DML when no status changed; otherwise 1 query and 1 insert for the whole batch.
+     *
+     * Takes no arguments on purpose. It reads Trigger.new and Trigger.oldMap itself and refuses to
+     * run anywhere except a Shipment__c after insert or after update trigger. Status history is
+     * written without sharing, so a caller must never be able to supply its own "before" and
+     * "after" records: that would let code expose an entry point that fabricates history for a
+     * shipment that never changed (Phase 2 follow-up F1).
      */
-    public void recordStatusEvents(List<Shipment__c> newList, Map<Id, Shipment__c> oldById) {
-        if (newList == null || newList.isEmpty()) {
+    public void recordStatusEvents() {
+        if (!isShipmentAfterSaveTrigger()) {
+            throw new AuthorizationException(Label.eLogix_Access_Denied).withCode(STATUS_EVENTS_TRIGGER_ONLY);
+        }
+        recordStatusEvents((List<Shipment__c>) Trigger.new, Trigger.isInsert ? null : (Map<Id, Shipment__c>) Trigger.oldMap);
+    }
+
+    private static Boolean isShipmentAfterSaveTrigger() {
+        return Trigger.isExecuting &&
+            Trigger.isAfter &&
+            (Trigger.isInsert || Trigger.isUpdate) &&
+            Trigger.new != null &&
+            Trigger.new.getSObjectType() == Shipment__c.SObjectType;
+    }
+
+    private void recordStatusEvents(List<Shipment__c> newList, Map<Id, Shipment__c> oldById) {
+        if (newList.isEmpty()) {
             return;
         }
         List<ShipmentStatusPolicy.Decision> decisions = oldById == null

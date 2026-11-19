@@ -11,6 +11,8 @@ public class TestDataFactory {
     public static final String OPERATIONS = 'eLogix_Operations_Executive';
     public static final String LOGISTICS_MANAGER = 'eLogix_Logistics_Manager';
     public static final String SALES = 'eLogix_Sales_Executive';
+    /** Holds only eLogix_Bypass_Validation_Rules. Used to create records that break a validation rule, as legacy data can. */
+    public static final String DATA_MIGRATION = 'eLogix_Data_Migration';
     public static final String TEST_USER_DOMAIN = '@test.elogix.example';
     public static final String CANCEL_PERMISSION = 'eLogix_Cancel_Confirmed_Shipment';
 

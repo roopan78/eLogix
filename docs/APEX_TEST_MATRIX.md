@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Last run | 2026-11-19, deploy `0Afg700000KNnfeCAD` (`RunLocalTests`) on `eLogixDev` |
-| Result | **77 of 77 passed**, 0 failures. Test run time is about 40 seconds. |
-| Coverage | **97.5%** (621 of 637 lines) across 17 classes that contain code, plus the trigger |
+| Last run | 2026-11-19, deploy `0Afg700000KOZcDCAX` (Phase 2 follow-up F1 to F3, `RunLocalTests`) on `eLogixDev`. Previous: `0Afg700000KNnfeCAD` (77 tests, 97.5%). |
+| Result | **79 of 79 passed**, 0 failures. Test run time is about 38 seconds. |
+| Coverage | **98.5%** (637 of 647 lines) across 17 classes that contain code, plus the trigger |
 | Standards | [TEST_STRATEGY.md](TEST_STRATEGY.md) section 2 |
 
 ## 1. Scenarios required by CLAUDE.md and the Phase 2 instructions
@@ -28,9 +28,11 @@
 | **Bulk: 200-row insert and update**, 1 query and 2 DML each | `ShipmentTriggerHandlerTest.bulkInsertAndUpdateUseOneQueryAndOneInsertEach` |
 | Bulk policy evaluation keeps order and indexes | `ShipmentStatusPolicyTest.bulkEvaluationPreservesOrderAndIndexes` |
 | **Partial success**: 100 valid and 100 invalid rows in one `allOrNone=false` update | `ShipmentTriggerHandlerTest.partialSuccessKeepsValidRowsAndRejectsInvalidOnes` |
-| **Trigger re-entry**: roll-up recalculation fires the trigger with no queries and no events | `ShipmentTriggerHandlerTest.rollUpRecalculationReFiresTriggerWithoutEvents`, `handlerIgnoresSavesWithoutStatusChange` |
-| **Trigger re-entry**: workflow-style re-fire does not duplicate; retry after rollback rewrites the same key | `ShipmentTriggerHandlerTest.reEntryWithTheSameVersionDoesNotDuplicateEvents` |
+| **Trigger re-entry**: roll-up recalculation fires the trigger with no queries and no events; a 200-row save without a status change costs 0 queries and only its own DML | `ShipmentTriggerHandlerTest.rollUpRecalculationReFiresTriggerWithoutEvents`, `savesWithoutStatusChangeCostNothing` |
+| **Trigger re-entry**: a workflow-style re-fire that computes an already-stored key writes nothing and does not block the save (driven through the real trigger) | `ShipmentTriggerHandlerTest.reEntryWithTheSameVersionDoesNotDuplicateEvents` |
+| **F1: status history only from the shipment trigger**: direct calls and fabricated records sent through the handler test constructor are refused (`STATUS_EVENTS_TRIGGER_ONLY`) and write nothing | `ShipmentTriggerHandlerTest.statusEventsCannotBeRecordedOutsideTheShipmentTrigger` |
 | **Rollback**: a failed tracking insert rolls back the status change (all-or-none and partial modes) | `ShipmentTriggerHandlerTest.trackingFailureRollsBackTheStatusChange` |
+| **F2: summary-update rollback**, reached with real data and no failure switch: a shipment loaded under the validation bypass fails the summary update, so the events of the whole call are rolled back and reported as `OPERATION_FAILED` (current batch-wide behaviour; Phase 6 item in TRACKING_IMPLEMENTATION section 5) | `TrackingServiceTest.summaryFailureRollsBackTheEventsOfTheWholeBatch` |
 | Operational events: insert, summary, idempotent replay, batch duplicates, out-of-order events | `TrackingServiceTest.recordsLocationEventAndUpdatesTrackingSummary`, `replayedExternalEventIsIdempotent`, `duplicateWithinOneBatchIsRecordedOnce`, `olderEventDoesNotOverwriteTheLatestLocation`, `newestEventInABatchWinsAndKeepsLastKnownLocation` |
 | Status-type and malformed operational events refused per request | `TrackingServiceTest.statusAndInvalidEventsAreRejectedPerRequest` |
 | Access: no create permission, invisible shipment, View All manager | `TrackingServiceTest.userWithoutCreateAccessIsDenied`, `shipmentTheUserCannotSeeIsReportedAsNotFound`, `managerWithViewAllCanRecordOnAnotherUsersShipment` |
@@ -46,8 +48,8 @@ Every test that depends on permissions runs as a role user with real permission-
 | Class | Tests | Kind |
 |---|---|---|
 | `ShipmentStatusPolicyTest` | 18 | Pure unit tests (injected rows, in-memory records, no DML) |
-| `ShipmentTriggerHandlerTest` | 16 | End to end through DML as Operations Executive and Logistics Manager |
-| `TrackingServiceTest` | 13 | Service with DML as four role users |
+| `ShipmentTriggerHandlerTest` | 17 | End to end through DML as Operations Executive and Logistics Manager |
+| `TrackingServiceTest` | 14 | Service with DML as five role users, including a Data Migration user who creates legacy-style invalid data |
 | `ShipmentServiceTest` | 7 | Service with user-mode DML |
 | `ShipmentStatusTransitionConfigTest` | 4 | Deployed CMDT integrity (fails the deploy if configuration breaks a rule) |
 | `SettingsServiceTest` | 4 | Deployed settings and failure modes |
@@ -61,19 +63,12 @@ Every test that depends on permissions runs as a role user with real permission-
 |---|---|---|
 | `ELogixException`, `ExceptionHandler`, `Logger`, `PermissionService`, `ServiceResult`, `SettingsService`, `ShipmentDomain`, `ShipmentItemsRequiredGuard`, `ShipmentTrigger`, `ShipmentTriggerHandler`, `TrackingEventSelector`, `TriggerHandler` | 100% | none |
 | `ShipmentStatusPolicy` | 99.5% (186/187) | `continue` for a guard returning a null map |
-| `TrackingService` | 96.2% (203/211) | Rollback branch when the summary update throws (the savepoint path); two empty-input early returns |
+| `TrackingService` | 99.1% (219/221) | Two empty-input early returns |
 | `TrackingEventRequest` | 92.9% | No-argument constructor |
-| `ShipmentService` | 90.0% (45/50) | Catch branch for an exception from the user-mode update (the observed failure mode is a row error, which is covered) |
+| `ShipmentService` | 90.0% (45/50) | Defensive catch for an exception from the user-mode update. Access failures arrive as row errors, which are covered. |
 | `ShipmentSelector` | 83.3% (5/6) | Empty-input early return |
 
-The summary-update rollback branch in `TrackingService.recordEvents` is not exercised yet. It **is reachable in production**: the system-mode summary update still runs the shipment's validation rules, so a shipment that currently breaks a rule fails the update and triggers the rollback. That happens with records loaded under `eLogix_Data_Migration` (validation bypass), and could happen with future record-triggered automation on `Shipment__c`.
-
-It can be tested **without** a production failure switch:
-1. A user holding Operations Executive and Data Migration creates a shipment whose expected delivery date is before its pickup date.
-2. A Logistics Manager, who has View All but no bypass, records an event on that shipment.
-3. Expected result: the event is rolled back and the request reports `OPERATION_FAILED`.
-
-This test is proposed for the next deploy ([PHASE2_IMPLEMENTATION_REPORT.md](PHASE2_IMPLEMENTATION_REPORT.md) section 9). It was not added during the pre-commit review, because a new test cannot run without a deploy.
+The summary-update rollback branch in `TrackingService.recordEvents` is covered (follow-up F2) through a supported production path: data loaded under `eLogix_Data_Migration` that breaks `SHP_Delivery_After_Pickup`. No production failure switch was added.
 
 ## 4. How to run
 

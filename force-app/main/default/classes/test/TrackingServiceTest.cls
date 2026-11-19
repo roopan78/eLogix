@@ -8,6 +8,7 @@ private class TrackingServiceTest {
     private static final String OTHER_OPS = 'Other Ops Tester';
     private static final String SALES = 'Tracking Sales Tester';
     private static final String MANAGER = 'Tracking Manager Tester';
+    private static final String MIGRATION = 'Tracking Migration Tester';
 
     @TestSetup
     static void setup() {
@@ -17,6 +18,7 @@ private class TrackingServiceTest {
         TestDataFactory.createUser(OTHER_OPS, TestDataFactory.OPERATIONS);
         TestDataFactory.createUser(SALES, TestDataFactory.SALES);
         TestDataFactory.createUser(MANAGER, TestDataFactory.LOGISTICS_MANAGER);
+        TestDataFactory.createUser(MIGRATION, new List<String>{ TestDataFactory.OPERATIONS, TestDataFactory.DATA_MIGRATION });
     }
 
     /** Inserts draft shipments owned by the running user. */
@@ -235,6 +237,56 @@ private class TrackingServiceTest {
             Assert.isNull(summary(records[0].Id).Latest_Location__c);
             Assert.areEqual('Vellore', summary(records[1].Id).Latest_Location__c);
         }
+    }
+
+    /**
+     * F2: the rollback branch of recordEvents, reached through a supported path with no failure switch.
+     * The system-mode summary update still runs shipment validation rules. A shipment loaded under the
+     * eLogix_Data_Migration bypass that breaks SHP_Delivery_After_Pickup fails that update for a user
+     * without the bypass, so the events inserted in the same call are rolled back.
+     *
+     * The second request shows the current batch-wide behaviour: one invalid shipment rolls back the
+     * events of every shipment in the call. This is consistent (nothing half-written) but is a known
+     * Phase 6 robustness item; see docs/TRACKING_IMPLEMENTATION.md section 5. Update this test
+     * deliberately when that design changes.
+     */
+    @IsTest
+    static void summaryFailureRollsBackTheEventsOfTheWholeBatch() {
+        Shipment__c legacy;
+        System.runAs(TestDataFactory.getUser(MIGRATION)) {
+            Account customer = [SELECT Id, Business_Unit__c FROM Account WHERE Customer_Code__c = 'CUST-TRK'];
+            legacy = TestDataFactory.buildShipment(customer.Id, customer.Business_Unit__c, 'Draft');
+            legacy.Pickup_Date__c = Date.today().addDays(5);
+            legacy.Expected_Delivery_Date__c = Date.today().addDays(2); // breaks SHP_Delivery_After_Pickup
+            insert legacy;
+        }
+        Shipment__c valid;
+        System.runAs(TestDataFactory.getUser(OPS)) {
+            valid = shipments(1)[0];
+        }
+
+        ServiceResult result;
+        System.runAs(TestDataFactory.getUser(MANAGER)) {
+            result = new TrackingService()
+                .recordEvents(
+                    new List<TrackingEventRequest>{
+                        gps(legacy.Id, 'Hosur', System.now().addMinutes(5), 'GPS-6001'),
+                        gps(valid.Id, 'Vellore', System.now().addMinutes(5), 'GPS-6002')
+                    }
+                );
+        }
+
+        Assert.isFalse(result.isSuccess);
+        Assert.isTrue(result.recordIds.isEmpty(), 'No event survives the rollback.');
+        Assert.areEqual(2, result.errors.size());
+        Assert.areEqual(new Set<Integer>{ 0, 1 }, new Set<Integer>{ result.errors[0].recordIndex, result.errors[1].recordIndex });
+        for (ServiceResult.ServiceError error : result.errors) {
+            Assert.areEqual(TrackingService.OPERATION_FAILED, error.code);
+            Assert.isTrue(String.isNotBlank(error.message));
+        }
+        Assert.areEqual(0, [SELECT COUNT() FROM Tracking_Event__c WHERE Event_Type__c = 'Location Update']);
+        Assert.isNull(summary(legacy.Id).Latest_Location__c);
+        Assert.isNull(summary(valid.Id).Latest_Location__c);
     }
 
     @IsTest

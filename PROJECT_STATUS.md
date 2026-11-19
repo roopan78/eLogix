@@ -3,8 +3,8 @@
 | | |
 |---|---|
 | Last updated | 2026-11-19 |
-| Current phase | **Phase 2 - complete: deployed and verified, not committed** (Apex foundation, shipment status policy, tracking) |
-| Next phase | Phase 3 - pricing and quotation (not started; awaiting your review of Phase 2 and approval) |
+| Current phase | **Phase 2 - complete, including mandatory follow-up F1 to F5** (deployed and verified, `0Afg700000KOZcDCAX`). Phase 2 commit `1d6d61d`; follow-up changes uncommitted, awaiting your review |
+| Next phase | Phase 3 - pricing and quotation (not started; needs your review of the follow-up and explicit approval) |
 | Target org | `eLogixDev` - Developer Edition, instance API 68.0, source API 67.0 |
 
 ## Phase plan
@@ -75,6 +75,8 @@ Behaviour now live:
 | Check-only deploy + `RunLocalTests` | `0Afg700000KO3IzCAL` | Succeeded, 674/674, 76/76 tests |
 | Check-only deploy + `RunLocalTests` (after adding one test) | `0Afg700000KM5omCAD` | Succeeded, 674/674, 77/77 tests |
 | **Deploy + `RunLocalTests`** | **`0Afg700000KNnfeCAD`** | **Succeeded, 674/674, 77/77 tests, coverage 97.5%** |
+| Follow-up check-only deploy + `RunLocalTests` | `0Afg700000KOIRiCAP` | Succeeded, 674/674, 79/79 tests |
+| **Follow-up deploy + `RunLocalTests` (F1 to F3)** | **`0Afg700000KOZcDCAX`** | **Succeeded, 674/674, 79/79 tests, coverage 98.5%** |
 
 ### Verification results
 
@@ -85,15 +87,29 @@ Behaviour now live:
 ### Known issues
 
 See [docs/PHASE2_IMPLEMENTATION_REPORT.md](docs/PHASE2_IMPLEMENTATION_REPORT.md#7-known-issues-and-limitations). The main ones:
-1. The misleading comment in `ShipmentService` was corrected locally during the pre-commit review. It is comment-only and will be deployed with the next deploy.
-2. One untested rollback branch in `TrackingService.recordEvents`.
+1. ~~The misleading comment in `ShipmentService`~~: corrected and deployed in `0Afg700000KOZcDCAX` (F3).
+2. ~~One untested rollback branch in `TrackingService.recordEvents`~~: covered by the F2 test.
 3. Ready for Dispatch and Dispatched guards are deferred to Phases 4 and 5.
 4. Prettier has not been run on the Apex code.
-5. Pre-commit security review: `TrackingService.recordStatusEvents` is public and trusts its inputs. There is no external entry point today; it should be restricted to the trigger context before Phase 6 or 7 (finding S3 in the Phase 2 report, section 9).
+5. ~~`recordStatusEvents` public and trusting its inputs~~: restricted to the shipment trigger (F1). Open for Phase 6: the batch-wide rollback and GPS record-lock items (F5).
 
 ### Source control
 
-Nothing is committed. All Phase 2 files are uncommitted on `feature/phase-1-metadata-foundation`. Waiting for your review of the diff before committing; a separate `feature/phase-2-apex-foundation` branch is recommended for the commit.
+Committed as `1d6d61d` ("feat: implement Phase 2 Apex foundation") on `feature/phase-2-apex-foundation`, branched from `feature/phase-1-metadata-foundation`. 82 files: 76 added, 6 modified, all documentation or Phase 2 source. Not pushed. The commit includes a comment-only correction to `ShipmentService` that is not yet deployed; the org copy differs from the repository by those comment lines until the follow-up deploy.
+
+**Follow-up F1 to F5 (uncommitted, awaiting your review):** 5 Apex files changed (`TrackingService`, `ShipmentTriggerHandler`, `ShipmentTriggerHandlerTest`, `TrackingServiceTest`, `TestDataFactory`) plus documentation. They are deployed in `0Afg700000KOZcDCAX`. The `ShipmentService` comment correction was already in commit `1d6d61d` and is now deployed too.
+
+### Mandatory follow-up before Phase 3
+
+These items came from the pre-commit review ([docs/PHASE2_IMPLEMENTATION_REPORT.md](docs/PHASE2_IMPLEMENTATION_REPORT.md) section 9). Phase 3 does not start until all of them are done and you approve.
+
+| # | Item | Done when | Status |
+|---|---|---|---|
+| F1 | **Restrict `TrackingService.recordStatusEvents`** (finding S3) so no future controller, REST resource or invocable action can supply fabricated status history. | Status events can be created only from the shipment trigger context; a test proves an out-of-trigger call is refused; the re-entry test still proves duplicate suppression through the trigger path. | **Done.** The method is now `recordStatusEvents()`: it reads `Trigger.new` and `Trigger.oldMap` and throws `AuthorizationException` (`STATUS_EVENTS_TRIGGER_ONLY`) outside a `Shipment__c` after-save trigger. Tests: `statusEventsCannotBeRecordedOutsideTheShipmentTrigger` covers direct calls and fabricated records sent through the handler test constructor; `reEntryWithTheSameVersionDoesNotDuplicateEvents` now runs through the real trigger; `savesWithoutStatusChangeCostNothing` covers 200 rows. |
+| F2 | **Add the production-reachable rollback test** for the summary-update failure in `recordEvents`, with no production failure switch. | A Data Migration user creates a shipment that breaks `SHP_Delivery_After_Pickup`; a Logistics Manager records an event on it; the test asserts `OPERATION_FAILED` and that no event is left behind. | **Done.** `TrackingServiceTest.summaryFailureRollsBackTheEventsOfTheWholeBatch`. `TrackingService` coverage rose from 96.2% to 99.1%. No failure switch was added. |
+| F3 | **One deploy** carrying the corrected `ShipmentService` comment together with F1 and F2. | Check-only, then real deploy with `RunLocalTests`; deploy ID recorded; the org matches the repository. | **Done.** Check-only `0Afg700000KOIRiCAP` (79/79), then **`0Afg700000KOZcDCAX`** (2026-11-19 10:59 UTC): 674/674 components, 79/79 tests, coverage 98.5% (637/647). Recorded in docs/DEPLOYMENT_GUIDE.md. The deployed source of all six changed classes was compared with the repository and is identical. |
+| F4 | **Re-run the validator and all Apex tests**, plus both verification scripts. | Validator passed; all tests pass; coverage at or above 85%; both scripts pass; results recorded. | **Done.** Validator passed; 79/79 tests; 98.5% coverage. `verify-phase2-apex.apex` passed 12/12 and `verify-phase1-metadata.apex` passed 19/19 (INR, Asia/Kolkata), with 0 shipments left behind. Recorded in docs/APEX_TEST_MATRIX.md and docs/TEST_STRATEGY.md. |
+| F5 | **Review the batch-wide rollback risk and the GPS record-lock risk**, and document the planned Phase 6 resolution. | docs/TRACKING_IMPLEMENTATION.md and docs/INTEGRATION_DESIGN.md describe the chosen design for both risks. | **Done (documentation only, no code).** TRACKING_IMPLEMENTATION section 5: summaries updated with partial success, compensating deletion of only the failed shipment's new events, and a retryable `RECORD_LOCKED` result instead of an uncaught `QueryException`, each with acceptance criteria. INTEGRATION_DESIGN section 3: asynchronous ingestion, per-shipment grouping, backoff retry with dead letter in `Integration_Log__c`. **Both must be implemented in Phase 6 before live GPS pings are connected.** |
 
 ---
 

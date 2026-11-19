@@ -5,7 +5,7 @@
 | Phase | 2: Apex foundation, shipment status policy, tracking, shipment trigger |
 | Date | 2026-11-19 |
 | Target org | `eLogixDev` (Developer Edition, source API 67.0) |
-| Outcome | **Deployed and verified.** Not committed (awaiting review). |
+| Outcome | **Deployed and verified.** Committed as `1d6d61d` on `feature/phase-2-apex-foundation` (not pushed). The F1 to F5 follow-up is deployed in `0Afg700000KOZcDCAX` and is pending its own commit. |
 
 ## 1. Process followed
 
@@ -104,8 +104,8 @@ There were no deployment or compile errors at any step.
 
 ## 7. Known issues and limitations
 
-1. **Code comment in `ShipmentService.changeStatus`: corrected locally during the pre-commit review, not yet deployed.** The comment above the catch block had said user-mode DML *throws* when access is missing. In `userWithoutEditAccessCannotChangeStatus`, a Sales Executive without edit access got a row error instead, and the catch branch was never reached. The comment now describes that behaviour and calls the catch defensive. Only the comment changed; the org copy differs from the repository by those comment lines until the next deploy.
-2. `TrackingService.recordEvents`: the rollback branch for a failed summary update is not exercised by a test. It is reachable in production and can be tested without a failure switch; see section 9 and [APEX_TEST_MATRIX.md](APEX_TEST_MATRIX.md) section 3.
+1. **Code comment in `ShipmentService.changeStatus`: corrected during the pre-commit review (commit `1d6d61d`) and deployed in `0Afg700000KOZcDCAX` (follow-up F3).** The comment above the catch block had said user-mode DML *throws* when access is missing. In `userWithoutEditAccessCannotChangeStatus`, a Sales Executive without edit access got a row error instead, and the catch branch was never reached. The comment now describes that behaviour and calls the catch defensive. Only the comment changed. The deployed class was compared with the repository after the deploy and is identical.
+2. `TrackingService.recordEvents`: the rollback branch for a failed summary update is reachable in production. **It is now covered by `TrackingServiceTest.summaryFailureRollsBackTheEventsOfTheWholeBatch`** (follow-up F2, deployed in `0Afg700000KOZcDCAX`), with no production failure switch; see section 9.3 and [APEX_TEST_MATRIX.md](APEX_TEST_MATRIX.md) section 3.
 3. Ready for Dispatch and Dispatched guards are deferred to Phases 4 and 5 (decision D3). Until then, Confirmed → Ready for Dispatch needs no allocation.
 4. Logging goes to the debug log only (decision D4).
 5. Prettier with `prettier-plugin-apex` was not run (`node_modules` is not installed). The code follows the repo's `.prettierrc` style by hand, so the pre-commit hook may reformat it once dependencies are installed. Two docs were reformatted on disk during the session, likely by an editor formatter; the content was kept.
@@ -125,8 +125,8 @@ Review scope: the full working-tree diff, the two `without sharing` classes, the
 |---|---|---|---|
 | S1 | **`TrackingService.Writer` (`without sharing`, system mode)** writes only (a) tracking events built by the service itself and (b) `Latest_Location__c` / `Latest_Tracking_Timestamp__c` on shipments. It never writes `Status__c` or any other shipment field. A summary update still fires `ShipmentTrigger`, so the lifecycle policy and validation rules still run. It is reachable only from `recordStatusEvents`, called by the trigger after a permitted shipment save, and from `recordEvents`, after the create-access check on `Tracking_Event__c` and a user-mode read of every shipment. | n/a | Intended. Deviation from the approved contract, documented in APEX_ARCHITECTURE section 6.1 |
 | S2 | **`TrackingEventSelector.KeyLookup` (`without sharing`)** returns only key strings for keys the caller supplies. Without it, a duplicate on an event the user cannot see would surface as a DUPLICATE_VALUE insert error, and that message contains the other record's Id. Seeing all keys therefore exposes less than the alternative. Residual effect: a caller replaying an external id that already exists on another shipment learns that the event exists, and their request is skipped. External ids are scoped per source system (`EXT:{source}:{id}`), so collisions mean the same provider message. | Low | Accepted |
-| S3 | **`recordStatusEvents` is `public` and trusts its inputs.** Apex code calling it with fabricated old and new records could write status history for a shipment that never changed, without sharing. There is no external entry point today: no `@AuraEnabled` method, REST resource, invocable method or `global` member exists. Only users who can author Apex can reach it, and they already have system-level reach. | Medium (latent) | **Open.** Recommended fix before Phase 6 or 7: make the method accept calls only in the shipment trigger context. One option is to move status-event creation behind a guard on `Trigger.isExecuting` and `Trigger.new`, and rework `reEntryWithTheSameVersionDoesNotDuplicateEvents` to drive it through the handler. This needs a code change and a deploy, so it waits for your approval. |
-| S4 | `recordEvents` locks shipments with `FOR UPDATE`. Under heavy concurrent pings on one shipment, a lock wait timeout surfaces as an uncaught `QueryException` from `recordEvents` and is not converted into a per-request result. | Low | Open; revisit with the GPS integration (Phase 6) |
+| S3 | **`recordStatusEvents` was `public` and trusted its inputs.** Apex code calling it with fabricated old and new records could have written status history for a shipment that never changed. | Medium (latent) | **Resolved by F1** (deploy `0Afg700000KOZcDCAX`). The method takes no arguments, reads the trigger context itself and is refused outside a `Shipment__c` after-save trigger. Tested. |
+| S4 | `recordEvents` locks shipments with `FOR UPDATE`. Under heavy concurrent pings on one shipment, a lock wait timeout surfaces as an uncaught `QueryException` from `recordEvents` and is not converted into a per-request result. | Low | Reviewed under F5. Phase 6 resolution documented in TRACKING_IMPLEMENTATION section 5.2. |
 | S5 | No hardcoded record Ids, usernames, credentials or tokens in any changed file. Test users use `example.com` emails and random usernames. | n/a | Verified by scan |
 
 ### 9.2 Robustness risk found during review
@@ -137,7 +137,7 @@ Review scope: the full working-tree diff, the two `without sharing` classes, the
 
 ### 9.3 Rollback branch reachability
 
-The branch is reachable through supported paths: validation rules run on the system-mode summary update. It is testable without a failure switch (see APEX_TEST_MATRIX section 3). Proposed test for the next deploy: `TrackingServiceTest.summaryFailureRollsBackEvents`.
+The branch is reachable through supported paths: validation rules run on the system-mode summary update. It is testable without a failure switch (see APEX_TEST_MATRIX section 3). **Done (follow-up F2):** `TrackingServiceTest.summaryFailureRollsBackTheEventsOfTheWholeBatch` passed in deploy `0Afg700000KOZcDCAX`. A shipment loaded under `eLogix_Data_Migration` breaks `SHP_Delivery_After_Pickup`, so a Logistics Manager's `recordEvents` call rolls back: both requests report `OPERATION_FAILED`, and neither the events nor the summary updates remain.
 
 ### 9.4 Documentation formatting
 
@@ -150,3 +150,13 @@ The branch is reachable through supported paths: validation rules run on the sys
 - `npm run metadata:validate`: passed, and wrote nothing.
 - `sf apex run test --test-level RunLocalTests` (test run `707g700001C32Pi`): 77 of 77 test methods passed. The CLI reports 81 because it also counts the 4 `@TestSetup` methods. Org-wide coverage is 97%.
 - These tests ran against the deployed code. The local change is comment-only, so behaviour is identical.
+
+### 9.6 Follow-up F1 to F5 results (2026-11-19)
+
+| # | Item | Result |
+|---|---|---|
+| F1 | Restrict `recordStatusEvents` | Done. The signature is now `recordStatusEvents()`; it reads `Trigger.new` and `Trigger.oldMap` and throws `AuthorizationException` (`STATUS_EVENTS_TRIGGER_ONLY`) outside a `Shipment__c` after-save trigger. `ShipmentTriggerHandler` was updated. New test `statusEventsCannotBeRecordedOutsideTheShipmentTrigger`. The re-entry test now runs through the real trigger, and the handler-seam no-change test was replaced by a 200-row trigger test (`savesWithoutStatusChangeCostNothing`). |
+| F2 | Rollback test without a failure switch | Done. `TrackingServiceTest.summaryFailureRollsBackTheEventsOfTheWholeBatch`: a user with Operations Executive and Data Migration creates a shipment breaking `SHP_Delivery_After_Pickup`, and a Logistics Manager's `recordEvents` call rolls back. `TrackingService` coverage rose from 96.2% to 99.1%. |
+| F3 | Deploy the comment correction with F1 and F2 | Done. Check-only `0Afg700000KOIRiCAP` (79/79), then deploy **`0Afg700000KOZcDCAX`**: 674/674 components, 79/79 tests, coverage 98.5% (637/647). The deployed source of all six changed classes was compared with the repository and is identical. |
+| F4 | Validator and all tests | Model validator passed. 79/79 tests passed in the deploy. `verify-phase2-apex.apex` passed 12/12, `verify-phase1-metadata.apex` passed 19/19 (INR, Asia/Kolkata), and no shipments were left behind. |
+| F5 | GPS robustness risks | Reviewed. The Phase 6 resolution is documented in TRACKING_IMPLEMENTATION section 5 and INTEGRATION_DESIGN section 3. No code change. |

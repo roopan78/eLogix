@@ -25,11 +25,12 @@ public with sharing class ShipmentTriggerHandler extends TriggerHandler {
         new ShipmentDomain().validateStatusChanges((List<Shipment__c>) newList, (Map<Id, Shipment__c>) oldMap);
     }
 
+    /** TrackingService reads Trigger.new and Trigger.oldMap itself; see TrackingService.recordStatusEvents. */
     protected override void afterInsert() {
-        new TrackingService().recordStatusEvents((List<Shipment__c>) newList, null);
+        new TrackingService().recordStatusEvents();
     }
 
     protected override void afterUpdate() {
-        new TrackingService().recordStatusEvents((List<Shipment__c>) newList, (Map<Id, Shipment__c>) oldMap);
+        new TrackingService().recordStatusEvents();
     }
 }

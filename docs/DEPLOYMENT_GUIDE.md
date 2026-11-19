@@ -104,6 +104,7 @@ Do this **before** loading demo data. Changing the currency locale relabels amou
 | 2026-11-19 ~04:03 | `0Afg700000KLuLRCA1` | Percent-field fix (quotation tax formulas, 3 validation rules) | 565 / 565 | Succeeded |
 | 2026-11-19 04:10 | `0Afg700000KLxb3CAD` | Page layouts, compact layouts, Account/Contact layout extensions | 621 / 621 | Succeeded |
 | 2026-11-19 09:49 | `0Afg700000KNnfeCAD` | Phase 2: 33 Apex classes, `ShipmentTrigger`, 18 custom labels (`RunLocalTests`: 77/77 passed, coverage 97.5%) | 674 / 674 | Succeeded |
+| 2026-11-19 10:59 | `0Afg700000KOZcDCAX` | Phase 2 follow-up F1 to F3: `recordStatusEvents` restricted to the shipment trigger, rollback test, `ShipmentService` comment (`RunLocalTests`: 79/79 passed, coverage 98.5%) | 674 / 674 | Succeeded |
 
 Each deploy was preceded by a successful `--dry-run`. The only dry-run failure in the phase was the first one: `isNavAutomaticallyAdded` is not a valid `CustomApplication` element. The writer now copies the element set of a Lightning app retrieved from the org.
 

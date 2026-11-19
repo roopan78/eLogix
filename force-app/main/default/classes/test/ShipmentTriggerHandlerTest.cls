@@ -304,31 +304,82 @@ private class ShipmentTriggerHandlerTest {
         }
     }
 
+    /**
+     * Re-entry through the real trigger path. A workflow or flow re-fire runs the after-trigger again
+     * with the original Trigger.old, so it computes the key of an event that already exists. The test
+     * stores that event first, then makes the status change: the trigger must find the key and write
+     * nothing. The opposite case (key absent, so the event is written, as after a partial-success
+     * rollback) is the normal path, asserted in allowedTransitionRecordsOneEvent.
+     */
     @IsTest
     static void reEntryWithTheSameVersionDoesNotDuplicateEvents() {
-        Shipment__c original;
-        Shipment__c updated;
+        Shipment__c shipment;
+        System.runAs(TestDataFactory.getUser(OPS)) {
+            shipment = build(1, 'Draft')[0];
+            insert shipment;
+        }
+        Shipment__c original = reload(shipment.Id);
+        String expectedKey = original.Id + ':Draft>Requested:' + original.SystemModstamp.getTime();
+        insert new Tracking_Event__c(
+            Shipment__c = original.Id,
+            Event_Type__c = 'Requested',
+            Event_Timestamp__c = System.now(),
+            From_Status__c = 'Draft',
+            To_Status__c = 'Requested',
+            Event_Key__c = expectedKey,
+            Remarks__c = 'Written by the first trigger run.'
+        );
+        Assert.areEqual(original.SystemModstamp, reload(original.Id).SystemModstamp, 'Adding history must not change the shipment version.');
+
+        System.runAs(TestDataFactory.getUser(OPS)) {
+            shipment.Status__c = 'Requested';
+            update shipment;
+        }
+
+        List<Tracking_Event__c> requested = [
+            SELECT Event_Key__c, Remarks__c
+            FROM Tracking_Event__c
+            WHERE Shipment__c = :original.Id AND Event_Type__c = 'Requested'
+        ];
+        Assert.areEqual(1, requested.size(), 'The re-fired trigger must not write a second event.');
+        Assert.areEqual(expectedKey, requested[0].Event_Key__c);
+        Assert.areEqual('Written by the first trigger run.', requested[0].Remarks__c);
+        Assert.areEqual('Requested', reload(original.Id).Status__c, 'Skipping a recorded event does not block the save.');
+    }
+
+    /** F1: status history cannot be written from outside the Shipment__c trigger, even through the handler test seam. */
+    @IsTest
+    static void statusEventsCannotBeRecordedOutsideTheShipmentTrigger() {
         System.runAs(TestDataFactory.getUser(OPS)) {
             Shipment__c shipment = build(1, 'Draft')[0];
             insert shipment;
-            original = reload(shipment.Id);
-            shipment.Status__c = 'Requested';
-            update shipment;
-            updated = reload(shipment.Id);
+            Shipment__c previous = reload(shipment.Id);
+            Shipment__c fabricated = previous.clone(true, true, true, true);
+            fabricated.Status__c = 'Delivered';
 
-            // A workflow re-fire runs the after-trigger again with the original Trigger.old.
-            new TrackingService().recordStatusEvents(new List<Shipment__c>{ updated }, new Map<Id, Shipment__c>{ original.Id => original });
-            Assert.areEqual(1, [SELECT COUNT() FROM Tracking_Event__c WHERE Shipment__c = :original.Id AND Event_Type__c = 'Requested']);
-        }
+            try {
+                new TrackingService().recordStatusEvents();
+                Assert.fail('recordStatusEvents must refuse to run outside a trigger.');
+            } catch (AuthorizationException e) {
+                Assert.areEqual(TrackingService.STATUS_EVENTS_TRIGGER_ONLY, e.code);
+                Assert.areEqual(Label.eLogix_Access_Denied, e.getMessage());
+            }
 
-        // A partial-success retry runs after rollback: the event is gone, so it is written again with the same key.
-        Tracking_Event__c first = [SELECT Id, Event_Key__c FROM Tracking_Event__c WHERE Shipment__c = :original.Id AND Event_Type__c = 'Requested'];
-        delete first;
-        System.runAs(TestDataFactory.getUser(OPS)) {
-            new TrackingService().recordStatusEvents(new List<Shipment__c>{ updated }, new Map<Id, Shipment__c>{ original.Id => original });
+            try {
+                new ShipmentTriggerHandler(
+                        System.TriggerOperation.AFTER_UPDATE,
+                        new List<Shipment__c>{ fabricated },
+                        new Map<Id, Shipment__c>{ previous.Id => previous }
+                    )
+                    .run();
+                Assert.fail('Fabricated before and after records must not produce status history.');
+            } catch (AuthorizationException e) {
+                Assert.areEqual(TrackingService.STATUS_EVENTS_TRIGGER_ONLY, e.code);
+            }
+
+            Assert.areEqual(0, [SELECT COUNT() FROM Tracking_Event__c WHERE Shipment__c = :shipment.Id AND Event_Type__c = 'Delivered']);
+            Assert.areEqual('Draft', reload(shipment.Id).Status__c);
         }
-        Tracking_Event__c rewritten = [SELECT Event_Key__c FROM Tracking_Event__c WHERE Shipment__c = :original.Id AND Event_Type__c = 'Requested'];
-        Assert.areEqual(first.Event_Key__c, rewritten.Event_Key__c);
     }
 
     @IsTest
@@ -381,23 +432,26 @@ private class ShipmentTriggerHandlerTest {
     }
 
     @IsTest
-    static void handlerIgnoresSavesWithoutStatusChange() {
+    static void savesWithoutStatusChangeCostNothing() {
         System.runAs(TestDataFactory.getUser(OPS)) {
-            Shipment__c shipment = build(1, 'Draft')[0];
-            insert shipment;
-            Shipment__c previous = reload(shipment.Id);
-            Shipment__c current = previous.clone(true, true, true, true);
+            List<Shipment__c> shipments = build(200, 'Draft');
+            insert shipments;
+            Integer eventsBefore = [SELECT COUNT() FROM Tracking_Event__c];
+            for (Shipment__c shipment : shipments) {
+                shipment.Special_Instructions__c = 'Handle with care.';
+            }
 
             Test.startTest();
             Integer queriesBefore = Limits.getQueries();
-            new ShipmentTriggerHandler(
-                    System.TriggerOperation.AFTER_UPDATE,
-                    new List<Shipment__c>{ current },
-                    new Map<Id, Shipment__c>{ previous.Id => previous }
-                )
-                .run();
-            Assert.areEqual(0, Limits.getQueries() - queriesBefore);
+            Integer dmlBefore = Limits.getDmlStatements();
+            update shipments;
+            Integer queries = Limits.getQueries() - queriesBefore;
+            Integer dml = Limits.getDmlStatements() - dmlBefore;
             Test.stopTest();
+
+            Assert.areEqual(0, queries, 'A save without a status change must not query.');
+            Assert.areEqual(1, dml, 'Only the shipment update itself.');
+            Assert.areEqual(eventsBefore, [SELECT COUNT() FROM Tracking_Event__c]);
         }
     }
 }

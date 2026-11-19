@@ -25,6 +25,8 @@
 - **Post-deploy behaviour:** `scripts/apex/verify-phase2-apex.apex` passed 12 of 12 checks against live configuration as the admin user, including override and hard rules. Everything was rolled back.
 - **Phase 1 regression:** `verify-phase1-metadata.apex` passed 19 of 19 checks with the shipment trigger active.
 
+- **Follow-up F1 to F3 (deploy `0Afg700000KOZcDCAX`):** 79 of 79 tests passed; coverage 98.5%. Both verification scripts passed again: 12/12 and 19/19.
+
 ## 3. Phase 1 results (2026-11-19, `eLogixDev`)
 
 **Model validation.** It passes. Three deliberately injected faults (an unknown cross-object field, a misspelled picklist value and a broken View All dependency) were each reported by the validator.
