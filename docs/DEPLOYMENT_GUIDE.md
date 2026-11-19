@@ -42,7 +42,16 @@ sf project deploy start --dry-run --source-dir force-app --target-org eLogixDev 
 sf project deploy start --source-dir force-app --target-org eLogixDev --wait 30
 ```
 
-Once Apex exists (Phase 2 onward), a Developer Edition org runs local tests on deploy, as production does. Never use `--test-level NoTestRun` to force a deployment (CLAUDE.md rule 29).
+From Phase 2 onward, every deploy runs all local Apex tests. Pass the test level explicitly, and run the check-only deploy with tests too:
+
+```bash
+sf project deploy start --dry-run --source-dir force-app --target-org eLogixDev --test-level RunLocalTests --wait 30
+sf project deploy start --source-dir force-app --target-org eLogixDev --test-level RunLocalTests --wait 30
+```
+
+Never use `--test-level NoTestRun` to force a deployment (CLAUDE.md rule 29). `ShipmentStatusTransitionConfigTest` reads the deployed `Shipment_Status_Transition__mdt` records. A transition edit that breaks a lifecycle rule therefore fails the next deploy.
+
+`labels/CustomLabels.labels-meta.xml` is **hand-maintained**. The generator does not own it. Label values must not contain apostrophes, because Apex formats them with `String.format`.
 
 ## 3. Post-deploy steps
 
@@ -55,6 +64,13 @@ sf apex run --file scripts/apex/verify-phase1-metadata.apex --target-org eLogixD
 ```
 
 Expect `SMOKE SUMMARY checks=19 failures=0` in the debug output.
+
+```bash
+# Verify the status policy and tracking against live configuration (rolled back; run as a user with eLogix_Administrator)
+sf apex run --file scripts/apex/verify-phase2-apex.apex --target-org eLogixDev
+```
+
+Expect `SMOKE SUMMARY checks=12 failures=0`.
 
 For data seeding (Phase 9), temporarily assign `eLogix_Data_Migration` so that historical dates pass the bypassable validation rules. Remove it afterwards:
 
@@ -87,6 +103,7 @@ Do this **before** loading demo data. Changing the currency locale relabels amou
 | 2026-11-19 03:58 | `0Afg700000KLr5pCAD` | Phase 1 metadata foundation | 565 / 565 | Succeeded |
 | 2026-11-19 ~04:03 | `0Afg700000KLuLRCA1` | Percent-field fix (quotation tax formulas, 3 validation rules) | 565 / 565 | Succeeded |
 | 2026-11-19 04:10 | `0Afg700000KLxb3CAD` | Page layouts, compact layouts, Account/Contact layout extensions | 621 / 621 | Succeeded |
+| 2026-11-19 09:49 | `0Afg700000KNnfeCAD` | Phase 2: 33 Apex classes, `ShipmentTrigger`, 18 custom labels (`RunLocalTests`: 77/77 passed, coverage 97.5%) | 674 / 674 | Succeeded |
 
 Each deploy was preceded by a successful `--dry-run`. The only dry-run failure in the phase was the first one: `isNavAutomaticallyAdded` is not a valid `CustomApplication` element. The writer now copies the element set of a Lightning app retrieved from the org.
 

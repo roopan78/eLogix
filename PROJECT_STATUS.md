@@ -3,8 +3,8 @@
 | | |
 |---|---|
 | Last updated | 2026-11-19 |
-| Current phase | **Phase 1 - complete** (project setup, architecture documentation, metadata foundation) |
-| Next phase | Phase 2 - Apex foundation, shipment status policy and tracking (awaiting go-ahead) |
+| Current phase | **Phase 2 - complete: deployed and verified, not committed** (Apex foundation, shipment status policy, tracking) |
+| Next phase | Phase 3 - pricing and quotation (not started; awaiting your review of Phase 2 and approval) |
 | Target org | `eLogixDev` - Developer Edition, instance API 68.0, source API 67.0 |
 
 ## Phase plan
@@ -12,7 +12,7 @@
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Project inspection, architecture docs, data model, security, configuration and app metadata | **Done - deployed and verified** |
-| 2 | Apex foundation (trigger handler, result/exception pattern, logger, settings and permission services, selectors), `ShipmentStatusPolicy`, `ShipmentService`, `TrackingService`, triggers, tests | Not started |
+| 2 | Apex foundation (trigger handler, result/exception pattern, logger, settings and permission services, selectors), `ShipmentStatusPolicy`, `ShipmentService`, `TrackingService`, triggers, tests | **Done - deployed and verified** (`0Afg700000KNnfeCAD`, 77/77 tests, 97.5% coverage). Commit pending your review. |
 | 3 | `FreightCalculationService`, rate card selection, quotation service, tests | Not started |
 | 4 | `FleetAllocationService`, `VehicleAvailabilityService` (capacity, validity, overlap, row locking), tests | Not started |
 | 5 | Inventory and stock movements, delivery, invoicing, payments; Flows (request, quotation approval, delivery completion, invoice generation, payment status, SLA) | Not started |
@@ -26,13 +26,13 @@
 **Day 1**
 - [x] Project inspection and setup (CLI 2.140.6, org edition and limits, API versions, existing metadata)
 - [x] Architecture and documentation (12 documents in `docs/`, generated catalogue)
-- [x] Data model and metadata (deployed: 621 components)
-- [ ] Shipment and quotation services (P2, P3)
+- [x] Data model and metadata (deployed: 621 components; 674 with the Phase 2 Apex)
+- [ ] Shipment and quotation services (shipment service done in P2; quotation in P3)
 - [ ] Freight calculation (P3)
 - [ ] Fleet allocation (P4)
-- [ ] Status transition policy (P2; configuration already live)
-- [ ] Tracking history (P2)
-- [ ] Initial Apex tests (P2 to P4)
+- [x] Status transition policy (P2)
+- [x] Tracking history (P2)
+- [ ] Initial Apex tests (P2 done: 77 tests; P3 and P4 to follow)
 
 **Day 2**
 - [ ] Warehouse and inventory essentials (P5)
@@ -42,6 +42,58 @@
 - [ ] Native reports and dashboards (P8)
 - [ ] Demo data (P9)
 - [ ] Regression tests, deployment validation, demo rehearsal (P9)
+
+---
+
+## Phase 2 report
+
+Full report: [docs/PHASE2_IMPLEMENTATION_REPORT.md](docs/PHASE2_IMPLEMENTATION_REPORT.md). Architecture contract (approved, with a deviations section): [docs/APEX_ARCHITECTURE.md](docs/APEX_ARCHITECTURE.md).
+
+### What was built
+
+| Component | Count | Location |
+|---|---|---|
+| Production Apex classes (framework, policy, guard, domain, services, selectors, handler) | 20 | `force-app/main/default/classes/{base,common,shipment,tracking,selectors,handlers}/` |
+| Test classes (including `TestDataFactory`) | 13 | `classes/test/` |
+| Trigger | 1 (`ShipmentTrigger`) | `triggers/` |
+| Custom labels | 18 | `labels/CustomLabels.labels-meta.xml` (hand-maintained) |
+| Post-deploy verification script | 1 (12 checks) | `scripts/apex/verify-phase2-apex.apex` |
+
+Behaviour now live:
+- Every shipment status change, from any entry path, is checked against the 46 deployed transitions.
+- Leaving Closed or Cancelled, and moving Delivered backwards, are hard rules that no permission can bypass.
+- Cancel after confirmation needs `eLogix_Cancel_Confirmed_Shipment`.
+- Override changes are recorded as `Exception` events.
+- A shipment needs an item before Confirmed.
+- Every allowed change writes exactly one tracking event, keyed deterministically. If that event cannot be written, the status change is rolled back.
+
+### Deployment results
+
+| Step | ID | Result |
+|---|---|---|
+| Model validator | n/a | Passed |
+| Check-only deploy + `RunLocalTests` | `0Afg700000KO3IzCAL` | Succeeded, 674/674, 76/76 tests |
+| Check-only deploy + `RunLocalTests` (after adding one test) | `0Afg700000KM5omCAD` | Succeeded, 674/674, 77/77 tests |
+| **Deploy + `RunLocalTests`** | **`0Afg700000KNnfeCAD`** | **Succeeded, 674/674, 77/77 tests, coverage 97.5%** |
+
+### Verification results
+
+- `verify-phase2-apex.apex`: **12/12** against live configuration, all rolled back.
+- `verify-phase1-metadata.apex`: **19/19**. Phase 1 still works with the trigger active.
+- Org inventory: 33 classes, 1 active trigger, 18 labels, 0 shipments left behind.
+
+### Known issues
+
+See [docs/PHASE2_IMPLEMENTATION_REPORT.md](docs/PHASE2_IMPLEMENTATION_REPORT.md#7-known-issues-and-limitations). The main ones:
+1. The misleading comment in `ShipmentService` was corrected locally during the pre-commit review. It is comment-only and will be deployed with the next deploy.
+2. One untested rollback branch in `TrackingService.recordEvents`.
+3. Ready for Dispatch and Dispatched guards are deferred to Phases 4 and 5.
+4. Prettier has not been run on the Apex code.
+5. Pre-commit security review: `TrackingService.recordStatusEvents` is public and trusts its inputs. There is no external entry point today; it should be restricted to the trigger context before Phase 6 or 7 (finding S3 in the Phase 2 report, section 9).
+
+### Source control
+
+Nothing is committed. All Phase 2 files are uncommitted on `feature/phase-1-metadata-foundation`. Waiting for your review of the diff before committing; a separate `feature/phase-2-apex-foundation` branch is recommended for the commit.
 
 ---
 
@@ -130,6 +182,6 @@ Phase 1 is committed on branch `feature/phase-1-metadata-foundation` (local only
 
 1. Push `feature/phase-1-metadata-foundation` and open a pull request when ready. Nothing has been pushed.
 
-### Recommended next phase
+### Recommended next phase (Phase 1 recommendation, now delivered by Phase 2)
 
 **Phase 2 - Apex foundation and shipment core:** base framework (trigger handler, `ServiceResult`, exception hierarchy, logger, `SettingsService`, `PermissionService`, selectors). Then `ShipmentStatusPolicy` driven by the deployed transition metadata, `ShipmentService`, `TrackingService`, a single `ShipmentTrigger`, and unit tests covering valid and invalid transitions, the item guard, override and cancel permissions, tracking event creation, and 200-record bulk updates.

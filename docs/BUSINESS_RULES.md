@@ -33,13 +33,13 @@ Status legend: **Live** = deployed and verified in `eLogixDev`. **Planned (Pn)**
 | Expected delivery date must be after pickup | Validation rule | `SR_Delivery_After_Pickup`, `SHP_Delivery_After_Pickup` (strictly after, as specified) | Live, verified |
 | Actual delivery cannot precede pickup; delivered shipments need a delivery date | Validation rule | `SHP_Actual_Delivery_After_Pickup`, `SHP_Delivered_Requires_Delivery_Date` | Live |
 | Origin and destination must differ | Validation rule | `SR_`, `SHP_`, `RT_Origin_Differs_From_Destination` | Live |
-| Shipment must have at least one item before confirmation | Apex policy | `ShipmentStatusPolicy` guard on the move to `Confirmed`, using roll-up `Item_Count__c` | Planned (P2) |
-| Status must follow an allowed transition | Apex policy | `ShipmentStatusPolicy` reading `Shipment_Status_Transition__mdt` (46 records live) | Metadata live; policy planned (P2) |
-| Delivered shipments cannot be dispatched again | Configuration | No `Delivered → Dispatched` transition exists; the generator refuses to emit one | Live (data); enforced in P2 |
-| Cancelled shipments cannot be processed further | Configuration | `Cancelled` and `Closed` have no outgoing transitions (generator check) | Live (data); enforced in P2 |
-| Cancel after confirmation needs authority | Configuration + Apex | Transition records carry `Required_Permission__c = eLogix_Cancel_Confirmed_Shipment` | Live (data); enforced in P2 |
+| Shipment must have at least one item before confirmation | Apex policy | `ShipmentItemsRequiredGuard` (via `ShipmentStatusPolicy`) on the move to `Confirmed`, using roll-up `Item_Count__c`; applies under override too | Live, tested (P2) |
+| Status must follow an allowed transition | Apex policy | `ShipmentStatusPolicy` reading `Shipment_Status_Transition__mdt` (46 records), enforced by `ShipmentTrigger` for every entry path; fails closed when configuration is missing | Live, tested (P2) |
+| Delivered shipments cannot be dispatched again | Configuration | No `Delivered → Dispatched` transition exists (generator check); `ShipmentStatusPolicy` hard rule rejects any move from `Delivered` back to a pre-delivery status, even under override | Live, tested (P2) |
+| Cancelled shipments cannot be processed further | Configuration | `Cancelled` and `Closed` have no outgoing transitions (generator check); `ShipmentStatusPolicy` hard rule rejects leaving them, even under override | Live, tested (P2) |
+| Cancel after confirmation needs authority | Configuration + Apex | Transition records carry `Required_Permission__c = eLogix_Cancel_Confirmed_Shipment`; checked by `ShipmentStatusPolicy` | Live, tested (P2) |
 | Hold and cancellation need a reason | Validation rule | `SHP_Hold_Reason_Required`, `SHP_Cancellation_Reason_Required` | Live |
-| Every meaningful status change creates a Tracking Event | Apex | `TrackingService` called from the shipment trigger handler; event type from the transition record | Planned (P2) |
+| Every meaningful status change creates a Tracking Event | Apex | `TrackingService` called from the shipment trigger handler; event type from the transition record; deterministic `Event_Key__c` prevents duplicates; a failed event rolls back the status change | Live, tested (P2) |
 | Tracking history is immutable | Validation rule | `TE_Events_Are_Immutable` | Live, verified |
 
 ## Freight rules

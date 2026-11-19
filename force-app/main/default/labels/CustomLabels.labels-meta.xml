@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>eLogix_Access_Denied</fullName>
+        <categories>eLogix,Common</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Access Denied</shortDescription>
+        <value>You do not have access to perform this operation.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Request_Invalid</fullName>
+        <categories>eLogix,Common</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Request Invalid</shortDescription>
+        <value>Request {0} is incomplete or contains an invalid value.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Setting_Missing</fullName>
+        <categories>eLogix,Common</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Setting Missing</shortDescription>
+        <value>The eLogix setting {0} is missing or has no value. Ask your administrator to configure it.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Shipment_Items_Required</fullName>
+        <categories>eLogix,Shipment</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Shipment Items Required</shortDescription>
+        <value>Add at least one shipment item before confirming the shipment.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Status_Configuration_Invalid</fullName>
+        <categories>eLogix,Shipment</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Status Configuration Invalid</shortDescription>
+        <value>The change from {0} to {1} is blocked because its status transition configuration is invalid. Ask your administrator to review the Shipment Status Transition metadata.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Status_Configuration_Missing</fullName>
+        <categories>eLogix,Shipment</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Status Configuration Missing</shortDescription>
+        <value>Shipment status changes are blocked because no active status transitions are configured. Ask your administrator to restore the Shipment Status Transition metadata.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Status_Delivered_Reversal</fullName>
+        <categories>eLogix,Shipment</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Status Delivered Reversal</shortDescription>
+        <value>A delivered shipment cannot be moved back to {1}.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Status_Initial_Not_Allowed</fullName>
+        <categories>eLogix,Shipment</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Status Initial Not Allowed</shortDescription>
+        <value>A new shipment cannot start as {1}. Allowed starting statuses: {2}.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Status_Override_Remark</fullName>
+        <categories>eLogix,Tracking</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Status Override Remark</shortDescription>
+        <value>Status changed under override. Rule skipped: {0}.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Status_Permission_Required</fullName>
+        <categories>eLogix,Shipment</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Status Permission Required</shortDescription>
+        <value>You do not have permission to move a shipment from {0} to {1}.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Status_Required</fullName>
+        <categories>eLogix,Shipment</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Status Required</shortDescription>
+        <value>Select a shipment status.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Status_Terminal</fullName>
+        <categories>eLogix,Shipment</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Status Terminal</shortDescription>
+        <value>This shipment is {0}, which is a final status. It cannot be changed to {1}.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Status_Transition_Inactive</fullName>
+        <categories>eLogix,Shipment</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Status Transition Inactive</shortDescription>
+        <value>The change from {0} to {1} is currently disabled by your administrator.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Status_Transition_Not_Allowed</fullName>
+        <categories>eLogix,Shipment</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Status Transition Not Allowed</shortDescription>
+        <value>A shipment cannot move from {0} to {1}.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Tracking_Event_Failed</fullName>
+        <categories>eLogix,Tracking</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Tracking Event Failed</shortDescription>
+        <value>The status change was not saved because its tracking event could not be recorded. Try again, or contact your administrator if the problem continues.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Tracking_Shipment_Not_Found</fullName>
+        <categories>eLogix,Tracking</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Tracking Shipment Not Found</shortDescription>
+        <value>Shipment {0} does not exist or you do not have access to it.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Tracking_Status_Event_Not_Allowed</fullName>
+        <categories>eLogix,Tracking</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Tracking Status Event Not Allowed</shortDescription>
+        <value>{0} events are recorded automatically when the shipment status changes. Change the shipment status instead.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Unexpected_Error</fullName>
+        <categories>eLogix,Common</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Unexpected Error</shortDescription>
+        <value>Something went wrong. Give your administrator this reference: {0}.</value>
+    </labels>
+</CustomLabels>

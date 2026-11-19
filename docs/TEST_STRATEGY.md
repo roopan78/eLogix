@@ -19,6 +19,12 @@
 - Bulk tests use 200 records per transaction and assert governor usage stays bounded.
 - Coverage target is at least 85% of implemented functionality, and tests must assert outcomes, not just execute lines.
 
+## 2a. Phase 2 results (2026-11-19, `eLogixDev`)
+
+- **Apex tests:** 77 of 77 passed in deploy `0Afg700000KNnfeCAD` (`RunLocalTests`). Code coverage is 97.5% (621 of 637 lines). The scenario-by-scenario list is in [APEX_TEST_MATRIX.md](APEX_TEST_MATRIX.md).
+- **Post-deploy behaviour:** `scripts/apex/verify-phase2-apex.apex` passed 12 of 12 checks against live configuration as the admin user, including override and hard rules. Everything was rolled back.
+- **Phase 1 regression:** `verify-phase1-metadata.apex` passed 19 of 19 checks with the shipment trigger active.
+
 ## 3. Phase 1 results (2026-11-19, `eLogixDev`)
 
 **Model validation.** It passes. Three deliberately injected faults (an unknown cross-object field, a misspelled picklist value and a broken View All dependency) were each reported by the validator.

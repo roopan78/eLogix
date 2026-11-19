@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Phase 1 (metadata foundation) deployed and verified on 2026-11-19 |
+| Status | Phase 1 (metadata foundation) and Phase 2 (Apex foundation, status policy, tracking) deployed and verified on 2026-11-19 |
 | Target org | `eLogixDev` - Developer Edition, instance API 68.0 |
 | Source API version | 67.0 (`sfdx-project.json`; kept per CLAUDE.md section 18) |
 | Related | [DATA_MODEL.md](DATA_MODEL.md) · [BUSINESS_RULES.md](BUSINESS_RULES.md) · [SECURITY_DESIGN.md](SECURITY_DESIGN.md) · [SHIPMENT_LIFECYCLE.md](SHIPMENT_LIFECYCLE.md) |
@@ -84,19 +84,37 @@ flowchart TB
 
 ## 4. Apex package structure (Phase 2 onward)
 
+Built in Phase 2 (contract: [APEX_ARCHITECTURE.md](APEX_ARCHITECTURE.md); conventions: [APEX_FRAMEWORK.md](APEX_FRAMEWORK.md)):
+
 ```
 force-app/main/default/classes/
-  base/        TriggerHandler, BaseSelector, ServiceResult, ELogixException hierarchy
-  common/      Logger, SettingsService (eLogix_Setting__mdt), PermissionService, IdempotencyKeys
-  shipment/    ShipmentService, ShipmentStatusPolicy, ShipmentDomain
+  base/        TriggerHandler, ServiceResult, ELogixException, ValidationException,
+               ConfigurationException, AuthorizationException
+  common/      Logger, ExceptionHandler, PermissionService, SettingsService
+  shipment/    ShipmentStatusPolicy, ShipmentStatusGuard, ShipmentItemsRequiredGuard,
+               ShipmentDomain, ShipmentService
+  tracking/    TrackingService, TrackingEventRequest
+  selectors/   ShipmentSelector, TrackingEventSelector
+  handlers/    ShipmentTriggerHandler
+  test/        TestDataFactory + 12 test classes
+force-app/main/default/triggers/   ShipmentTrigger
+force-app/main/default/labels/     CustomLabels (hand-maintained)
+```
+
+The original plan listed a `BaseSelector` and an `IdempotencyKeys` class. Neither was built. Selectors are small enough not to need a base class, and idempotency keys belong to the service that owns each record type (for example, tracking keys in `TrackingService`).
+
+Planned for later phases:
+
+```
+force-app/main/default/classes/
   pricing/     FreightCalculationService, RateCardSelector
   fleet/       FleetAllocationService, VehicleAvailabilityService
   warehouse/   WarehouseService, InventoryService
-  tracking/    TrackingService, DeliveryService
+  tracking/    DeliveryService
   finance/     InvoiceService, PaymentService
   returns/     ReturnService
   integrations/ GPS, payment, accounting, mapping, notification interfaces + mocks; IntegrationLogService
-  selectors/ handlers/ batch/ queueable/ events/ test/
+  batch/ queueable/ events/
 ```
 
 Salesforce DX source format allows nested folders inside a package directory. The folders are for organisation only; class names stay globally unique.
@@ -105,7 +123,7 @@ Salesforce DX source format allows nested folders inside a package directory. Th
 
 ```mermaid
 flowchart LR
-    P1[Phase 1<br/>Metadata foundation<br/>DONE] --> P2[Phase 2<br/>Apex foundation +<br/>status policy + tracking]
+    P1[Phase 1<br/>Metadata foundation<br/>DONE] --> P2[Phase 2<br/>Apex foundation +<br/>status policy + tracking<br/>DONE]
     P2 --> P3[Phase 3<br/>Pricing + quotation]
     P2 --> P4[Phase 4<br/>Fleet allocation]
     P3 --> P5[Phase 5<br/>Inventory, delivery,<br/>invoicing, payments + flows]

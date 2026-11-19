@@ -3,9 +3,9 @@
 | | |
 |---|---|
 | Configuration | `Shipment_Status_Transition__mdt`: 46 records, **live** in `eLogixDev` |
-| Enforcement | `ShipmentStatusPolicy` (Apex, Phase 2), called from `ShipmentTriggerHandler` on insert and on status change |
+| Enforcement | `ShipmentStatusPolicy`, **live since Phase 2** (deploy `0Afg700000KNnfeCAD`). `ShipmentTrigger` calls it in before insert and before update for every entry path: UI, API, Flow and services. See [SHIPMENT_POLICY_IMPLEMENTATION.md](SHIPMENT_POLICY_IMPLEMENTATION.md). |
 | Status vocabulary | Global value set `eLogix_Shipment_Status` (17 values; default `Draft`) |
-| History | Every allowed transition writes one `Tracking_Event__c`. `Status__c` also has field history tracking. |
+| History | Every allowed transition writes one `Tracking_Event__c` (`TrackingService`, live). `Status__c` also has field history tracking. See [TRACKING_IMPLEMENTATION.md](TRACKING_IMPLEMENTATION.md). |
 
 ## 1. State diagram
 
@@ -79,16 +79,16 @@ stateDiagram-v2
 ## 2. Design rules
 
 1. **Initial statuses.** A shipment can be created only as `Draft`, `Requested` or `Quoted` (records with blank `From_Status__c`). Shipments are never created already `Confirmed`. Their items are child records inserted after the parent, so the at-least-one-item rule can only be checked on the move to `Confirmed`.
-2. **Terminal statuses.** `Closed` and `Cancelled` have no outgoing transitions. The generator fails the build if one is added. This implements "cancelled shipments cannot be processed further".
-3. **No re-dispatch.** No path from `Delivered` leads back to `Dispatched` (also a generator check). This implements "delivered shipments cannot be dispatched again".
-4. **Override.** A user holding `eLogix_Override_Shipment_Status` (Administrator, Logistics Manager) may make any change, to correct data. The policy still writes a Tracking Event, with remarks marking it as an override.
+2. **Terminal statuses.** `Closed` and `Cancelled` have no outgoing transitions. The generator fails the build if one is added, `ShipmentStatusTransitionConfigTest` fails the deploy, and the policy rejects leaving them even if a row exists (hard rule). This implements "cancelled shipments cannot be processed further".
+3. **No re-dispatch.** No path from `Delivered` leads back to `Dispatched` or any earlier status (generator check, deploy-time test and policy hard rule). This implements "delivered shipments cannot be dispatched again".
+4. **Override.** A user holding `eLogix_Override_Shipment_Status` (Administrator, Logistics Manager) may make a change that the table does not list, or whose row is inactive, or that needs a permission they lack, to correct data. The change writes a Tracking Event whose remarks name the skipped rule. The type is `Exception` when no row exists for the pair; otherwise it is the row's event type. Override **cannot** leave `Closed` or `Cancelled`, move `Delivered` back to any pre-delivery status, or skip a guard (decisions D1 and D2 in [APEX_ARCHITECTURE.md](APEX_ARCHITECTURE.md#10-decisions-all-seven-approved-as-recommended-2026-11-19)). Validation rules still apply.
 5. **Transition guards** (enforced in Apex, in addition to the table):
 
    | Into | Guard | Phase |
    |---|---|---|
-   | `Confirmed` | `Item_Count__c ≥ 1` | P2 |
-   | `Ready for Dispatch` | Vehicle and driver allocated through `FleetAllocationService` | P4 |
-   | `Dispatched` | Warehouse-sourced items have reserved stock | P5 |
+   | `Confirmed` | `Item_Count__c ≥ 1` (`ShipmentItemsRequiredGuard`; applies under override too) | **Live (P2)** |
+   | `Ready for Dispatch` | Vehicle and driver allocated through `FleetAllocationService` | P4 (not enforced until then, decision D3) |
+   | `Dispatched` | Warehouse-sourced items have reserved stock | P5 (not enforced until then, decision D3) |
    | `Delivered` | `Actual_Delivery_Date__c` set (validation rule `SHP_Delivered_Requires_Delivery_Date`, live) | Live |
    | `On Hold` / `Cancelled` | Reason entered (validation rules, live) | Live |
 6. **Tracking event mapping.** `Tracking_Event_Type__c` on each transition record names the event type. It equals the target status, except that creation writes `Created`. The event's `From_Status__c` and `To_Status__c` fields record the actual change.
