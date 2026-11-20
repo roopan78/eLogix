@@ -529,6 +529,22 @@
         <value>Shipment {0} needs a pickup date and an expected delivery date on or after it before a vehicle can be allocated.</value>
     </labels>
     <labels>
+        <fullName>eLogix_GPS_Access_Denied</fullName>
+        <categories>eLogix,Integration</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix GPS Access Denied</shortDescription>
+        <value>You do not have permission to submit GPS pings. Ask your administrator for the eLogix GPS Integration permission set.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_GPS_Invalid_Payload</fullName>
+        <categories>eLogix,Integration</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix GPS Invalid Payload</shortDescription>
+        <value>The request body must be JSON with a pings list of 1 to {0} pings. Each ping needs messageId, vehicleNumber, latitude, longitude and recordedAt.</value>
+    </labels>
+    <labels>
         <fullName>eLogix_Pricing_Input_Invalid</fullName>
         <categories>eLogix,Pricing</categories>
         <language>en_US</language>
@@ -863,6 +879,14 @@
         <protected>false</protected>
         <shortDescription>eLogix Tracking Event Failed</shortDescription>
         <value>The status change was not saved because its tracking event could not be recorded. Try again, or contact your administrator if the problem continues.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Tracking_Record_Locked</fullName>
+        <categories>eLogix,Tracking</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Tracking Record Locked</shortDescription>
+        <value>The shipment is being updated by someone else right now. The event was not recorded and can be retried.</value>
     </labels>
     <labels>
         <fullName>eLogix_Tracking_Shipment_Not_Found</fullName>

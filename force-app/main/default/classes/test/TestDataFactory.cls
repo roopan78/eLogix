@@ -283,7 +283,7 @@ public class TestDataFactory {
         return createUser(lastName, new List<String>{ permissionSetName });
     }
 
-    /** A user created earlier in the test (for example in @TestSetup), found by last name. */
+    // A user created earlier in the test (for example in @TestSetup), found by last name. 
     public static User getUser(String lastName) {
         return [SELECT Id FROM User WHERE LastName = :lastName AND Username LIKE :('%' + TEST_USER_DOMAIN) LIMIT 1];
     }

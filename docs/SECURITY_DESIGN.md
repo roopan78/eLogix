@@ -59,6 +59,13 @@ Letters: **C**reate, **R**ead, **E**dit, **D**elete, **V**iew All, **M**odify Al
 
 The generator enforces the platform's permission dependencies at build time. Every grant includes Read. Delete requires Edit. Modify All requires Edit, Delete and View All. A detail object needs Read on its master, and View All or Modify All on the detail needs the same on the master. Contact needs Account.
 
+**`eLogix_GPS_Integration`** (Phase 6) is for the GPS provider's API-only integration user, and has no app.
+
+- Object access: Shipment `RV`, Vehicle `R`, Vehicle Assignment `R`, Tracking Event `CR`, Integration Log `CRE`.
+- Apex class access: `GpsPingResource`.
+- Custom permission: `eLogix_Ingest_GPS`.
+- View All on Shipment is required because GPS updates the tracking summary of any shipment on an Active trip. Event and summary writes stay in `TrackingService`'s narrow system-mode writer. The integration user cannot edit shipments.
+
 No role except the Administrator can delete transactional records. Tracking events and stock movements are create-only for everyone else, which keeps them as an audit trail.
 
 ## 4. Custom permissions
@@ -75,6 +82,7 @@ No role except the Administrator can delete transactional records. Tracking even
 | `eLogix_Settle_Claim` | Admin, Logistics Mgr, Finance | Claim approval and settlement |
 | `eLogix_Record_Advance_Payment` | Admin, Finance | Overpayment, only when setting `Allow_Advance_Payments` is true |
 | `eLogix_Modify_Paid_Invoice` | Admin | Editing a Paid invoice |
+| `eLogix_Ingest_GPS` | Admin, **`eLogix_GPS_Integration`** | Submitting GPS pings (REST endpoint and `GpsIngestionJob.submit`) |
 | `eLogix_Bypass_Validation_Rules` | **`eLogix_Data_Migration` only** | Bypassable validation rules during seeding or migration. Assign temporarily; never part of Admin. |
 
 ## <a id="protected-fields"></a>5. Protected fields

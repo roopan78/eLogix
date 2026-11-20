@@ -96,6 +96,18 @@ sf apex run --file scripts/apex/verify-phase5-cancellation.apex --target-org eLo
 
 Expect `failures=0` in each `SMOKE SUMMARY` (11, 7 and 3 checks). Since Phase 5, check 8 of the Phase 2 script verifies that the override cannot reach Delivered without a confirmed delivery; the delivery-reversal rule moved to the Phase 5 script.
 
+```bash
+# Verify Phase 6 GPS ingestion (rolled back; run as a user with eLogix_Administrator)
+sf apex run --file scripts/apex/verify-phase6-gps.apex --target-org eLogixDev           # checks=8: G1-G5
+```
+
+GPS integration user (optional; only for a live or simulated provider calling the REST endpoint):
+
+1. Create an API-only user, for example with the Salesforce Integration user licence where available, or Standard Platform User.
+2. Assign the GPS permission set: `sf org assign permset --name eLogix_GPS_Integration --on-behalf-of <integration username> --target-org eLogixDev`
+3. The provider posts to `/services/apexrest/elogix/gps/v1/pings` as that user, for example through an External Client App with the client credentials flow.
+4. Without a provider, the mock feeds the same asynchronous path. Run `GpsIngestionJob.submit(new MockGpsProvider().currentPositions());` in anonymous Apex as a user with `eLogix_Ingest_GPS`; it returns the batch id. The batch log is the `Integration_Log__c` whose `Correlation_Id__c` matches it.
+
 For data seeding (Phase 9), temporarily assign `eLogix_Data_Migration` so that historical dates pass the bypassable validation rules. Remove it afterwards:
 
 ```bash

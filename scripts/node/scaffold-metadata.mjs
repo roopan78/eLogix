@@ -329,11 +329,15 @@ function resolvePermissionSet(def) {
     for (const permission of def.customPermissions) {
         if (!permissionNames.has(permission)) fail(`${def.api}: unknown custom permission ${permission}`);
     }
+    for (const apexClass of def.apexClasses ?? []) {
+        if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(apexClass)) fail(`${def.api}: invalid Apex class name ${apexClass}`);
+    }
 
     return {
         applications: def.noApp ? [] : [APPLICATION.api],
         metadataTypes: def.noApp ? [] : METADATA_TYPES.map((t) => t.api),
         customPermissions: def.customPermissions,
+        apexClasses: [...(def.apexClasses ?? [])].sort(),
         fields,
         objects,
         tabs: [...objects.keys()].filter((api) => OBJECTS_BY_API.get(api).tab)

@@ -121,6 +121,7 @@ export const PERMISSION_SETS = [
             'eLogix_Approve_Quotation',
             'eLogix_Allocate_Fleet',
             'eLogix_Correct_Dispatched_Allocation',
+            'eLogix_Ingest_GPS',
             'eLogix_Adjust_Inventory',
             'eLogix_Approve_Return',
             'eLogix_Settle_Claim',
@@ -316,6 +317,21 @@ export const PERMISSION_SETS = [
             Claim__c: 'CRE'
         },
         customPermissions: []
+    },
+    {
+        api: 'eLogix_GPS_Integration',
+        label: 'eLogix GPS Integration',
+        description: 'For the GPS provider integration user (API only): submits GPS pings to the GPS ingestion endpoint. Reads shipments, vehicles and assignments; writes tracking events and integration logs.',
+        objects: {
+            Shipment__c: 'RV', // the ingestion locks and updates the tracking summary of any shipment on an Active trip
+            Vehicle__c: 'R',
+            Vehicle_Assignment__c: 'R',
+            Tracking_Event__c: 'CR',
+            Integration_Log__c: 'CRE'
+        },
+        customPermissions: ['eLogix_Ingest_GPS'],
+        apexClasses: ['GpsPingResource'],
+        noApp: true
     },
     {
         api: 'eLogix_Data_Migration',

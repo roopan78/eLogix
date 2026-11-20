@@ -541,6 +541,12 @@ export function buildPermissionSet(def, resolved) {
         lines.push(tag('visible', true, `${I}${I}`));
         lines.push(`${I}</applicationVisibilities>`);
     }
+    for (const apexClass of resolved.apexClasses ?? []) {
+        lines.push(`${I}<classAccesses>`);
+        lines.push(tag('apexClass', apexClass, `${I}${I}`));
+        lines.push(tag('enabled', true, `${I}${I}`));
+        lines.push(`${I}</classAccesses>`);
+    }
     for (const type of resolved.metadataTypes) {
         lines.push(`${I}<customMetadataTypeAccesses>`);
         lines.push(tag('enabled', true, `${I}${I}`));

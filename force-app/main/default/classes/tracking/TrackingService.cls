@@ -28,6 +28,11 @@ public with sharing class TrackingService {
     public static final String SHIPMENT_NOT_FOUND = 'SHIPMENT_NOT_FOUND';
     public static final String OPERATION_FAILED = 'OPERATION_FAILED';
     public static final String STATUS_EVENTS_TRIGGER_ONLY = 'STATUS_EVENTS_TRIGGER_ONLY';
+    /** Phase 6 (F5): retryable; the shipment was locked by another transaction. */
+    public static final String RECORD_LOCKED = 'RECORD_LOCKED';
+    /** Test seam: a test substitutes a selector whose lock query times out (F5 5.2). */
+    @TestVisible
+    private static ShipmentSelector shipmentSelector = new ShipmentSelector();
     @TestVisible
     private static final String CREATION_CODE = 'NEW';
     @TestVisible
@@ -271,8 +276,20 @@ public with sharing class TrackingService {
         }
 
         // 2. Authorize per shipment: the user must be able to read it (user mode). Lock it so that
-        //    concurrent events compare against a current tracking summary.
-        Map<Id, Shipment__c> shipments = new ShipmentSelector().selectTrackingSummaryForUpdate(shipmentIds);
+        //    concurrent events compare against a current tracking summary. A lock wait timeout is
+        //    reported per request as the retryable RECORD_LOCKED, never thrown (Phase 6, F5 5.2).
+        Map<Id, Shipment__c> shipments;
+        try {
+            shipments = shipmentSelector.selectTrackingSummaryForUpdate(shipmentIds);
+        } catch (QueryException e) {
+            if (!isLockTimeout(e.getMessage())) {
+                throw e;
+            }
+            for (Integer i : candidateIndexes) {
+                result.addError(RECORD_LOCKED, Label.eLogix_Tracking_Record_Locked, i, requests[i].shipmentId);
+            }
+            return result;
+        }
 
         // 3. Build events; collapse duplicate external ids within the batch.
         List<Tracking_Event__c> events = new List<Tracking_Event__c>();
@@ -312,12 +329,16 @@ public with sharing class TrackingService {
             return result;
         }
 
-        // 5. Insert events and update the tracking summary together, or not at all.
+        // 5. Insert events and update the tracking summaries, consistent per shipment (Phase 6, F5
+        //    5.1): summaries are updated with partial success, and a shipment whose summary update
+        //    fails loses only its own new events, which are deleted again in this transaction, so
+        //    other shipments in the batch keep theirs. The savepoint remains for unexpected errors.
         Savepoint savepoint = Database.setSavepoint();
         Writer writer = new Writer();
         List<Database.SaveResult> saveResults = writer.insertEvents(toInsert);
         List<Id> insertedIds = new List<Id>();
         List<Integer> insertedRequestIndexes = new List<Integer>();
+        List<Id> insertedShipmentIds = new List<Id>();
         Map<Id, Shipment__c> summaryUpdates = new Map<Id, Shipment__c>();
         for (Integer j = 0; j < saveResults.size(); j++) {
             Integer requestIndex = insertRequestIndexes[j];
@@ -329,11 +350,28 @@ public with sharing class TrackingService {
             }
             insertedIds.add(saveResults[j].getId());
             insertedRequestIndexes.add(requestIndex);
+            insertedShipmentIds.add(toInsert[j].Shipment__c);
             collectSummaryUpdate(toInsert[j], shipments.get(toInsert[j].Shipment__c), summaryUpdates);
         }
 
+        Map<Id, Database.Error> failedSummaries = new Map<Id, Database.Error>();
         try {
-            writer.updateSummaries(summaryUpdates.values());
+            List<Shipment__c> summaries = summaryUpdates.values();
+            List<Database.SaveResult> summaryResults = writer.updateSummaries(summaries);
+            for (Integer j = 0; j < summaryResults.size(); j++) {
+                if (!summaryResults[j].isSuccess()) {
+                    failedSummaries.put(summaries[j].Id, summaryResults[j].getErrors()[0]);
+                }
+            }
+            if (!failedSummaries.isEmpty()) {
+                List<Id> orphaned = new List<Id>();
+                for (Integer k = 0; k < insertedIds.size(); k++) {
+                    if (failedSummaries.containsKey(insertedShipmentIds[k])) {
+                        orphaned.add(insertedIds[k]);
+                    }
+                }
+                writer.deleteEvents(orphaned);
+            }
         } catch (Exception e) {
             Database.rollback(savepoint);
             String message = ExceptionHandler.toUserMessage(e, EVENTS_CONTEXT);
@@ -342,11 +380,28 @@ public with sharing class TrackingService {
             }
             return result;
         }
-        for (Id eventId : insertedIds) {
-            result.addRecordId(eventId);
+        for (Integer k = 0; k < insertedIds.size(); k++) {
+            Database.Error failure = failedSummaries.get(insertedShipmentIds[k]);
+            if (failure == null) {
+                result.addRecordId(insertedIds[k]);
+            } else {
+                Boolean locked = isLockTimeout(failure.getMessage()) || failure.getStatusCode() == StatusCode.UNABLE_TO_LOCK_ROW;
+                result.addError(
+                    locked ? RECORD_LOCKED : String.valueOf(failure.getStatusCode()),
+                    locked ? Label.eLogix_Tracking_Record_Locked : failure.getMessage(),
+                    insertedRequestIndexes[k],
+                    insertedShipmentIds[k]
+                );
+            }
         }
         Logger.info(EVENTS_CONTEXT, 'requested=' + requests.size() + ' inserted=' + insertedIds.size() + ' errors=' + result.errors.size());
         return result;
+    }
+
+    /** Phase 6 (F5 5.2): a row-lock wait timeout, from a FOR UPDATE query or a DML error. */
+    @TestVisible
+    private static Boolean isLockTimeout(String message) {
+        return message != null && (message.contains('UNABLE_TO_LOCK_ROW') || message.contains('Record Currently Unavailable'));
     }
 
     private static Boolean isWellFormed(TrackingEventRequest request, Set<String> eventTypes, Set<String> sources) {
@@ -441,9 +496,14 @@ public with sharing class TrackingService {
             return Database.insert(events, false, AccessLevel.SYSTEM_MODE);
         }
 
-        public void updateSummaries(List<Shipment__c> shipments) {
-            if (!shipments.isEmpty()) {
-                Database.update(shipments, true, AccessLevel.SYSTEM_MODE);
+        public List<Database.SaveResult> updateSummaries(List<Shipment__c> shipments) {
+            return shipments.isEmpty() ? new List<Database.SaveResult>() : Database.update(shipments, false, AccessLevel.SYSTEM_MODE);
+        }
+
+        /** Phase 6 (F5 5.1): removes the events just inserted for shipments whose summary update failed. */
+        public void deleteEvents(List<Id> eventIds) {
+            if (!eventIds.isEmpty()) {
+                Database.delete(eventIds, true, AccessLevel.SYSTEM_MODE);
             }
         }
     }

@@ -240,18 +240,14 @@ private class TrackingServiceTest {
     }
 
     /**
-     * F2: the rollback branch of recordEvents, reached through a supported path with no failure switch.
-     * The system-mode summary update still runs shipment validation rules. A shipment loaded under the
+     * F5 (Phase 6): a failed tracking-summary update affects only its own shipment. The system-mode
+     * summary update still runs shipment validation rules. A shipment loaded under the
      * eLogix_Data_Migration bypass that breaks SHP_Delivery_After_Pickup fails that update for a user
-     * without the bypass, so the events inserted in the same call are rolled back.
-     *
-     * The second request shows the current batch-wide behaviour: one invalid shipment rolls back the
-     * events of every shipment in the call. This is consistent (nothing half-written) but is a known
-     * Phase 6 robustness item; see docs/TRACKING_IMPLEMENTATION.md section 5. Update this test
-     * deliberately when that design changes.
+     * without the bypass: its new event is removed again, while the other shipment in the same call
+     * keeps its event and summary.
      */
     @IsTest
-    static void summaryFailureRollsBackTheEventsOfTheWholeBatch() {
+    static void summaryFailureRemovesOnlyThatShipmentsEvents() {
         Shipment__c legacy;
         System.runAs(TestDataFactory.getUser(MIGRATION)) {
             Account customer = [SELECT Id, Business_Unit__c FROM Account WHERE Customer_Code__c = 'CUST-TRK'];
@@ -277,16 +273,73 @@ private class TrackingServiceTest {
         }
 
         Assert.isFalse(result.isSuccess);
-        Assert.isTrue(result.recordIds.isEmpty(), 'No event survives the rollback.');
-        Assert.areEqual(2, result.errors.size());
-        Assert.areEqual(new Set<Integer>{ 0, 1 }, new Set<Integer>{ result.errors[0].recordIndex, result.errors[1].recordIndex });
-        for (ServiceResult.ServiceError error : result.errors) {
-            Assert.areEqual(TrackingService.OPERATION_FAILED, error.code);
-            Assert.isTrue(String.isNotBlank(error.message));
-        }
-        Assert.areEqual(0, [SELECT COUNT() FROM Tracking_Event__c WHERE Event_Type__c = 'Location Update']);
+        Assert.areEqual(1, result.recordIds.size(), 'The valid shipment keeps its event.');
+        Assert.areEqual(1, result.errors.size(), String.valueOf(result.errors));
+        Assert.areEqual(0, result.errors[0].recordIndex);
+        Assert.areEqual(legacy.Id, result.errors[0].recordId);
+        Assert.areNotEqual(TrackingService.OPERATION_FAILED, result.errors[0].code, 'Reported per shipment, not batch-wide.');
+        Assert.areNotEqual(TrackingService.RECORD_LOCKED, result.errors[0].code, 'A validation failure is not retryable.');
+        Assert.isTrue(String.isNotBlank(result.errors[0].message));
+
+        Assert.areEqual(0, [SELECT COUNT() FROM Tracking_Event__c WHERE Shipment__c = :legacy.Id AND Event_Type__c = 'Location Update']);
+        Assert.areEqual(1, [SELECT COUNT() FROM Tracking_Event__c WHERE Shipment__c = :valid.Id AND Event_Type__c = 'Location Update']);
         Assert.isNull(summary(legacy.Id).Latest_Location__c);
-        Assert.isNull(summary(valid.Id).Latest_Location__c);
+        Assert.areEqual('Vellore', summary(valid.Id).Latest_Location__c);
+    }
+
+    /** F5 (Phase 6): a lock wait timeout on the shipments is returned per request as RECORD_LOCKED. */
+    @IsTest
+    static void lockTimeoutIsReportedPerRequestAsRetryable() {
+        System.runAs(TestDataFactory.getUser(OPS)) {
+            List<Shipment__c> records = shipments(2);
+            TrackingService.shipmentSelector = new LockedSelector('UNABLE_TO_LOCK_ROW, unable to obtain exclusive access to this record');
+
+            ServiceResult result = new TrackingService()
+                .recordEvents(
+                    new List<TrackingEventRequest>{
+                        gps(records[0].Id, 'Hosur', System.now().addMinutes(-5), 'GPS-L-1'),
+                        gps(records[1].Id, 'Vellore', System.now().addMinutes(-5), 'GPS-L-2')
+                    }
+                );
+
+            Assert.isFalse(result.isSuccess);
+            Assert.isTrue(result.recordIds.isEmpty());
+            Assert.areEqual(2, result.errors.size());
+            for (ServiceResult.ServiceError error : result.errors) {
+                Assert.areEqual(TrackingService.RECORD_LOCKED, error.code);
+                Assert.areEqual(Label.eLogix_Tracking_Record_Locked, error.message);
+            }
+            Assert.areEqual(0, [SELECT COUNT() FROM Tracking_Event__c WHERE Event_Type__c = 'Location Update']);
+        }
+    }
+
+    @IsTest
+    static void otherQueryFailuresAreNotMistakenForLocks() {
+        System.runAs(TestDataFactory.getUser(OPS)) {
+            List<Shipment__c> records = shipments(1);
+            TrackingService.shipmentSelector = new LockedSelector('Some other query problem');
+            try {
+                new TrackingService().recordEvents(new List<TrackingEventRequest>{ gps(records[0].Id, 'Hosur', System.now(), 'GPS-Q-1') });
+                Assert.fail('Expected the QueryException to propagate.');
+            } catch (QueryException e) {
+                Assert.areEqual('Some other query problem', e.getMessage());
+            }
+        }
+        Assert.isTrue(TrackingService.isLockTimeout('Record Currently Unavailable: the record is being modified'));
+        Assert.isFalse(TrackingService.isLockTimeout(null));
+    }
+
+    /** Simulates a FOR UPDATE query that fails with the given message. */
+    private class LockedSelector extends ShipmentSelector {
+        private final String message;
+
+        LockedSelector(String message) {
+            this.message = message;
+        }
+
+        public override Map<Id, Shipment__c> selectTrackingSummaryForUpdate(Set<Id> shipmentIds) {
+            throw new QueryException(message);
+        }
     }
 
     @IsTest

@@ -40,6 +40,11 @@ export const CUSTOM_PERMISSIONS = [
         description: 'Correct the vehicle, driver or booking window of a dispatched shipment while it is On Hold, with a reason. Needs Allocate Fleet too. Each correction is fully revalidated and written to tracking history.'
     },
     {
+        api: 'eLogix_Ingest_GPS',
+        label: 'eLogix: Ingest GPS',
+        description: 'Submit GPS position pings for vehicles on Active trips through the GPS ingestion endpoint.'
+    },
+    {
         api: 'eLogix_Adjust_Inventory',
         label: 'eLogix: Adjust Inventory',
         description: 'Post manual stock adjustments and damage write-offs.'
@@ -244,6 +249,26 @@ export const METADATA_TYPES = [
             setting('Max_Delivery_Attempts', 'Max Delivery Attempts', {
                 number: 3,
                 description: 'Delivery attempts allowed per shipment. After the last failed attempt the shipment can only go On Hold or start a return.'
+            }),
+            setting('GPS_Min_Interval_Minutes', 'GPS Min Interval Minutes', {
+                number: 15,
+                description: 'A GPS ping is stored as a Location Update only if this many minutes have passed since the shipment last stored GPS location, or it moved GPS_Min_Distance_Km.'
+            }),
+            setting('GPS_Min_Distance_Km', 'GPS Min Distance Km', {
+                number: 2,
+                description: 'A GPS ping is stored if the vehicle moved at least this many kilometres from the last stored GPS location, whatever the interval.'
+            }),
+            setting('GPS_Max_Ping_Age_Hours', 'GPS Max Ping Age Hours', {
+                number: 24,
+                description: 'GPS pings recorded longer ago than this are rejected as stale.'
+            }),
+            setting('GPS_Max_Future_Skew_Minutes', 'GPS Max Future Skew Minutes', {
+                number: 5,
+                description: 'GPS pings timestamped further in the future than this are rejected (device clock skew).'
+            }),
+            setting('GPS_Max_Retries', 'GPS Max Retries', {
+                number: 3,
+                description: 'Retries for GPS pings that hit a record lock, with backoff of 1, 2 and 4 minutes. Pings still failing then become Dead Letter integration logs.'
             }),
             setting('POD_File_Required', 'POD File Required', {
                 bool: true,

@@ -829,5 +829,10 @@ Named configuration values for eLogix business rules. Read through a single sett
 | `Default_Billing_Milestone` | On Delivery |  | false | Billing milestone used for automatically generated invoices. |
 | `Document_Expiry_Warning_Days` |  | 30 | false | Vehicle documents and driver licences expiring within this many days are shown as Expiring Soon. |
 | `Max_Delivery_Attempts` |  | 3 | false | Delivery attempts allowed per shipment. After the last failed attempt the shipment can only go On Hold or start a return. |
+| `GPS_Min_Interval_Minutes` |  | 15 | false | A GPS ping is stored as a Location Update only if this many minutes have passed since the shipment last stored GPS location, or it moved GPS_Min_Distance_Km. |
+| `GPS_Min_Distance_Km` |  | 2 | false | A GPS ping is stored if the vehicle moved at least this many kilometres from the last stored GPS location, whatever the interval. |
+| `GPS_Max_Ping_Age_Hours` |  | 24 | false | GPS pings recorded longer ago than this are rejected as stale. |
+| `GPS_Max_Future_Skew_Minutes` |  | 5 | false | GPS pings timestamped further in the future than this are rejected (device clock skew). |
+| `GPS_Max_Retries` |  | 3 | false | Retries for GPS pings that hit a record lock, with backoff of 1, 2 and 4 minutes. Pings still failing then become Dead Letter integration logs. |
 | `POD_File_Required` |  |  | true | When true, a delivery can be confirmed only when its proof of delivery has at least one file attached. |
 

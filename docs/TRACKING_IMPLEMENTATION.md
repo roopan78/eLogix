@@ -80,9 +80,15 @@ Several fields are protected, meaning read-only for every role:
 
 With 5 MB of data storage, only allowed status changes and explicit operational events create rows. Roll-up recalculations, no-change saves and replays create none.
 
-## 5. Phase 6 robustness items (follow-up F5, reviewed 2026-11-19)
+## 5. Phase 6 robustness items (follow-up F5, reviewed 2026-11-19; resolved in Phase 6)
 
-`recordEvents` is correct today, and its rollback branch is covered by `TrackingServiceTest.summaryFailureRollsBackTheEventsOfTheWholeBatch`. Two behaviours would hurt a high-volume GPS feed. Phase 6, which builds the GPS integration, must resolve both before `recordEvents` is connected to live pings.
+**Status: resolved in Phase 6.** Both items were implemented as planned below.
+
+- 5.1: summaries are updated with partial success, and the failed shipment's new events are deleted in system mode. Covered by `TrackingServiceTest.summaryFailureRemovesOnlyThatShipmentsEvents`, which replaces `summaryFailureRollsBackTheEventsOfTheWholeBatch`.
+- 5.2: a lock timeout on the `FOR UPDATE` query, or a lock error on the summary update, is reported per request as `RECORD_LOCKED` (label `eLogix_Tracking_Record_Locked`). Covered by `lockTimeoutIsReportedPerRequestAsRetryable` and `otherQueryFailuresAreNotMistakenForLocks`, through the `TrackingService.shipmentSelector` test seam.
+- The retry and dead-letter path is in `GpsIngestionJob`; see [INTEGRATION_DESIGN.md](INTEGRATION_DESIGN.md) section 3.
+
+The original review follows; its "Today" rows describe the pre-Phase 6 behaviour.
 
 ### 5.1 Batch-wide rollback
 
@@ -102,4 +108,4 @@ With 5 MB of data storage, only allowed status changes and explicit operational 
 | Planned resolution (Phase 6) | (1) Inbound pings go through the asynchronous path described in [INTEGRATION_DESIGN.md](INTEGRATION_DESIGN.md) section 3, never synchronously from the caller. (2) Pings are grouped per shipment and ordered by timestamp before `recordEvents` is called, so one transaction takes each lock once. (3) `recordEvents` catches the lock exception and reports every affected request with a retryable code (`RECORD_LOCKED`) instead of throwing. (4) The integration layer retries retryable codes with backoff and records attempts in `Integration_Log__c` (`Retry_Count__c`; status `Retrying`, then `Dead Letter`). Idempotent `Event_Key__c` values make the retries safe. |
 | Acceptance | A test that holds the shipment lock is not feasible in Apex, so the catch is unit-tested by injecting a selector that throws. The retry and dead-letter path is covered by Phase 6 integration tests. |
 
-No code changed for F5. These are design commitments for Phase 6, tracked in [PROJECT_STATUS.md](../PROJECT_STATUS.md).
+No code changed for F5 in Phase 2; the commitments above were implemented in Phase 6.
