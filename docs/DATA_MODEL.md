@@ -84,7 +84,14 @@ Master-detail chains go at most three levels deep (`Warehouse → Inventory → 
    - Invoice: `Subtotal` = Σ line amounts, `Tax` = Σ line tax, `Paid` = Σ **Completed** payments only, `Balance` = `Subtotal + Tax − Paid`.
    - Shipment: `Item_Count__c`, `Total_Item_Weight__c`, `Total_Declared_Value__c`, `Additional_Charges__c`.
    - Inventory: `Net_Available_Quantity__c`, `Is_Below_Reorder__c`, `Stock_Value__c`; Warehouse totals roll up from inventory.
-4. **Eligibility flags as formulas.** `Vehicle__c.Is_Allocatable__c` is true when the vehicle is Available and its registration and insurance are valid. `Driver__c.Is_Allocatable__c` is true when the driver is Available and the licence is valid. `Vehicle__c.Open_Maintenance_Count__c` counts maintenance that is neither Completed nor Cancelled. `FleetAllocationService` uses these to pre-filter candidates in SOQL. It still re-checks them under a row lock before allocating, because the formulas use `TODAY()`.
+4. **Eligibility flags as formulas.** These were redefined in Phase 4 (Q2, Q15):
+   - `Vehicle__c.Is_Allocatable__c` is true when the vehicle is neither Inactive nor Under Maintenance, and its registration, insurance and fitness (if filled in) are valid today.
+   - `Driver__c.Is_Allocatable__c` is true when the driver is neither Inactive nor On Leave, and the licence is valid today.
+   - Status is administrative; allocation never changes it.
+   - `Vehicle__c.Document_Status__c` and `Driver__c.License_Status__c` show Missing, Expired, Expiring Soon or Valid, using `eLogix_Setting.Document_Expiry_Warning_Days`.
+   - The allocation trigger re-checks every document against the assignment window end, not against today.
+
+   Superseded Phase 1 wording: `Vehicle__c.Is_Allocatable__c` is true when the vehicle is Available and its registration and insurance are valid. `Driver__c.Is_Allocatable__c` is true when the driver is Available and the licence is valid. `Vehicle__c.Open_Maintenance_Count__c` counts maintenance that is neither Completed nor Cancelled. `FleetAllocationService` uses these to pre-filter candidates in SOQL. It still re-checks them under a row lock before allocating, because the formulas use `TODAY()`.
 5. **Shared vocabularies** are global value sets. `Vehicle_Type__c` on both Vehicle and Rate Card uses `eLogix_Vehicle_Type`, so a rate card always matches a vehicle type exactly. Every shipment status has a same-named tracking event type, which makes the transition → event mapping 1:1.
 6. **Immutable audit objects.** `Tracking_Event__c` and `Stock_Movement__c` cannot be edited after insert (validation rules) and only the Administrator can delete them. Corrections are new records.
 7. **Formulas never reference other formula fields**, so deployment order does not matter. Formulas may reference roll-ups.

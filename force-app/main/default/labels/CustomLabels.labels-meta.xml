@@ -9,6 +9,294 @@
         <value>You do not have access to perform this operation.</value>
     </labels>
     <labels>
+        <fullName>eLogix_Fleet_Activation_Status</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Activation Status</shortDescription>
+        <value>Shipment {0} is {1}. An assignment can become Active only when its shipment is Ready for Dispatch or Dispatched.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Allocation_Invalid</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Allocation Invalid</shortDescription>
+        <value>The allocated vehicle and driver are no longer valid for dispatch: {0}</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Allocation_Required</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Allocation Required</shortDescription>
+        <value>Allocate a vehicle and a driver before the shipment is ready for dispatch or in transit.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Assignment_Locked</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Assignment Locked</shortDescription>
+        <value>This vehicle assignment is {0}, so its vehicle, driver, shipment and window can no longer change.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Business_Unit_Mismatch</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Business Unit Mismatch</shortDescription>
+        <value>The shipment, vehicle {0} and driver {1} must belong to the same business unit.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Busy</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Busy</shortDescription>
+        <value>The vehicle or driver is being allocated by someone else right now. Try again in a moment.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Capacity_Insufficient</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Capacity Insufficient</shortDescription>
+        <value>Vehicle {0} carries up to {1} kg, but the shipment weighs {2} kg.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Correction_Event</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Correction Event</shortDescription>
+        <value>Allocation corrected on {0}. Vehicle: {1} (was {2}). Driver: {3} (was {4}). Booking window: {5} to {6}. Reason: {7}</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Correction_Not_Allowed</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Correction Not Allowed</shortDescription>
+        <value>A dispatched allocation can be corrected only by a user with the Correct Dispatched Allocation permission, while the shipment is On Hold, on a Planned assignment whose status does not change, and with a correction reason.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Correction_Not_Recorded</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Correction Not Recorded</shortDescription>
+        <value>The correction could not be recorded in tracking history, so it was not saved: {0}</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Correction_Reason_Required</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Correction Reason Required</shortDescription>
+        <value>Enter a reason for this correction. It must differ from the reason given for the previous correction.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Delete_Not_Allowed</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Delete Not Allowed</shortDescription>
+        <value>Vehicle assignments cannot be deleted or restored from the Recycle Bin. Cancel a Planned assignment to release it; completed and cancelled assignments are kept as history.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Driver_Double_Booked</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Driver Double Booked</shortDescription>
+        <value>Driver {0} already has an assignment that overlaps this window.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Driver_Licence_Invalid</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Driver Licence Invalid</shortDescription>
+        <value>Driver {0} cannot be allocated: the licence must be valid until {1}.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Driver_Unavailable</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Driver Unavailable</shortDescription>
+        <value>Driver {0} is {1} and cannot be allocated.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Locked_After_Dispatch</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Locked After Dispatch</shortDescription>
+        <value>Shipment {0} has already reached Ready for Dispatch, so its vehicle and driver can no longer be changed or released. While it is On Hold, a user with the Correct Dispatched Allocation permission can correct the allocation with a reason; otherwise cancel the shipment.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Maintenance_Conflict</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Maintenance Conflict</shortDescription>
+        <value>Vehicle {0} has maintenance in progress or scheduled during this assignment.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Must_Start_Planned</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Must Start Planned</shortDescription>
+        <value>A new vehicle assignment must start as Planned.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_No_Open_Assignment</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet No Open Assignment</shortDescription>
+        <value>Shipment {0} has no Planned vehicle assignment to change.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Permission_Required</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Permission Required</shortDescription>
+        <value>You need the eLogix Allocate Fleet permission to create or change vehicle assignments.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Record_Not_Found</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Record Not Found</shortDescription>
+        <value>Record {0} does not exist or you do not have access to it.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Release_Failed</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Release Failed</shortDescription>
+        <value>The shipment could not be cancelled because its vehicle assignment could not be released: {0}</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Shipment_Already_Allocated</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Shipment Already Allocated</shortDescription>
+        <value>Shipment {0} already has an open vehicle assignment. Reallocate or release it instead.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Shipment_Delete_Blocked</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Shipment Delete Blocked</shortDescription>
+        <value>Shipment {0} still has a Planned or Active vehicle assignment. Cancel the assignment, or cancel the shipment, before deleting it.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Shipment_Immutable</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Shipment Immutable</shortDescription>
+        <value>A vehicle assignment stays linked to its shipment. Release it and allocate the other shipment instead.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Shipment_Required</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Shipment Required</shortDescription>
+        <value>A vehicle assignment must be linked to a shipment.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Shipment_Status</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Shipment Status</shortDescription>
+        <value>Shipment {0} is {1}. Vehicles can be allocated, changed or released only while a shipment is Confirmed or On Hold.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Shipment_Sync_Failed</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Shipment Sync Failed</shortDescription>
+        <value>Shipment {0} could not be updated with its vehicle and driver: {1}</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Transition_Not_Allowed</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Transition Not Allowed</shortDescription>
+        <value>A vehicle assignment cannot move from {0} to {1}.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Vehicle_Document_Invalid</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Vehicle Document Invalid</shortDescription>
+        <value>Vehicle {0} cannot be allocated: its {1} must be on or after {2}.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Vehicle_Double_Booked</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Vehicle Double Booked</shortDescription>
+        <value>Vehicle {0} already has an assignment that overlaps this window.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Vehicle_Inactive</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Vehicle Inactive</shortDescription>
+        <value>Vehicle {0} is inactive.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Vehicle_Type_Mismatch</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Vehicle Type Mismatch</shortDescription>
+        <value>The shipment was quoted for a {0}, but vehicle {1} is a {2}.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Vehicle_Under_Maintenance</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Vehicle Under Maintenance</shortDescription>
+        <value>Vehicle {0} is under maintenance.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Window_Changed</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Window Changed</shortDescription>
+        <value>The dates of shipment {0} changed after its vehicle was allocated. Reallocate the vehicle and driver to renew the booking before dispatch.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Window_Invalid</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Window Invalid</shortDescription>
+        <value>Shipment {0} needs a pickup date and an expected delivery date on or after it before a vehicle can be allocated.</value>
+    </labels>
+    <labels>
         <fullName>eLogix_Pricing_Input_Invalid</fullName>
         <categories>eLogix,Pricing</categories>
         <language>en_US</language>

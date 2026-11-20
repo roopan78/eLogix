@@ -97,6 +97,76 @@ The summary-update rollback branch in `TrackingService.recordEvents` is covered 
 
 Coverage of Phase 3 classes: `QuotationDomain`, `QuotationTriggerHandler`, `RateCardSelector`, `FreightBreakdown` 100%; `FreightCalculationService` 99.3%; `QuotationService` 94.4%; `QuotationSelector`, `ShipmentRequestSelector` 90.9%; combined 96.9%. Org-wide 97.6%.
 
+## 6. Phase 4 scenarios (check-only validation `0Afg700000KSngbCAD`: 173/173 tests, 37 for Phase 4; not yet deployed)
+
+| Scenario | Test(s) |
+|---|---|
+| Valid allocation: Planned, window derived from the shipment in org time (Q3), business unit stamped, shipment mirrored (Q18) | `FleetAllocationServiceTest.allocatesAndMirrorsTheShipment`, `VehicleAvailabilityServiceTest.windowsUseOrgTimeBoundaries` |
+| Capacity; inactive vehicle and driver; Under Maintenance; On Leave | `VehicleAvailabilityServiceTest` status, capacity and business-unit tests; `FleetAllocationServiceTest.ruleViolationsAreReportedPerRecord` |
+| Expired insurance, registration and licence through the window end; fitness checked only when filled in (Q4) | `VehicleAvailabilityServiceTest` document tests; `ruleViolationsAreReportedPerRecord` |
+| Maintenance: In Progress blocks whatever its dates; Scheduled blocks when its dates overlap; Scheduled with no completion date occupies only its scheduled day (Q5) | `VehicleAvailabilityServiceTest` maintenance tests |
+| Vehicle and driver overlaps, stored and within one call; a non-overlapping later booking is allowed; back-to-back days do not overlap (Q1) | `aDoubleBookedDriverIsRejectedButALaterBookingIsAllowed`, `doubleBookingWithinOneCallIsRejected`, `VehicleAvailabilityServiceTest` overlap tests |
+| Quoted vehicle type, including when the Fleet Manager cannot read the quotation (sharing regression) (Q7) | `FleetAllocationServiceTest.theQuotedVehicleTypeIsEnforced` |
+| Business-unit mismatch (Q8) | `crossBusinessUnitAllocationIsRejected` |
+| Allocation only while Confirmed or On Hold; reallocation in place; a failed reallocation keeps the previous one (Q9) | `onlyConfirmedOrOnHoldShipmentsCanBeAllocated`, `reallocationChangesTheAssignmentInPlace` |
+| Release frees the vehicle and clears the shipment | `releaseFreesTheVehicleAndClearsTheShipment` |
+| Ready for Dispatch guard, valid and invalid (Q10); the guard is in the default set | `readyForDispatchNeedsAVerifiedAllocation`, `ShipmentStatusTransitionConfigTest.deployedLifecycleBehavesAsDocumented` |
+| Cancellation auto-release, once, with no recursion and without the fleet permission (Q11) | `cancellingAShipmentReleasesItsAssignmentOnce` |
+| Lifecycle Planned → Active → Completed; history kept after completion (Q12, Q18) | `lifecycleKeepsHistoryAfterCompletion` |
+| An old assignment never clears a newer reference (Q18) | `VehicleAssignmentTriggerHandlerTest.anOldAssignmentNeverClearsANewerReference` |
+| **Direct DML and bypass attempts**: same rules without the service; permission required; release exemption not borrowable; transitions, terminal locks, Active freeze; mirror fields not writable by the Fleet Manager; trigger-only entry points refuse other callers | `VehicleAssignmentTriggerHandlerTest` (8 tests), `usersWithoutTheFleetPermissionAreDenied`, `invalidAndInvisibleRequestsAreReportedPerRecord` |
+| **Bulk 200**: 10 SOQL, 2 DML; remarks-only save of 20: 0 SOQL, 1 DML | `twoHundredAllocationsInOneCall`, `aRemarksOnlySaveCostsNothing` |
+| Lock timeout becomes retryable `FLEET_BUSY`, nothing saved (Q16) | `aLockTimeoutBecomesARetryableError` |
+
+### Audit fixes (check-only validation `0Afg700000KVnYnCAL`: 190/190 tests, 54 for Phase 4)
+
+| Scenario | Test(s) |
+|---|---|
+| Delete refused for the Fleet Manager (no Delete permission) and for the Administrator (trigger); the booking still blocks an overlapping allocation | `VehicleAssignmentTriggerHandlerTest.deletionIsRefusedForEveryoneAndKeepsTheBooking` |
+| Completed history cannot be deleted | `completedHistoryCannotBeDeleted` |
+| Undelete and delete are routed to a refusal (a real undelete cannot be produced, because nothing can be deleted) | `deleteAndRestoreAreRoutedToARefusal` |
+| Ready for Dispatch → On Hold (and back to Confirmed): reallocation, release and direct DML refused | `FleetDispatchRulesTest.readyForDispatchThenOnHoldKeepsTheAllocation` |
+| Dispatched / In Transit → On Hold, including the On Hold → In Transit shortcut: refused | `dispatchedOrInTransitThenOnHoldKeepsTheAllocation` |
+| On Hold before dispatch: reallocation and release allowed | `onHoldBeforeDispatchStillAllowsChanges` |
+| Cancellation still releases after dispatch | `cancellationStillReleasesAfterDispatch` |
+| Ready for Dispatch revalidation, 10 shipments in one partial-success save: unchanged passes; weight, business unit, vehicle capacity, vehicle status, insurance, licence, driver status, maintenance and date changes each refused; nothing written | `readyForDispatchRevalidatesAgainstCurrentData` |
+| Revalidation excludes the assignment itself and a non-overlapping booking of the same pair | `aValidAllocationIsNotRejectedByItself` |
+| A stale window is refused; reallocating the same pair renews it | `reallocatingRenewsAStaleWindow` |
+| The guard fails closed outside the shipment trigger | `theGuardFailsClosedOutsideTheShipmentTrigger` |
+| Lock timeouts at the service, mirror, cancellation and guard lock points become `FLEET_BUSY` with no raw text and nothing written; retry succeeds | `FleetLockingTest` (5 tests) |
+| All nine enforcement reads refuse callers outside their trigger | `FleetLockingTest.enforcementReadsRefuseCallsOutsideTheirTrigger` |
+
+### Round 3 (check-only validation `0Afg700000KW0hJCAT`: 201/201 tests, 65 for Phase 4)
+
+| Scenario | Test(s) |
+|---|---|
+| A Logistics Manager corrects an On Hold dispatched allocation; mirror updated; one Exception event naming the assignment, old and new vehicle, driver and the reason, created by the manager; Ready for Dispatch then passes | `FleetCorrectionTest.aManagerCorrectsAnOnHoldDispatchedAllocationWithHistory` |
+| Fleet Manager refused (service and direct DML); blank and repeated reasons refused; a reason-less change stays locked; a release is never a correction | `correctionNeedsThePermissionAReasonAndANewReason` |
+| No correction at Ready for Dispatch, Dispatched, In Transit, Delayed, Failed Delivery, or Confirmed after dispatch | `correctionIsOnlyAllowedOnHold` |
+| A correction is revalidated in full (expired insurance refused) and renews a stale window | `aCorrectionIsRevalidatedInFullAndCanRenewTheWindow` |
+| A correction that cannot be recorded is not saved | `aCorrectionThatCannotBeRecordedIsNotSaved` |
+| A first allocation cannot carry a correction reason; the history writer is trigger-only | `aFirstAllocationCannotCarryACorrectionReason`, `correctionHistoryOnlyRunsInItsTrigger` |
+| On Hold → In Transit: no assignment refused, valid accepted, invalid (inactive vehicle) refused, mismatched refused | `FleetDispatchRulesTest.onHoldToInTransitNeedsAValidMatchingAllocation` |
+| Dispatched → In Transit is revalidated (driver On Leave refused, then accepted) | `dispatchedToInTransitIsRevalidatedToo` |
+| Shipments with a Planned or Active assignment cannot be deleted; after cancellation the shipment deletes and the Cancelled history stays; the check is trigger-only | `VehicleAssignmentTriggerHandlerTest.aShipmentWithAnOpenAssignmentCannotBeDeleted`, `theDeletionCheckOnlyRunsInItsTrigger` |
+| Ready for Dispatch behaviour unchanged | All earlier Ready for Dispatch tests pass unchanged |
+
+Coverage after round 3:
+- 100%: `VehicleAvailabilityService`, `AssignmentWindow`, both trigger handlers and both triggers.
+- 90.0% to 97.1%: `ShipmentAllocationGuard` 97.1%, `FleetAllocationService` 95.0%, `VehicleAssignmentDomain` 93.9%, `FleetSelector` 90.7%, `AllocationRequest` 90.0%.
+- Org-wide 96.4% (2,335 lines).
+
+Coverage after the fixes:
+- 100%: `VehicleAvailabilityService`, `AssignmentWindow`, the handler and the trigger.
+- 89.9% to 97.1%: `ShipmentAllocationGuard` 97.1%, `VehicleAssignmentDomain` 95.5%, `FleetAllocationService` 94.5%, `FleetSelector` 89.9%.
+- 88.9%: `AllocationRequest`.
+- Org-wide 96.6% (2,220 lines).
+
+Coverage of Phase 4 classes before the fixes:
+- 100%: `VehicleAvailabilityService`, `AssignmentWindow`, `ShipmentAllocationGuard`, `VehicleAssignmentTriggerHandler`, `VehicleAssignmentTrigger`.
+- `VehicleAssignmentDomain` 97.3%; `FleetAllocationService` 95.3%; `AllocationRequest` 88.9%; `FleetSelector` 87.4%.
+- Org-wide 97.1% (2,005 lines).
+
 ## 4. How to run
 
 ```bash

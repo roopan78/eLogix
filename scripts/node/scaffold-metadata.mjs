@@ -102,8 +102,21 @@ function resolveReference(objectApi, path) {
     return fieldOf(current, last) ? null : `${current}.${last} does not exist`;
 }
 
-/** Checks field references, ISPICKVAL values and $Permission names inside a formula. */
-function checkFormula(context, objectApi, formula) {
+/** $CustomMetadata.Type__mdt.Record.Field__c - a configuration value read inside a formula (Phase 4). */
+const CMDT_REFERENCE = /\$CustomMetadata\.([A-Za-z0-9_]+__mdt)\.([A-Za-z0-9_]+)\.([A-Za-z0-9_]+__c)/g;
+
+/** Checks field references, ISPICKVAL values, $Permission names and $CustomMetadata references inside a formula. */
+function checkFormula(context, objectApi, rawFormula) {
+    for (const match of rawFormula.matchAll(CMDT_REFERENCE)) {
+        const type = METADATA_TYPES.find((t) => t.api === match[1]);
+        if (!type) fail(`${context}: unknown custom metadata type ${match[1]}`);
+        else {
+            if (!type.records.some((r) => r.name === match[2])) fail(`${context}: ${match[1]} has no record ${match[2]}`);
+            if (!type.fields.some((f) => f.api === match[3])) fail(`${context}: ${match[1]} has no field ${match[3]}`);
+        }
+    }
+    // Custom metadata references are checked above; field references below are local to objectApi.
+    const formula = rawFormula.replace(CMDT_REFERENCE, '0');
     for (const match of formula.matchAll(/\b((?:[A-Za-z][A-Za-z0-9_]*__r\.)*[A-Za-z][A-Za-z0-9_]*__c)\b/g)) {
         const problem = resolveReference(objectApi, match[1]);
         if (problem) fail(`${context}: ${problem}`);
@@ -199,6 +212,16 @@ for (const object of OBJECTS) {
 
     for (const column of object.listColumns ?? []) {
         if (!fieldOf(object.api, column)) fail(`${object.api} list view: unknown column ${column}`);
+    }
+    for (const view of object.listViews ?? []) {
+        if (!API_NAME.test(view.name) || view.name === 'All') fail(`${object.api} list view ${view.name}: invalid name`);
+        if (!object.listColumns) fail(`${object.api} list view ${view.name}: the object needs listColumns`);
+        for (const column of view.columns ?? []) {
+            if (!fieldOf(object.api, column)) fail(`${object.api} list view ${view.name}: unknown column ${column}`);
+        }
+        for (const filter of view.filters ?? []) {
+            if (!fieldOf(object.api, filter.field)) fail(`${object.api} list view ${view.name}: unknown filter field ${filter.field}`);
+        }
     }
     if (object.tab && object.standard) fail(`${object.api}: tabs are only generated for custom objects`);
 }
@@ -333,7 +356,7 @@ const counts = {
     'standard object extensions': OBJECTS.length - customObjects.length,
     fields: OBJECTS.reduce((sum, o) => sum + o.fields.length, 0),
     'validation rules': OBJECTS.reduce((sum, o) => sum + (o.rules?.length ?? 0), 0),
-    'list views': OBJECTS.filter((o) => o.listColumns).length,
+    'list views': OBJECTS.filter((o) => o.listColumns).length + OBJECTS.reduce((n, o) => n + (o.listViews?.length ?? 0), 0),
     'compact layouts': OBJECTS.filter((o) => o.listColumns).length,
     'page layouts': customObjects.length + METADATA_TYPES.length,
     tabs: OBJECTS.filter((o) => o.tab).length,

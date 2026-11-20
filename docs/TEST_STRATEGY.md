@@ -35,6 +35,21 @@
 - **Follow-up A1 to A3 (deploy `0Afg700000KRt9mCAD`):** 135 of 135 tests passed (3 new), coverage 97.6%; verification scripts Phase 1 19/19, Phase 2 12/12, Phase 3 19/19 (one A1 check added).
 - **Follow-up A4 (deploy `0Afg700000KRUWMCA5`):** 136 of 136 tests passed (1 new; the conversion validity test was reworked), coverage 97.6%; verification scripts 19/19, 12/12 and 19/19.
 
+## 2c. Phase 4 results (2026-11-20, `eLogixDev`, check-only)
+
+- **Apex tests:** check-only validation `0Afg700000KSngbCAD` ran 173 of 173 tests and all passed: 136 from Phases 2 and 3, and 37 from Phase 4. Phase 4 classes have 87% to 100% coverage; the org has 97.1%. Scenarios are in [APEX_TEST_MATRIX.md](APEX_TEST_MATRIX.md) section 6.
+- **Regression adjustment:** `ShipmentStatusTransitionConfigTest.deployedLifecycleBehavesAsDocumented` now builds the policy with the item guard only, because in-memory records cannot hold an assignment. It also asserts that the default guard set includes `ShipmentAllocationGuard`.
+- **Verification scripts:** Phase 1 19/19, Phase 2 12/12 and Phase 3 19/19 passed against the org, which still runs the Phase 3 code. `verify-phase4-fleet.apex` (15 checks) needs the Phase 4 classes and runs after deployment.
+- **Audit fixes (validation `0Afg700000KVnYnCAL`):** 190 of 190 tests passed, 17 of them new: `FleetDispatchRulesTest` 8, `FleetLockingTest` 6, and 3 delete/undelete tests in `VehicleAssignmentTriggerHandlerTest`. Org coverage is 96.6%. Phase 1, 2 and 3 scripts: 19/19, 12/12, 19/19 (the Phase 3 run was repeated once after a network DNS failure). Lock contention cannot be produced in Apex tests, so every lock point is made to time out through the selector seam.
+- **Round 3 (validation `0Afg700000KW0hJCAT`):**
+  - **Tests:** 201 of 201 passed, 11 of them new: `FleetCorrectionTest` 7, `FleetDispatchRulesTest` +2 (In Transit), `VehicleAssignmentTriggerHandlerTest` +2 (shipment deletion).
+  - **Coverage:** 96.4% org-wide.
+  - **Earlier attempts:**
+    - `0Afg700000KVyIvCAL` failed on deploy: a custom permission description over 255 characters, which the model validator does not check.
+    - `0Afg700000KVydtCAD` ran 200 of 201 tests: one test exceeded 100 queries walking shipments one at a time, and was rewritten to move them in bulk.
+  - **Verification scripts:** Phase 1 19/19, Phase 2 12/12, Phase 3 19/19.
+- **Found during validation:** enforcement reads applied the caller's sharing, so the quoted-vehicle-type rule was skipped for a Fleet Manager. Fixed with a `without sharing` reader; the test now proves the precondition.
+
 ## 3. Phase 1 results (2026-11-19, `eLogixDev`)
 
 **Model validation.** It passes. Three deliberately injected faults (an unknown cross-object field, a misspelled picklist value and a broken View All dependency) were each reported by the validator.

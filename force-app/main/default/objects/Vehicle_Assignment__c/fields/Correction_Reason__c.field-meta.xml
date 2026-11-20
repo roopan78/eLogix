@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Correction_Reason__c</fullName>
+    <inlineHelpText>Reason for the latest correction of a dispatched allocation. Setting it requests a correction: allowed only while the shipment is On Hold, with the Correct Dispatched Allocation permission. Each correction is also written to tracking history.</inlineHelpText>
+    <label>Correction Reason</label>
+    <length>255</length>
+    <required>false</required>
+    <type>Text</type>
+</CustomField>

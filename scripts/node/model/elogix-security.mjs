@@ -41,6 +41,10 @@ export const PROTECTED_FIELDS = {
     'Shipment__c.Latest_Location__c': [],
     'Shipment__c.Latest_Tracking_Timestamp__c': [],
 
+    // Phase 4: setting it requests a dispatched-allocation correction, which the assignment trigger
+    // accepts only with eLogix_Correct_Dispatched_Allocation.
+    'Vehicle_Assignment__c.Correction_Reason__c': [LOGISTICS_MANAGER],
+
     'Freight_Charge__c.Approved_By__c': [],
 
     'Inventory__c.Available_Quantity__c': [],
@@ -111,6 +115,7 @@ export const PERMISSION_SETS = [
             'eLogix_Cancel_Confirmed_Shipment',
             'eLogix_Approve_Quotation',
             'eLogix_Allocate_Fleet',
+            'eLogix_Correct_Dispatched_Allocation',
             'eLogix_Adjust_Inventory',
             'eLogix_Approve_Return',
             'eLogix_Settle_Claim',
@@ -157,6 +162,7 @@ export const PERMISSION_SETS = [
             'eLogix_Cancel_Confirmed_Shipment',
             'eLogix_Approve_Quotation',
             'eLogix_Allocate_Fleet',
+            'eLogix_Correct_Dispatched_Allocation',
             'eLogix_Approve_Return',
             'eLogix_Settle_Claim'
         ]
@@ -223,11 +229,11 @@ export const PERMISSION_SETS = [
         objects: {
             Account: 'R',
             Business_Unit__c: 'R',
-            Shipment__c: 'R',
+            Shipment__c: 'RV', // Phase 4 (Q13): read-only View All to plan the fleet
             Shipment_Item__c: 'R',
             Vehicle__c: 'CREDV',
             Driver__c: 'CREDV',
-            Vehicle_Assignment__c: 'CREDV',
+            Vehicle_Assignment__c: 'CREV', // Phase 4 audit fix 1: no Delete; release is by cancellation
             Vehicle_Maintenance__c: 'CREDV',
             Route__c: 'R',
             Route_Stop__c: 'R',

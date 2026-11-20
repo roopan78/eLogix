@@ -89,7 +89,18 @@ private class ShipmentStatusTransitionConfigTest {
     static void deployedLifecycleBehavesAsDocumented() {
         PermissionService.testOverrides.put(ShipmentStatusPolicy.OVERRIDE_PERMISSION, false);
         PermissionService.testOverrides.put(TestDataFactory.CANCEL_PERMISSION, false);
-        ShipmentStatusPolicy policy = new ShipmentStatusPolicy();
+        // The deployed transitions with the item guard only. The Phase 4 allocation guard needs a
+        // persisted assignment, which in-memory records cannot have; FleetAllocationServiceTest walks
+        // the same path with real records. Here we only prove the default guard set includes it.
+        Boolean allocationGuarded = false;
+        for (ShipmentStatusGuard guard : ShipmentStatusPolicy.defaultGuards()) {
+            allocationGuarded |= guard instanceof ShipmentAllocationGuard;
+        }
+        Assert.isTrue(allocationGuarded, 'Ready for Dispatch must be guarded by the fleet allocation check (Phase 4, Q10).');
+        ShipmentStatusPolicy policy = new ShipmentStatusPolicy(
+            Shipment_Status_Transition__mdt.getAll().values(),
+            new List<ShipmentStatusGuard>{ new ShipmentItemsRequiredGuard() }
+        );
         List<String> path = new List<String>{
             'Draft',
             'Requested',

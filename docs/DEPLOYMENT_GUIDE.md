@@ -79,6 +79,13 @@ sf apex run --file scripts/apex/verify-phase3-pricing.apex --target-org eLogixDe
 
 Expect `SMOKE SUMMARY checks=19 failures=0`. The script also prints `SMOKE INFO rate card region after insert without a region = South`; see PRICING_IMPLEMENTATION section 1.
 
+```bash
+# Verify fleet allocation, the Ready for Dispatch guard and the cancellation release (rolled back; run as a user with eLogix_Administrator)
+sf apex run --file scripts/apex/verify-phase4-fleet.apex --target-org eLogixDev
+```
+
+Expect `SMOKE SUMMARY checks=20 failures=0`.
+
 For data seeding (Phase 9), temporarily assign `eLogix_Data_Migration` so that historical dates pass the bypassable validation rules. Remove it afterwards:
 
 ```bash
@@ -116,6 +123,10 @@ Do this **before** loading demo data. Changing the currency locale relabels amou
 | 2026-11-19 17:41 | `0Afg700000KRoekCAD` | Phase 3 Apex: pricing, quotation, approval, conversion; `QuotationTrigger`; 27 labels (`RunLocalTests`: 132/132 passed, coverage 97.2%) | 717 / 717 | Succeeded |
 | 2026-11-19 18:03 | `0Afg700000KRt9mCAD` | Phase 3 follow-up A1 to A3: request link immutable, self-approval check against previous owner, request lock on conversion; 1 label (`RunLocalTests`: 135/135 passed, coverage 97.6%) | 718 / 718 | Succeeded |
 | 2026-11-19 18:13 | `0Afg700000KRUWMCA5` | Phase 3 follow-up A4: quotation validity date locked after Draft; lock label wording (`RunLocalTests`: 136/136 passed, coverage 97.6%) | 718 / 718 | Succeeded |
+
+| 2026-11-19 19:32 | `0Afg700000KSngbCAD` | **Check-only** Phase 4: fleet allocation Apex, `VehicleAssignmentTrigger`, 27 labels, expiry formulas and list views, `Document_Expiry_Warning_Days`, Fleet Manager Shipment View All (`RunLocalTests`: 173/173 passed, coverage 97.1%) | 765 / 765 | Superseded by the audit-fix validation below |
+| 2026-11-20 02:47 | `0Afg700000KVnYnCAL` | **Check-only** Phase 4 with the six audit fixes: no delete or undelete of assignments, dispatch-history lock, Ready for Dispatch revalidation, lock timeouts at every lock point, trigger-only enforcement reads; Fleet Manager without Delete on Vehicle Assignment; 4 labels (`RunLocalTests`: 190/190 passed, coverage 96.6%) | 771 / 771 | Superseded by the round 3 validation below |
+| 2026-11-20 03:44 | `0Afg700000KW0hJCAT` | **Check-only** Phase 4 round 3: controlled correction of dispatched allocations (`eLogix_Correct_Dispatched_Allocation`, `Vehicle_Assignment__c.Correction_Reason__c`), allocation guard on In Transit, shipment deletion blocked while an open assignment exists (`ShipmentTrigger` before delete); 5 new labels and 2 reworded (`RunLocalTests`: 201/201 passed, coverage 96.4%) | 779 / 779 | Validated, **not deployed** |
 
 Each deploy was preceded by a successful `--dry-run`. The only dry-run failure in the phase was the first one: `isNavAutomaticallyAdded` is not a valid `CustomApplication` element. The writer now copies the element set of a Lightning app retrieved from the org.
 

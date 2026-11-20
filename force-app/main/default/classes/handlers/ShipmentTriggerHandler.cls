@@ -23,6 +23,8 @@ public with sharing class ShipmentTriggerHandler extends TriggerHandler {
 
     protected override void beforeUpdate() {
         new ShipmentDomain().validateStatusChanges((List<Shipment__c>) newList, (Map<Id, Shipment__c>) oldMap);
+        // Phase 4 (Q11): a cancelled shipment drops the vehicle and driver of its Planned assignment.
+        new FleetAllocationService().clearCancelledShipmentAllocations();
     }
 
     /** TrackingService reads Trigger.new and Trigger.oldMap itself; see TrackingService.recordStatusEvents. */
@@ -30,7 +32,14 @@ public with sharing class ShipmentTriggerHandler extends TriggerHandler {
         new TrackingService().recordStatusEvents();
     }
 
+    /** Phase 4 (audit round 3): a shipment with a Planned or Active vehicle assignment cannot be deleted. */
+    protected override void beforeDelete() {
+        new FleetAllocationService().rejectDeletionWithOpenAssignments();
+    }
+
     protected override void afterUpdate() {
         new TrackingService().recordStatusEvents();
+        // Phase 4 (Q11): ...and its Planned assignment is cancelled, freeing the vehicle and driver.
+        new FleetAllocationService().releaseCancelledShipmentAssignments();
     }
 }

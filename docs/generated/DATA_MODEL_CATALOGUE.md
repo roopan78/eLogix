@@ -240,8 +240,9 @@ Standard object - eLogix custom fields only.
 | `Status__c` | Picklist: Available, Assigned, In Transit, Under Maintenance, Inactive |  |  |
 | `Current_Odometer__c` | Number(10,0) |  |  |
 | `Is_Active__c` | Formula(Checkbox): `NOT(ISPICKVAL(Status__c, "Inactive"))` |  |  |
-| `Is_Documents_Valid__c` | Formula(Checkbox): `AND(NOT(ISBLANK(Registration_Expiry__c)), Registration_Expiry__c >= TODAY(), NOT(ISBLANK(Insurance_Expiry__c)), Insurance_Expiry__c >= TODAY())` |  |  |
-| `Is_Allocatable__c` | Formula(Checkbox): `AND(ISPICKVAL(Status__c, "Available"), NOT(ISBLANK(Registration_Expiry__c)), Registration_Expiry__c >= TODAY(), NOT(ISBLANK(Insurance_Expiry__c)), Insurance_Expiry__c >= TODAY())` |  | Read by FleetAllocationService to pre-filter candidate vehicles. |
+| `Is_Documents_Valid__c` | Formula(Checkbox): `AND(NOT(ISBLANK(Registration_Expiry__c)), Registration_Expiry__c >= TODAY(), NOT(ISBLANK(Insurance_Expiry__c)), Insurance_Expiry__c >= TODAY(), OR(ISBLANK(Fitness_Expiry__c), Fitness_Expiry__c >= TODAY()))` |  |  |
+| `Is_Allocatable__c` | Formula(Checkbox): `AND(NOT(ISPICKVAL(Status__c, "Under Maintenance")), NOT(ISPICKVAL(Status__c, "Inactive")), AND(NOT(ISBLANK(Registration_Expiry__c)), Registration_Expiry__c >= TODAY(), NOT(ISBLANK(Insurance_Expiry__c)), Insurance_Expiry__c >= TODAY(), OR(ISBLANK(Fitness_Expiry__c), Fitness_Expiry__c >= TODAY())))` |  | Indicative for today. Allocation also checks documents through the assignment window, maintenance and overlapping bookings. |
+| `Document_Status__c` | Formula(Text): `IF(OR(ISBLANK(Registration_Expiry__c), ISBLANK(Insurance_Expiry__c)), "Missing", IF(OR(Registration_Expiry__c < TODAY(), Insurance_Expiry__c < TODAY(), AND(NOT(ISBLANK(Fitness_Expiry__c)), Fitness_Expiry__c < TODAY())), "Expired", IF(OR(Registration_Expiry__c <= TODAY() + $CustomMetadata.eLogix_Setting__mdt.Document_Expiry_Warning_Days.Number_Value__c, Insurance_Expiry__c <= TODAY() + $CustomMetadata.eLogix_Setting__mdt.Document_Expiry_Warning_Days.Number_Value__c, AND(NOT(ISBLANK(Fitness_Expiry__c)), Fitness_Expiry__c <= TODAY() + $CustomMetadata.eLogix_Setting__mdt.Document_Expiry_Warning_Days.Number_Value__c)), "Expiring Soon", "Valid")))` |  | Missing, Expired, Expiring Soon (within the eLogix setting Document_Expiry_Warning_Days) or Valid, across registration, insurance and fitness. |
 | `Open_Maintenance_Count__c` | Roll-up COUNT (Vehicle_Maintenance__c.Vehicle__c) where Vehicle_Maintenance__c.Status__c notEqual "Completed, Cancelled" |  | Scheduled or in-progress maintenance. Vehicles with open maintenance cannot be allocated. |
 
 **Validation rules**
@@ -267,7 +268,8 @@ Standard object - eLogix custom fields only.
 | `Date_of_Joining__c` | Date |  |  |
 | `User__c` | Lookup → User |  |  |
 | `Is_License_Valid__c` | Formula(Checkbox): `AND(NOT(ISBLANK(License_Expiry__c)), License_Expiry__c >= TODAY())` |  |  |
-| `Is_Allocatable__c` | Formula(Checkbox): `AND(ISPICKVAL(Status__c, "Available"), NOT(ISBLANK(License_Expiry__c)), License_Expiry__c >= TODAY())` |  |  |
+| `Is_Allocatable__c` | Formula(Checkbox): `AND(NOT(ISPICKVAL(Status__c, "On Leave")), NOT(ISPICKVAL(Status__c, "Inactive")), NOT(ISBLANK(License_Expiry__c)), License_Expiry__c >= TODAY())` |  | Indicative for today. Allocation also checks the licence through the assignment window and overlapping bookings. |
+| `License_Status__c` | Formula(Text): `IF(ISBLANK(License_Expiry__c), "Missing", IF(License_Expiry__c < TODAY(), "Expired", IF(License_Expiry__c <= TODAY() + $CustomMetadata.eLogix_Setting__mdt.Document_Expiry_Warning_Days.Number_Value__c, "Expiring Soon", "Valid")))` |  | Expiring Soon means the licence expires within the eLogix setting Document_Expiry_Warning_Days. |
 
 ## Vehicle Assignment (`Vehicle_Assignment__c`)
 
@@ -286,6 +288,7 @@ Standard object - eLogix custom fields only.
 | `Is_Open__c` | Formula(Checkbox): `OR(ISPICKVAL(Status__c, "Planned"), ISPICKVAL(Status__c, "Active"))` |  | Open assignments are the ones that can conflict with a new allocation. |
 | `Duration_Hours__c` | Formula(Number): `IF(OR(ISBLANK(Assignment_Start__c), ISBLANK(Assignment_End__c)), null, (Assignment_End__c - Assignment_Start__c) * 24)` |  |  |
 | `Remarks__c` | Text(255) |  |  |
+| `Correction_Reason__c` | Text(255) |  | Protected (service-written). Reason for the latest correction of a dispatched allocation. Setting it requests a correction: allowed only while the shipment is On Hold, with the Correct Dispatched Allocation permission. Each correction is also written to tracking history. |
 
 **Validation rules**
 
@@ -823,4 +826,5 @@ Named configuration values for eLogix business rules. Read through a single sett
 | `Allow_Advance_Payments` |  |  | false | When true, users with eLogix_Record_Advance_Payment may record payments above the outstanding balance. |
 | `Delay_Grace_Hours` |  | 6 | false | Hours past the expected delivery date before SLA monitoring flags a shipment as Delayed. |
 | `Default_Billing_Milestone` | On Delivery |  | false | Billing milestone used for automatically generated invoices. |
+| `Document_Expiry_Warning_Days` |  | 30 | false | Vehicle documents and driver licences expiring within this many days are shown as Expiring Soon. |
 

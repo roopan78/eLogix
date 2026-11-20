@@ -30,6 +30,10 @@
     </customPermissions>
     <customPermissions>
         <enabled>true</enabled>
+        <name>eLogix_Correct_Dispatched_Allocation</name>
+    </customPermissions>
+    <customPermissions>
+        <enabled>true</enabled>
         <name>eLogix_Adjust_Inventory</name>
     </customPermissions>
     <customPermissions>
@@ -501,6 +505,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Vehicle__c.Document_Status__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Vehicle__c.Open_Maintenance_Count__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -540,6 +549,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Driver__c.License_Status__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Vehicle_Assignment__c.Shipment__c</field>
         <readable>true</readable>
@@ -572,6 +586,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Vehicle_Assignment__c.Remarks__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Vehicle_Assignment__c.Correction_Reason__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

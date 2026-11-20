@@ -74,7 +74,7 @@ public with sharing class ShipmentStatusPolicy {
     }
 
     public static List<ShipmentStatusGuard> defaultGuards() {
-        return new List<ShipmentStatusGuard>{ new ShipmentItemsRequiredGuard() };
+        return new List<ShipmentStatusGuard>{ new ShipmentItemsRequiredGuard(), new ShipmentAllocationGuard() };
     }
 
     /** Active values of Shipment__c.Status__c. */

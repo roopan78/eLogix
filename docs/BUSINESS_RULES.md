@@ -63,13 +63,28 @@ Status legend: **Live** = deployed and verified in `eLogixDev`. **Planned (Pn)**
 
 ## Fleet rules
 
+The `Vehicle_Assignment__c` trigger enforces all fleet rules on every entry path, under row locks: `VehicleAssignmentDomain` calls `VehicleAvailabilityService`. Details are in [FLEET_IMPLEMENTATION.md](FLEET_IMPLEMENTATION.md). "Built (P4)" means implemented and check-only verified, but not yet deployed.
+
 | Rule | Owner | Component | Status |
 |---|---|---|---|
-| Vehicle must be active and not under maintenance | Apex | `FleetAllocationService` (pre-filter `Is_Allocatable__c`, `Open_Maintenance_Count__c = 0`; re-check under lock) | Formulas live; service planned (P4) |
-| Sufficient carrying capacity | Apex | `Capacity__c ≥ Shipment.Weight__c` | Planned (P4) |
-| Driver active with valid licence | Apex | `Driver__c.Is_Allocatable__c` re-checked under lock | Planned (P4) |
-| Insurance and registration valid | Apex | `Vehicle__c.Is_Documents_Valid__c` | Planned (P4) |
-| No conflicting active assignments | Apex | `VehicleAvailabilityService`: overlap check on open assignments, with `FOR UPDATE` on vehicle and driver rows | Planned (P4) |
+| Allocation needs `eLogix_Allocate_Fleet`, except the automatic release when a shipment is cancelled | Apex | `VehicleAssignmentDomain` | Built (P4) |
+| Vehicle not Inactive or Under Maintenance; no In Progress maintenance; no Scheduled maintenance overlapping the window | Apex | `VehicleAvailabilityService` (Q2, Q5) | Built (P4) |
+| Enough carrying capacity; no load sharing | Apex | `Capacity__c ≥ Shipment.Weight__c` (Q6) | Built (P4) |
+| Driver not Inactive or On Leave; licence valid through the window end | Apex | `VehicleAvailabilityService` (Q2, Q4) | Built (P4) |
+| Registration and insurance valid through the window end. Fitness is checked too when filled in; a blank fitness date means "not applicable", by design | Apex | `VehicleAvailabilityService` (Q4) | Built (P4) |
+| A quoted shipment needs the rate card's vehicle type | Apex | `VehicleAvailabilityService` (Q7) | Built (P4) |
+| Shipment, vehicle and driver in the same business unit | Apex | `VehicleAvailabilityService` (Q8) | Built (P4) |
+| No overlapping open assignment for a vehicle or driver, whether stored or in the same batch | Apex | `VehicleAvailabilityService` with `FOR UPDATE` on vehicles, then drivers (Q1) | Built (P4) |
+| One open assignment per shipment. Allocate while Confirmed or On Hold. No reallocation or release once the shipment has ever reached Ready for Dispatch, decided from its tracking history (returning to On Hold does not reset it) | Apex | `VehicleAssignmentDomain` (Q9, audit fix 2) | Built (P4) |
+| Assignment lifecycle: Planned → Active → Completed, or Planned → Cancelled. The shipment link never changes; an Active assignment is frozen | Apex | `VehicleAssignmentDomain` (Q12) | Built (P4) |
+| Ready for Dispatch **and In Transit** need an allocation that matches the shipment and still passes every rule against current data (weight, business unit, dates, vehicle and driver status, documents, maintenance, quoted type, overlaps excluding itself) | Apex guard | `ShipmentAllocationGuard` → `VehicleAssignmentDomain.checkDispatchReadiness` (Q10, audit fix 3) | Built (P4) |
+| A dispatched allocation can be corrected only while the shipment is On Hold, by a user with `eLogix_Correct_Dispatched_Allocation`, with a new reason; always revalidated and written to tracking history | Apex | `VehicleAssignmentDomain` (round 3) | Built (P4) |
+| A shipment with a Planned or Active assignment cannot be deleted | Apex | `FleetAllocationService.rejectDeletionWithOpenAssignments` (round 3) | Built (P4) |
+| Assignments cannot be deleted or restored; cancellation is the only release, and history is kept | Apex | `VehicleAssignmentDomain` before delete and after undelete (audit fix 1) | Built (P4) |
+| Cancelling a shipment releases its Planned assignment | Apex | Shipment-trigger hooks in `FleetAllocationService` (Q11) | Built (P4) |
+| The shipment's `Vehicle__c` and `Driver__c` mirror the open assignment | Apex | `VehicleAssignmentDomain.syncShipments` (Q18) | Built (P4) |
+| Expired and expiring documents are visible | Formula | `Document_Status__c`, `License_Status__c` and list views; window set by `Document_Expiry_Warning_Days` (Q15) | Built (P4) |
+| Maintenance created over existing bookings | Apex guard | Not checked when the maintenance is saved (Q17). Caught when the shipment moves to Ready for Dispatch (audit fix 3). | Partly built |
 | Assignment end after start | Validation rule | `VA_End_After_Start`, `VA_End_Required_When_Completed` | Live |
 | Capacity positive | Validation rule | `VEH_Capacity_Positive` | Live |
 

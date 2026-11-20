@@ -34,4 +34,4 @@ Each behaviour has exactly one owner (CLAUDE.md section 10). Flows orchestrate; 
 | `Shipment_Status_Changed__e` | Published by `TrackingService` after commit; subscribers send notifications and post GPS or accounting sync | P6 |
 | `IntegrationCalloutQueueable` | Callouts with timeout, retry policy, idempotency key, `Integration_Log__c` entry, dead letter after max retries | P6 |
 | `IntegrationLogPurgeBatch` | Deletes successful logs older than N days (protects 5 MB storage) | P6 |
-| `DocumentExpiryBatch` | Flags vehicles and drivers whose registration, insurance or licence expires within 30 days | P4 |
+| ~~`DocumentExpiryBatch`~~ | **Dropped in Phase 4 (Q15).** Replaced by the formula fields `Vehicle__c.Document_Status__c` and `Driver__c.License_Status__c`, whose window comes from `eLogix_Setting.Document_Expiry_Warning_Days`, plus list views. There is no scheduled job. | - |

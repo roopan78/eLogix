@@ -35,10 +35,10 @@ Letters: **C**reate, **R**ead, **E**dit, **D**elete, **V**iew All, **M**odify Al
 | Shipment Request | CREDVM | CREV | CRE | RE | - | - | R | CRE |
 | Quotation | CREDVM | CREV | CRE | R | - | - | R | R |
 | Quotation Line | CREDVM | CREDV | CRED | R | - | - | R | R |
-| Shipment | CREDVM | CREV | R | CRE | R | R | R | R |
+| Shipment | CREDVM | CREV | R | CRE | RV (P4, Q13) | R | R | R |
 | Shipment Item | CREDVM | CREDV | R | CRED | R | R | R | R |
 | Vehicle / Driver | CREDVM | RV | - | R | CREDV | - | - | - |
-| Vehicle Assignment | CREDVM | CREV | - | R | CREDV | - | - | - |
+| Vehicle Assignment | CREDVM | CREV | - | R | CREV (P4: no Delete) | - | - | - |
 | Vehicle Maintenance | CREDVM | RV | - | - | CREDV | - | - | - |
 | Warehouse | CREDVM | RV | - | R | - | CREV | R | - |
 | Inventory | CREDVM | RV | - | R | - | CREV | R | - |
@@ -68,7 +68,8 @@ No role except the Administrator can delete transactional records. Tracking even
 | `eLogix_Override_Shipment_Status` | Admin, Logistics Mgr | Bypassing `ShipmentStatusPolicy` (still writes tracking history) |
 | `eLogix_Cancel_Confirmed_Shipment` | Admin, Logistics Mgr | Confirmed / Ready for Dispatch / On Hold → Cancelled (declared on the transition records) |
 | `eLogix_Approve_Quotation` | Admin, Logistics Mgr | Approving quotations above the discount threshold |
-| `eLogix_Allocate_Fleet` | Admin, Logistics Mgr, Fleet | `FleetAllocationService` |
+| `eLogix_Correct_Dispatched_Allocation` | Admin, Logistics Mgr | Correct the allocation of a shipment that has reached dispatch: shipment On Hold, new reason, full revalidation, tracking event (P4 round 3). Needs `eLogix_Allocate_Fleet` too. |
+| `eLogix_Allocate_Fleet` | Admin, Logistics Mgr, Fleet | The trigger enforces it on every `Vehicle_Assignment__c` insert and update, on all paths (P4). The only exemption is the automatic release of a Planned assignment whose shipment is already Cancelled; it is recognised from the stored record state. |
 | `eLogix_Adjust_Inventory` | Admin, Warehouse | Manual `Adjustment` / `Damage Write Off` movements |
 | `eLogix_Approve_Return` | Admin, Logistics Mgr | `ReturnService` approve/reject (stamps `Approval_Date__c`) |
 | `eLogix_Settle_Claim` | Admin, Logistics Mgr, Finance | Claim approval and settlement |
@@ -84,7 +85,8 @@ These fields hold system-derived values. FLS makes them read-only for every role
 |---|---|---|
 | `Account.Credit_Limit__c`, `Credit_Terms_Days__c` | Finance | Users (Finance) |
 | `Quotation__c` pricing components, `Rate_Card__c`, `Tax_Percent__c`, `Version__c`, `Approved_By__c`, `Approval_Date__c` | - | `FreightCalculationService`, quotation approval |
-| `Shipment__c.Freight_Amount__c`, `Vehicle__c`, `Driver__c`, `Latest_Location__c`, `Latest_Tracking_Timestamp__c` | - | `ShipmentService`, `FleetAllocationService`, `TrackingService` |
+| `Vehicle_Assignment__c.Correction_Reason__c` | Logistics Mgr | Users holding `eLogix_Correct_Dispatched_Allocation`; the trigger accepts a change only as a valid correction |
+| `Shipment__c.Freight_Amount__c`, `Vehicle__c`, `Driver__c`, `Latest_Location__c`, `Latest_Tracking_Timestamp__c` | - | `ShipmentService` and `TrackingService`. `Vehicle__c` and `Driver__c` are written only by the `Vehicle_Assignment__c` trigger mirror (`VehicleAssignmentDomain.MirrorWriter`, P4). |
 | `Inventory__c.Available_Quantity__c`, `Reserved_Quantity__c`, `Inventory_Key__c` | - | `InventoryService` (only through stock movements) |
 | `Stock_Movement__c.Quantity_Before__c`, `Quantity_After__c`, `Movement_Key__c`, `Performed_By__c` | - | `InventoryService` |
 | `Tracking_Event__c.Event_Key__c`, `From_Status__c`, `To_Status__c` | - | `TrackingService` |
@@ -101,6 +103,10 @@ These fields hold system-derived values. FLS makes them read-only for every role
 - **Protected fields** are written in system mode by their owning service. This happens only after the service has checked object access and the relevant custom permission. Each such write is a named, reviewed code path (for example `InventoryService.applyMovement`). It is not a general escape hatch.
 - Custom permission checks go through one `PermissionService` so tests can assert them and messages come from Custom Labels.
 - No hardcoded record IDs, profile names or user names in Apex.
+- **Integrity reads ignore sharing on purpose (Phase 4).** `WITH SYSTEM_MODE` skips CRUD and FLS but still applies the sharing of the calling class. Fleet conflict, maintenance, lock and quoted-vehicle-type reads must see every record, whoever owns it. They therefore run in the private `without sharing` `FleetSelector.EnforcementReader`. Their results go only to the rule evaluator. Violation messages name only the shipment, vehicle and driver the caller supplied. Without this, a Fleet Manager (no Quotation access) would bypass the quoted-type rule silently; this was found during the Phase 4 check-only run.
+- **Enforcement reads are trigger-only (Phase 4 audit fix 5).** Each public `FleetSelector` method that reaches the `without sharing` reader checks the executing trigger object and operation, and throws `AuthorizationException` (`FLEET_ENFORCEMENT_TRIGGER_ONLY`) otherwise. No controller, REST resource, invocable action or Flow can read through it.
+- **Assignments are never deleted (Phase 4 audit fix 1).** The `Vehicle_Assignment__c` trigger refuses every delete and undelete, for every user including the Administrator, so a restored row can never skip the rules and history is kept. Profile-level Delete or Modify All does not override this.
+- **Trigger-only system paths (Phase 4).** The shipment mirror (`VehicleAssignmentDomain.syncShipments`) and the cancellation release (`FleetAllocationService.clearCancelledShipmentAllocations`, `releaseCancelledShipmentAssignments`) take no arguments. They read `Trigger.new` and `Trigger.oldMap` and refuse any other caller with an `AuthorizationException`. This is the same pattern as Phase 2 F1. There is no caller-controlled bypass flag.
 
 ## 7. Planned (Phase 9): roles and sharing
 

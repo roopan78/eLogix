@@ -65,11 +65,15 @@
                 <behavior>Readonly</behavior>
                 <field>Is_Documents_Valid__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Readonly</behavior>
+                <field>Is_Allocatable__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>
                 <behavior>Readonly</behavior>
-                <field>Is_Allocatable__c</field>
+                <field>Document_Status__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Readonly</behavior>

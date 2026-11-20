@@ -33,11 +33,47 @@ export const EXPERIENCE = {
     Shipment_Item__c: { listColumns: ['Shipment__c', 'Item_Name__c', 'SKU__c', 'Quantity__c', 'Weight__c'] },
     Vehicle__c: {
         tab: 'Custom98: Truck',
-        listColumns: ['Vehicle_Number__c', 'Vehicle_Type__c', 'Capacity__c', 'Status__c', 'Business_Unit__c', 'Insurance_Expiry__c']
+        listColumns: ['Vehicle_Number__c', 'Vehicle_Type__c', 'Capacity__c', 'Status__c', 'Business_Unit__c', 'Insurance_Expiry__c', 'Document_Status__c'],
+        // Phase 4 (decision Q15): expired and expiring-soon documents stay distinguishable.
+        listViews: [
+            {
+                name: 'Documents_Expired',
+                label: 'Documents Expired',
+                columns: ['Vehicle_Number__c', 'Status__c', 'Registration_Expiry__c', 'Insurance_Expiry__c', 'Fitness_Expiry__c', 'Business_Unit__c'],
+                filters: [{ field: 'Document_Status__c', operation: 'equals', value: 'Expired' }]
+            },
+            {
+                name: 'Documents_Expiring_Soon',
+                label: 'Documents Expiring Soon',
+                columns: ['Vehicle_Number__c', 'Status__c', 'Registration_Expiry__c', 'Insurance_Expiry__c', 'Fitness_Expiry__c', 'Business_Unit__c'],
+                filters: [{ field: 'Document_Status__c', operation: 'equals', value: 'Expiring Soon' }]
+            },
+            {
+                name: 'Documents_Missing',
+                label: 'Documents Missing',
+                columns: ['Vehicle_Number__c', 'Status__c', 'Registration_Expiry__c', 'Insurance_Expiry__c', 'Business_Unit__c'],
+                filters: [{ field: 'Document_Status__c', operation: 'equals', value: 'Missing' }]
+            }
+        ]
     },
     Driver__c: {
         tab: 'Custom15: People',
-        listColumns: ['License_Number__c', 'License_Expiry__c', 'Phone__c', 'Status__c', 'Business_Unit__c']
+        listColumns: ['License_Number__c', 'License_Expiry__c', 'Phone__c', 'Status__c', 'Business_Unit__c', 'License_Status__c'],
+        // Phase 4 (decision Q15).
+        listViews: [
+            {
+                name: 'Licences_Expired',
+                label: 'Licences Expired',
+                columns: ['License_Number__c', 'License_Expiry__c', 'Status__c', 'Phone__c', 'Business_Unit__c'],
+                filters: [{ field: 'License_Status__c', operation: 'equals', value: 'Expired' }]
+            },
+            {
+                name: 'Licences_Expiring_Soon',
+                label: 'Licences Expiring Soon',
+                columns: ['License_Number__c', 'License_Expiry__c', 'Status__c', 'Phone__c', 'Business_Unit__c'],
+                filters: [{ field: 'License_Status__c', operation: 'equals', value: 'Expiring Soon' }]
+            }
+        ]
     },
     Vehicle_Assignment__c: {
         tab: 'Custom76: Keys',

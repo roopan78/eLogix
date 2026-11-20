@@ -119,7 +119,8 @@ Planned for later phases:
 ```
 force-app/main/default/classes/
   (pricing/ and crm/ are built: see PRICING_IMPLEMENTATION.md)
-  fleet/       FleetAllocationService, VehicleAvailabilityService
+  fleet/       built in Phase 4: FleetAllocationService, VehicleAssignmentDomain, VehicleAvailabilityService,
+               AssignmentWindow, AllocationRequest, ShipmentAllocationGuard (see FLEET_IMPLEMENTATION.md)
   warehouse/   WarehouseService, InventoryService
   tracking/    DeliveryService
   finance/     InvoiceService, PaymentService

@@ -453,9 +453,17 @@ export const OBJECTS = [
             ]),
             num('Current_Odometer__c', 10, 0),
             formula('Is_Active__c', 'Checkbox', 'NOT(ISPICKVAL(Status__c, "Inactive"))'),
-            formula('Is_Documents_Valid__c', 'Checkbox', 'AND(NOT(ISBLANK(Registration_Expiry__c)), Registration_Expiry__c >= TODAY(), NOT(ISBLANK(Insurance_Expiry__c)), Insurance_Expiry__c >= TODAY())'),
-            formula('Is_Allocatable__c', 'Checkbox', 'AND(ISPICKVAL(Status__c, "Available"), NOT(ISBLANK(Registration_Expiry__c)), Registration_Expiry__c >= TODAY(), NOT(ISBLANK(Insurance_Expiry__c)), Insurance_Expiry__c >= TODAY())', {
-                helpText: 'Read by FleetAllocationService to pre-filter candidate vehicles.'
+            // Phase 4 (decision Q4): a fitness certificate counts only when its expiry is filled in.
+            formula('Is_Documents_Valid__c', 'Checkbox', 'AND(NOT(ISBLANK(Registration_Expiry__c)), Registration_Expiry__c >= TODAY(), NOT(ISBLANK(Insurance_Expiry__c)), Insurance_Expiry__c >= TODAY(), OR(ISBLANK(Fitness_Expiry__c), Fitness_Expiry__c >= TODAY()))'),
+            // Phase 4 (decision Q2): status is administrative availability only; allocation does not change it.
+            // Indicative for today: FleetAllocationService also checks documents through the assignment window,
+            // maintenance and overlapping bookings.
+            formula('Is_Allocatable__c', 'Checkbox', 'AND(NOT(ISPICKVAL(Status__c, "Under Maintenance")), NOT(ISPICKVAL(Status__c, "Inactive")), AND(NOT(ISBLANK(Registration_Expiry__c)), Registration_Expiry__c >= TODAY(), NOT(ISBLANK(Insurance_Expiry__c)), Insurance_Expiry__c >= TODAY(), OR(ISBLANK(Fitness_Expiry__c), Fitness_Expiry__c >= TODAY())))', {
+                helpText: 'Indicative for today. Allocation also checks documents through the assignment window, maintenance and overlapping bookings.'
+            }),
+            // Phase 4 (decision Q15): registration, insurance and (when filled in) fitness, as one status.
+            formula('Document_Status__c', 'Text', 'IF(OR(ISBLANK(Registration_Expiry__c), ISBLANK(Insurance_Expiry__c)), "Missing", IF(OR(Registration_Expiry__c < TODAY(), Insurance_Expiry__c < TODAY(), AND(NOT(ISBLANK(Fitness_Expiry__c)), Fitness_Expiry__c < TODAY())), "Expired", IF(OR(Registration_Expiry__c <= TODAY() + $CustomMetadata.eLogix_Setting__mdt.Document_Expiry_Warning_Days.Number_Value__c, Insurance_Expiry__c <= TODAY() + $CustomMetadata.eLogix_Setting__mdt.Document_Expiry_Warning_Days.Number_Value__c, AND(NOT(ISBLANK(Fitness_Expiry__c)), Fitness_Expiry__c <= TODAY() + $CustomMetadata.eLogix_Setting__mdt.Document_Expiry_Warning_Days.Number_Value__c)), "Expiring Soon", "Valid")))', {
+                helpText: 'Missing, Expired, Expiring Soon (within the eLogix setting Document_Expiry_Warning_Days) or Valid, across registration, insurance and fitness.'
             }),
             rollup('Open_Maintenance_Count__c', 'Vehicle_Maintenance__c.Vehicle__c', 'count', {
                 filters: [{ field: 'Vehicle_Maintenance__c.Status__c', operation: 'notEqual', value: 'Completed, Cancelled' }],
@@ -480,7 +488,14 @@ export const OBJECTS = [
             date('Date_of_Joining__c'),
             lookup('User__c', 'User', 'eLogix_Driver_Records', { relationshipLabel: 'eLogix Driver Records' }),
             formula('Is_License_Valid__c', 'Checkbox', 'AND(NOT(ISBLANK(License_Expiry__c)), License_Expiry__c >= TODAY())'),
-            formula('Is_Allocatable__c', 'Checkbox', 'AND(ISPICKVAL(Status__c, "Available"), NOT(ISBLANK(License_Expiry__c)), License_Expiry__c >= TODAY())')
+            // Phase 4 (decision Q2): status is administrative availability only; allocation does not change it.
+            formula('Is_Allocatable__c', 'Checkbox', 'AND(NOT(ISPICKVAL(Status__c, "On Leave")), NOT(ISPICKVAL(Status__c, "Inactive")), NOT(ISBLANK(License_Expiry__c)), License_Expiry__c >= TODAY())', {
+                helpText: 'Indicative for today. Allocation also checks the licence through the assignment window and overlapping bookings.'
+            }),
+            // Phase 4 (decision Q15): Missing, Expired, Expiring Soon (within Document_Expiry_Warning_Days) or Valid.
+            formula('License_Status__c', 'Text', 'IF(ISBLANK(License_Expiry__c), "Missing", IF(License_Expiry__c < TODAY(), "Expired", IF(License_Expiry__c <= TODAY() + $CustomMetadata.eLogix_Setting__mdt.Document_Expiry_Warning_Days.Number_Value__c, "Expiring Soon", "Valid")))', {
+                helpText: 'Expiring Soon means the licence expires within the eLogix setting Document_Expiry_Warning_Days.'
+            })
         ]
     },
     {
@@ -502,7 +517,10 @@ export const OBJECTS = [
                 helpText: 'Open assignments are the ones that can conflict with a new allocation.'
             }),
             formula('Duration_Hours__c', 'Number', 'IF(OR(ISBLANK(Assignment_Start__c), ISBLANK(Assignment_End__c)), null, (Assignment_End__c - Assignment_Start__c) * 24)', { scale: 2 }),
-            text('Remarks__c', 255)
+            text('Remarks__c', 255),
+            text('Correction_Reason__c', 255, {
+                helpText: 'Reason for the latest correction of a dispatched allocation. Setting it requests a correction: allowed only while the shipment is On Hold, with the Correct Dispatched Allocation permission. Each correction is also written to tracking history.'
+            })
         ]
     },
     {

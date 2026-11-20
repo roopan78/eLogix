@@ -302,6 +302,24 @@ export function buildListView(columns) {
     return lines;
 }
 
+/** A named list view with filters (Phase 4), e.g. vehicles whose documents expire soon. */
+export function buildFilteredListView(view, defaultColumns) {
+    const lines = [XML_HEADER, `<ListView xmlns="${NS}">`];
+    lines.push(tag('fullName', view.name, I));
+    for (const column of ['NAME', ...(view.columns ?? defaultColumns)]) lines.push(tag('columns', column, I));
+    lines.push(tag('filterScope', 'Everything', I));
+    for (const filter of view.filters ?? []) {
+        lines.push(`${I}<filters>`);
+        lines.push(tag('field', filter.field, `${I}${I}`));
+        lines.push(tag('operation', filter.operation, `${I}${I}`));
+        lines.push(tag('value', filter.value, `${I}${I}`));
+        lines.push(`${I}</filters>`);
+    }
+    lines.push(tag('label', view.label, I));
+    lines.push('</ListView>');
+    return lines;
+}
+
 /** Highlights-panel fields on Lightning record pages: Name plus the first list view columns. */
 export function buildCompactLayout(columns) {
     const lines = [XML_HEADER, `<CompactLayout xmlns="${NS}">`];
@@ -585,6 +603,9 @@ export function emitObjects(objects, root) {
         }
         if (def.listColumns) {
             written.push(writeFile(join(dir, 'listViews', 'All.listView-meta.xml'), buildListView(def.listColumns)));
+            for (const view of def.listViews ?? []) {
+                written.push(writeFile(join(dir, 'listViews', `${view.name}.listView-meta.xml`), buildFilteredListView(view, def.listColumns)));
+            }
             written.push(
                 writeFile(join(dir, 'compactLayouts', `${COMPACT_LAYOUT}.compactLayout-meta.xml`), buildCompactLayout(def.listColumns.slice(0, 4)))
             );

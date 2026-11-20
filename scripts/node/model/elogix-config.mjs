@@ -35,6 +35,11 @@ export const CUSTOM_PERMISSIONS = [
         description: 'Allocate vehicles and drivers to shipments through the fleet allocation service.'
     },
     {
+        api: 'eLogix_Correct_Dispatched_Allocation',
+        label: 'eLogix: Correct Dispatched Allocation',
+        description: 'Correct the vehicle, driver or booking window of a dispatched shipment while it is On Hold, with a reason. Needs Allocate Fleet too. Each correction is fully revalidated and written to tracking history.'
+    },
+    {
         api: 'eLogix_Adjust_Inventory',
         label: 'eLogix: Adjust Inventory',
         description: 'Post manual stock adjustments and damage write-offs.'
@@ -231,6 +236,10 @@ export const METADATA_TYPES = [
             setting('Default_Billing_Milestone', 'Default Billing Milestone', {
                 text: 'On Delivery',
                 description: 'Billing milestone used for automatically generated invoices.'
+            }),
+            setting('Document_Expiry_Warning_Days', 'Document Expiry Warning Days', {
+                number: 30,
+                description: 'Vehicle documents and driver licences expiring within this many days are shown as Expiring Soon.'
             })
         ]
     }

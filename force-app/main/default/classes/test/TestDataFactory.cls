@@ -166,6 +166,49 @@ public class TestDataFactory {
         return ids;
     }
 
+    /* ------------------------------------------------------------------ */
+    /* Phase 4: fleet builders                                             */
+    /* ------------------------------------------------------------------ */
+
+    public static final String FLEET = 'eLogix_Fleet_Manager';
+
+    /** A compliant 1,000 kg LCV, Available, documents valid for a year. Not inserted. */
+    public static Vehicle__c buildVehicle(String vehicleNumber, Id businessUnitId) {
+        return new Vehicle__c(
+            Name = 'Truck ' + vehicleNumber,
+            Vehicle_Number__c = vehicleNumber,
+            Vehicle_Type__c = 'LCV',
+            Capacity__c = 1000,
+            Business_Unit__c = businessUnitId,
+            Registration_Expiry__c = Date.today().addDays(365),
+            Insurance_Expiry__c = Date.today().addDays(365),
+            Status__c = 'Available'
+        );
+    }
+
+    /** An Available driver with a licence valid for a year. Not inserted. */
+    public static Driver__c buildDriver(String licenceNumber, Id businessUnitId) {
+        return new Driver__c(
+            Name = 'Driver ' + licenceNumber,
+            License_Number__c = licenceNumber,
+            License_Expiry__c = Date.today().addDays(365),
+            Business_Unit__c = businessUnitId,
+            Status__c = 'Available'
+        );
+    }
+
+    /**
+     * As the running user: shipments with one item each, moved Draft -> Requested -> Quoted ->
+     * Confirmed, ready for allocation. Window: pickup today + 1, expected delivery today + 3.
+     */
+    public static List<Shipment__c> confirmedShipments(Integer count, Id customerId, Id businessUnitId) {
+        List<Shipment__c> shipments = buildShipments(count, customerId, businessUnitId, 'Draft');
+        insert shipments;
+        insert buildItems(shipments);
+        advance(shipments, new List<String>{ 'Requested', 'Quoted', 'Confirmed' });
+        return shipments;
+    }
+
     /** A Standard Platform User with the given eLogix permission sets, inserted without mixed-DML errors. */
     public static User createUser(String lastName, List<String> permissionSetNames) {
         Profile platformProfile = [SELECT Id FROM Profile WHERE Name = 'Standard Platform User' LIMIT 1];
