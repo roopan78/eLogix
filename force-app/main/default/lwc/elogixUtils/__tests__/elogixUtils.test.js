@@ -4,7 +4,8 @@ import {
   serviceResultMessages,
   showSuccess,
   showError,
-  handleServiceResult
+  handleServiceResult,
+  formatLabel
 } from "c/elogixUtils";
 
 function fakeComponent() {
@@ -140,5 +141,12 @@ describe("c/elogixUtils", () => {
       expect(handleServiceResult(component, undefined)).toBe(false);
       expect(toastOf(component).message).toBe("c.eLogix_UI_Unexpected_Error");
     });
+  });
+
+  it("formatLabel fills numbered placeholders, repeated or missing", () => {
+    expect(
+      formatLabel("Move {0} from {1} to {2}; {0} again", "SHP-1", "Draft", null)
+    ).toBe("Move SHP-1 from Draft to ; SHP-1 again");
+    expect(formatLabel(undefined, "x")).toBe("");
   });
 });

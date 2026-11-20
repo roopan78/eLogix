@@ -503,8 +503,73 @@ export function buildTab(motif) {
     ];
 }
 
+/** A Lightning page tab (Phase 7). */
+export function buildPageTab(page) {
+    return [
+        XML_HEADER,
+        `<CustomTab xmlns="${NS}">`,
+        tag('description', page.description, I),
+        tag('flexiPage', page.api, I),
+        tag('label', page.label, I),
+        tag('motif', page.motif, I),
+        '</CustomTab>'
+    ];
+}
+
+/**
+ * A Lightning page (Phase 7). `regions` maps region name -> components; a component is an LWC bundle
+ * name or { name, identifier?, properties? }.
+ */
+export function buildFlexiPage(page) {
+    const I2 = `${I}${I}`;
+    const I3 = `${I2}${I}`;
+    const I4 = `${I3}${I}`;
+    const lines = [XML_HEADER, `<FlexiPage xmlns="${NS}">`];
+    lines.push(tag('description', page.description, I));
+    for (const [region, components] of Object.entries(page.regions)) {
+        lines.push(`${I}<flexiPageRegions>`);
+        for (const entry of components) {
+            const component = typeof entry === 'string' ? { name: entry } : entry;
+            lines.push(`${I2}<itemInstances>`);
+            lines.push(`${I3}<componentInstance>`);
+            for (const [name, value] of Object.entries(component.properties ?? {})) {
+                lines.push(`${I4}<componentInstanceProperties>`);
+                lines.push(tag('name', name, `${I4}${I}`));
+                lines.push(tag('value', value, `${I4}${I}`));
+                lines.push(`${I4}</componentInstanceProperties>`);
+            }
+            lines.push(tag('componentName', component.name, I4));
+            lines.push(tag('identifier', component.identifier ?? component.name, I4));
+            lines.push(`${I3}</componentInstance>`);
+            lines.push(`${I2}</itemInstances>`);
+        }
+        lines.push(tag('name', region, I2));
+        lines.push(tag('type', 'Region', I2));
+        lines.push(`${I}</flexiPageRegions>`);
+    }
+    lines.push(tag('masterLabel', page.label, I));
+    if (page.object) lines.push(tag('sobjectType', page.object, I));
+    lines.push(`${I}<template>`);
+    lines.push(tag('name', page.template, I2));
+    lines.push(`${I}</template>`);
+    lines.push(tag('type', page.type, I));
+    lines.push('</FlexiPage>');
+    return lines;
+}
+
 export function buildApplication(app) {
     const lines = [XML_HEADER, `<CustomApplication xmlns="${NS}">`];
+    // Phase 7: app-default desktop record pages.
+    for (const page of app.recordPages ?? []) {
+        lines.push(`${I}<actionOverrides>`);
+        lines.push(tag('actionName', 'View', `${I}${I}`));
+        lines.push(tag('content', page.api, `${I}${I}`));
+        lines.push(tag('formFactor', 'Large', `${I}${I}`));
+        lines.push(tag('skipRecordTypeSelect', false, `${I}${I}`));
+        lines.push(tag('type', 'Flexipage', `${I}${I}`));
+        lines.push(tag('pageOrSobjectType', page.object, `${I}${I}`));
+        lines.push(`${I}</actionOverrides>`);
+    }
     lines.push(`${I}<brand>`);
     lines.push(tag('headerColor', app.headerColor, `${I}${I}`));
     lines.push(tag('shouldOverrideOrgTheme', false, `${I}${I}`));
@@ -659,6 +724,21 @@ export function emitCustomPermissions(permissions, root) {
 
 export function emitApplication(app, root) {
     return [writeFile(join(root, 'applications', `${app.api}.app-meta.xml`), buildApplication(app))];
+}
+
+/** Phase 7: FlexiPages, plus a tab for each app page. */
+export function emitPages(appPages, recordPages, root) {
+    const written = [];
+    for (const page of appPages) {
+        const flexiPage = { ...page, type: 'AppPage', template: 'flexipage:defaultAppHomeTemplate', regions: { main: page.components } };
+        written.push(writeFile(join(root, 'flexipages', `${page.api}.flexipage-meta.xml`), buildFlexiPage(flexiPage)));
+        written.push(writeFile(join(root, 'tabs', `${page.api}.tab-meta.xml`), buildPageTab(page)));
+    }
+    for (const page of recordPages) {
+        const flexiPage = { ...page, type: 'RecordPage', template: 'flexipage:recordHomeTemplateDesktop' };
+        written.push(writeFile(join(root, 'flexipages', `${page.api}.flexipage-meta.xml`), buildFlexiPage(flexiPage)));
+    }
+    return written;
 }
 
 export function emitPermissionSets(resolvedSets, root) {

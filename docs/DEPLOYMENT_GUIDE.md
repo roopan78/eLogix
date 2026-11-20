@@ -2,12 +2,12 @@
 
 ## Prerequisites
 
-| Tool | Verified version |
-|---|---|
-| Salesforce CLI (`sf`) | 2.140.6 |
-| Node.js | 22.x (generator uses only built-in modules) |
-| Target org | Developer Edition, alias `eLogixDev` (default org for this project) |
-| Source API version | 67.0 |
+| Tool                  | Verified version                                                    |
+| --------------------- | ------------------------------------------------------------------- |
+| Salesforce CLI (`sf`) | 2.140.6                                                             |
+| Node.js               | 22.x (generator uses only built-in modules)                         |
+| Target org            | Developer Edition, alias `eLogixDev` (default org for this project) |
+| Source API version    | 67.0                                                                |
 
 Several orgs are authenticated on the development machine, including a client sandbox. **Always pass `--target-org eLogixDev`** (or the alias of the org you intend to change). Never rely on the default alone.
 
@@ -101,6 +101,13 @@ Expect `failures=0` in each `SMOKE SUMMARY` (11, 7 and 3 checks). Since Phase 5,
 sf apex run --file scripts/apex/verify-phase6-gps.apex --target-org eLogixDev           # checks=8: G1-G5
 ```
 
+Phase 7 (Lightning pages and screens): after deploying, the eLogix ERP app shows the Shipment, Fleet and Tracking Console tabs, and the eLogix Shipment and Quotation record pages are the app defaults on desktop. Nothing needs activating by hand: the page assignments are in the app metadata (`actionOverrides`). If an org already had a different page activated for the app, Lightning App Builder → the page → **Activation** shows which one wins. Then run the manual UI checklist in [LWC_IMPLEMENTATION.md](LWC_IMPLEMENTATION.md) section 5. LWC unit tests run locally:
+
+```bash
+npm run test:unit        # Jest, all LWC suites
+npm run lint             # ESLint on LWC
+```
+
 GPS integration user (optional; only for a live or simulated provider calling the REST endpoint):
 
 1. Create an API-only user, for example with the Salesforce Integration user licence where available, or Standard Platform User.
@@ -118,11 +125,11 @@ sf org assign permset --name eLogix_Data_Migration --target-org eLogixDev
 
 ## 4. Org settings for the Indian demo
 
-| Setting | Required value | Status (2026-11-19) | How |
-|---|---|---|---|
-| Org default time zone | Asia/Kolkata | Done (verified via `Organization.TimeZoneSidKey`) | Setup → Company Information, or `sf data update record --sobject Organization` |
-| Admin user time zone | Asia/Kolkata | Done (verified via `UserInfo.getTimeZone()`) | User settings |
-| Company currency locale | English (India) → INR | Done (verified: `SMOKE INFO org currency=INR`) | Manual, see below |
+| Setting                 | Required value        | Status (2026-11-19)                               | How                                                                            |
+| ----------------------- | --------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Org default time zone   | Asia/Kolkata          | Done (verified via `Organization.TimeZoneSidKey`) | Setup → Company Information, or `sf data update record --sobject Organization` |
+| Admin user time zone    | Asia/Kolkata          | Done (verified via `UserInfo.getTimeZone()`)      | User settings                                                                  |
+| Company currency locale | English (India) → INR | Done (verified: `SMOKE INFO org currency=INR`)    | Manual, see below                                                              |
 
 The currency locale of a single-currency org is not exposed through the SOAP/REST API (`Organization` has no such field) or through any settings metadata type (`CompanySettings` and `CurrencySettings` were retrieved and checked). On a fresh org, change it in the UI:
 
@@ -134,17 +141,17 @@ Do this **before** loading demo data. Changing the currency locale relabels amou
 
 ## 5. Deployment history
 
-| Date (UTC) | Deploy ID | Scope | Components | Result |
-|---|---|---|---|---|
-| 2026-11-19 03:58 | `0Afg700000KLr5pCAD` | Phase 1 metadata foundation | 565 / 565 | Succeeded |
-| 2026-11-19 ~04:03 | `0Afg700000KLuLRCA1` | Percent-field fix (quotation tax formulas, 3 validation rules) | 565 / 565 | Succeeded |
-| 2026-11-19 04:10 | `0Afg700000KLxb3CAD` | Page layouts, compact layouts, Account/Contact layout extensions | 621 / 621 | Succeeded |
-| 2026-11-19 09:49 | `0Afg700000KNnfeCAD` | Phase 2: 33 Apex classes, `ShipmentTrigger`, 18 custom labels (`RunLocalTests`: 77/77 passed, coverage 97.5%) | 674 / 674 | Succeeded |
-| 2026-11-19 10:59 | `0Afg700000KOZcDCAX` | Phase 2 follow-up F1 to F3: `recordStatusEvents` restricted to the shipment trigger, rollback test, `ShipmentService` comment (`RunLocalTests`: 79/79 passed, coverage 98.5%) | 674 / 674 | Succeeded |
-| 2026-11-19 ~11:53 | `0Afg700000KOim0CAD` | Phase 3 model change: `Quotation__c.Taxable_Line_Total__c`, tax/total formulas (Q14), `QTL_Locked_Unless_Draft` (Q18), layout, FLS (`RunLocalTests`: 79/79) | 55 / 55 | Succeeded |
-| 2026-11-19 17:41 | `0Afg700000KRoekCAD` | Phase 3 Apex: pricing, quotation, approval, conversion; `QuotationTrigger`; 27 labels (`RunLocalTests`: 132/132 passed, coverage 97.2%) | 717 / 717 | Succeeded |
-| 2026-11-19 18:03 | `0Afg700000KRt9mCAD` | Phase 3 follow-up A1 to A3: request link immutable, self-approval check against previous owner, request lock on conversion; 1 label (`RunLocalTests`: 135/135 passed, coverage 97.6%) | 718 / 718 | Succeeded |
-| 2026-11-19 18:13 | `0Afg700000KRUWMCA5` | Phase 3 follow-up A4: quotation validity date locked after Draft; lock label wording (`RunLocalTests`: 136/136 passed, coverage 97.6%) | 718 / 718 | Succeeded |
+| Date (UTC)        | Deploy ID            | Scope                                                                                                                                                                                 | Components | Result    |
+| ----------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | --------- |
+| 2026-11-19 03:58  | `0Afg700000KLr5pCAD` | Phase 1 metadata foundation                                                                                                                                                           | 565 / 565  | Succeeded |
+| 2026-11-19 ~04:03 | `0Afg700000KLuLRCA1` | Percent-field fix (quotation tax formulas, 3 validation rules)                                                                                                                        | 565 / 565  | Succeeded |
+| 2026-11-19 04:10  | `0Afg700000KLxb3CAD` | Page layouts, compact layouts, Account/Contact layout extensions                                                                                                                      | 621 / 621  | Succeeded |
+| 2026-11-19 09:49  | `0Afg700000KNnfeCAD` | Phase 2: 33 Apex classes, `ShipmentTrigger`, 18 custom labels (`RunLocalTests`: 77/77 passed, coverage 97.5%)                                                                         | 674 / 674  | Succeeded |
+| 2026-11-19 10:59  | `0Afg700000KOZcDCAX` | Phase 2 follow-up F1 to F3: `recordStatusEvents` restricted to the shipment trigger, rollback test, `ShipmentService` comment (`RunLocalTests`: 79/79 passed, coverage 98.5%)         | 674 / 674  | Succeeded |
+| 2026-11-19 ~11:53 | `0Afg700000KOim0CAD` | Phase 3 model change: `Quotation__c.Taxable_Line_Total__c`, tax/total formulas (Q14), `QTL_Locked_Unless_Draft` (Q18), layout, FLS (`RunLocalTests`: 79/79)                           | 55 / 55    | Succeeded |
+| 2026-11-19 17:41  | `0Afg700000KRoekCAD` | Phase 3 Apex: pricing, quotation, approval, conversion; `QuotationTrigger`; 27 labels (`RunLocalTests`: 132/132 passed, coverage 97.2%)                                               | 717 / 717  | Succeeded |
+| 2026-11-19 18:03  | `0Afg700000KRt9mCAD` | Phase 3 follow-up A1 to A3: request link immutable, self-approval check against previous owner, request lock on conversion; 1 label (`RunLocalTests`: 135/135 passed, coverage 97.6%) | 718 / 718  | Succeeded |
+| 2026-11-19 18:13  | `0Afg700000KRUWMCA5` | Phase 3 follow-up A4: quotation validity date locked after Draft; lock label wording (`RunLocalTests`: 136/136 passed, coverage 97.6%)                                                | 718 / 718  | Succeeded |
 
 | 2026-11-19 19:32 | `0Afg700000KSngbCAD` | **Check-only** Phase 4: fleet allocation Apex, `VehicleAssignmentTrigger`, 27 labels, expiry formulas and list views, `Document_Expiry_Warning_Days`, Fleet Manager Shipment View All (`RunLocalTests`: 173/173 passed, coverage 97.1%) | 765 / 765 | Superseded by the audit-fix validation below |
 | 2026-11-20 02:47 | `0Afg700000KVnYnCAL` | **Check-only** Phase 4 with the six audit fixes: no delete or undelete of assignments, dispatch-history lock, Ready for Dispatch revalidation, lock timeouts at every lock point, trigger-only enforcement reads; Fleet Manager without Delete on Vehicle Assignment; 4 labels (`RunLocalTests`: 190/190 passed, coverage 96.6%) | 771 / 771 | Superseded by the round 3 validation below |

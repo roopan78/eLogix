@@ -1,9 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <applicationVisibilities>
         <application>eLogix_ERP</application>
         <visible>true</visible>
     </applicationVisibilities>
+    <classAccesses>
+        <apexClass>DeliveryConsoleController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FleetConsoleController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ShipmentConsoleController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TrackingConsoleController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
         <name>Shipment_Status_Transition__mdt</name>
@@ -16,7 +32,8 @@
         <enabled>true</enabled>
         <name>eLogix_Allocate_Fleet</name>
     </customPermissions>
-    <description>Maintains vehicles, drivers and maintenance schedules, and allocates fleet to shipments.</description>
+    <description
+  >Maintains vehicles, drivers and maintenance schedules, and allocates fleet to shipments.</description>
     <fieldPermissions>
         <editable>false</editable>
         <field>Account.Customer_Code__c</field>
@@ -666,6 +683,18 @@
     </tabSettings>
     <tabSettings>
         <tab>Delivery__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>eLogix_Shipment_Console</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>eLogix_Fleet_Console</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>eLogix_Tracking_Console</tab>
         <visibility>Visible</visibility>
     </tabSettings>
 </PermissionSet>

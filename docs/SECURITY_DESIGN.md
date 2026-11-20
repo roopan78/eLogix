@@ -1,10 +1,10 @@
 # eLogix ERP - Security Design
 
-| | |
-|---|---|
-| Live in `eLogixDev` | 9 permission sets, 10 custom permissions, org-wide defaults on all 26 objects, field-level security on every non-required field |
-| Source | `scripts/node/model/elogix-security.mjs` (matrix) and `elogix-config.mjs` (custom permissions) → generated into `force-app/main/default/permissionsets/` |
-| Not yet deployed | Role hierarchy and sharing rules (Phase 9), Apex sharing enforcement (from Phase 2) |
+|                     |                                                                                                                                                          |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Live in `eLogixDev` | 9 permission sets, 10 custom permissions, org-wide defaults on all 26 objects, field-level security on every non-required field                          |
+| Source              | `scripts/node/model/elogix-security.mjs` (matrix) and `elogix-config.mjs` (custom permissions) → generated into `force-app/main/default/permissionsets/` |
+| Not yet deployed    | Role hierarchy and sharing rules (Phase 9), Apex sharing enforcement (from Phase 2)                                                                      |
 
 ## 1. Principles
 
@@ -15,49 +15,51 @@
 
 ## 2. Org-wide defaults
 
-| Object | Internal | External | Why |
-|---|---|---|---|
-| Shipment Request, Quotation, Shipment, Invoice, Return Request, Claim | Private | Private | Commercial and financial data; visibility through ownership, roles (P9) and View All for managers. |
-| Business Unit, Vehicle, Driver, Warehouse, Route, Rate Card | Public Read Only | Private | Reference data everyone needs to read; only owning roles edit. |
-| Vehicle Assignment | Public Read/Write | Private | Fleet coordinators work a shared board. Object permissions still limit who can edit. |
-| Integration Log | Public Read/Write | Private | Only the Administrator has object access. |
-| Line items, events, movements, deliveries, payments | Controlled by Parent | Controlled by Parent | Master-detail. |
+| Object                                                                | Internal             | External             | Why                                                                                                |
+| --------------------------------------------------------------------- | -------------------- | -------------------- | -------------------------------------------------------------------------------------------------- |
+| Shipment Request, Quotation, Shipment, Invoice, Return Request, Claim | Private              | Private              | Commercial and financial data; visibility through ownership, roles (P9) and View All for managers. |
+| Business Unit, Vehicle, Driver, Warehouse, Route, Rate Card           | Public Read Only     | Private              | Reference data everyone needs to read; only owning roles edit.                                     |
+| Vehicle Assignment                                                    | Public Read/Write    | Private              | Fleet coordinators work a shared board. Object permissions still limit who can edit.               |
+| Integration Log                                                       | Public Read/Write    | Private              | Only the Administrator has object access.                                                          |
+| Line items, events, movements, deliveries, payments                   | Controlled by Parent | Controlled by Parent | Master-detail.                                                                                     |
 
 ## 3. Permission set matrix
 
 Letters: **C**reate, **R**ead, **E**dit, **D**elete, **V**iew All, **M**odify All. A dash means no access.
 
-| Object | Admin | Logistics Mgr | Sales | Operations | Fleet | Warehouse | Finance | Customer Svc |
-|---|---|---|---|---|---|---|---|---|
-| Account | CREDVM | RV | CRE | R | R | R | RE | R |
-| Contact | CREDVM | RV | CRED | R | - | - | R | CRE |
-| Business Unit | CREDVM | RV | R | R | R | R | R | R |
-| Shipment Request | CREDVM | CREV | CRE | RE | - | - | R | CRE |
-| Quotation | CREDVM | CREV | CRE | R | - | - | R | R |
-| Quotation Line | CREDVM | CREDV | CRED | R | - | - | R | R |
-| Shipment | CREDVM | CREV | R | CRE | RV (P4, Q13) | R | R | R |
-| Shipment Item | CREDVM | CREDV | R | CRED | R | R | R | R |
-| Vehicle / Driver | CREDVM | RV | - | R | CREDV | - | - | - |
-| Vehicle Assignment | CREDVM | CREV | - | R | CREV (P4: no Delete) | - | - | - |
-| Vehicle Maintenance | CREDVM | RV | - | - | CREDV | - | - | - |
-| Warehouse | CREDVM | RV | - | R | - | CREV | R | - |
-| Inventory | CREDVM | RV | - | R | - | CREV | R | - |
-| Stock Movement | CREDVM | RV | - | R | - | CRV | - | - |
-| Route | CREDVM | CREV | R | R | R | R | R | R |
-| Route Stop | CREDVM | CREDV | R | R | R | - | - | - |
-| Rate Card | CREDVM | CREV | R | R | - | - | CREV | - |
-| Freight Charge | CREDVM | CREDV | R | CRE | - | - | R | - |
-| Tracking Event | CREDVM | CRV | R | CR | R | - | - | R |
-| Delivery | CREDVM | CREV | - | CRE | R | - | R | R |
-| Proof of Delivery | CREDVM | CREV | - | CRE | - | - | R | R |
-| Invoice | CREDVM | RV | R | R | - | - | CREV | R |
-| Invoice Line | CREDVM | RV | - | - | - | - | CREDV | R |
-| Payment | CREDVM | RV | - | - | - | - | CREV | R |
-| Return Request | CREDVM | CREV | R | RE | - | RE | R | CRE |
-| Claim | CREDVM | CREV | - | R | - | - | RE | CRE |
-| Integration Log | CREDVM | RV | - | - | - | - | - | - |
+| Object              | Admin  | Logistics Mgr | Sales | Operations | Fleet                | Warehouse | Finance | Customer Svc |
+| ------------------- | ------ | ------------- | ----- | ---------- | -------------------- | --------- | ------- | ------------ |
+| Account             | CREDVM | RV            | CRE   | R          | R                    | R         | RE      | R            |
+| Contact             | CREDVM | RV            | CRED  | R          | -                    | -         | R       | CRE          |
+| Business Unit       | CREDVM | RV            | R     | R          | R                    | R         | R       | R            |
+| Shipment Request    | CREDVM | CREV          | CRE   | RE         | -                    | -         | R       | CRE          |
+| Quotation           | CREDVM | CREV          | CRE   | R          | -                    | -         | R       | R            |
+| Quotation Line      | CREDVM | CREDV         | CRED  | R          | -                    | -         | R       | R            |
+| Shipment            | CREDVM | CREV          | R     | CRE        | RV (P4, Q13)         | R         | R       | R            |
+| Shipment Item       | CREDVM | CREDV         | R     | CRED       | R                    | R         | R       | R            |
+| Vehicle / Driver    | CREDVM | RV            | -     | R          | CREDV                | -         | -       | -            |
+| Vehicle Assignment  | CREDVM | CREV          | -     | R          | CREV (P4: no Delete) | -         | -       | -            |
+| Vehicle Maintenance | CREDVM | RV            | -     | -          | CREDV                | -         | -       | -            |
+| Warehouse           | CREDVM | RV            | -     | R          | -                    | CREV      | R       | -            |
+| Inventory           | CREDVM | RV            | -     | R          | -                    | CREV      | R       | -            |
+| Stock Movement      | CREDVM | RV            | -     | R          | -                    | CRV       | -       | -            |
+| Route               | CREDVM | CREV          | R     | R          | R                    | R         | R       | R            |
+| Route Stop          | CREDVM | CREDV         | R     | R          | R                    | -         | -       | -            |
+| Rate Card           | CREDVM | CREV          | R     | R          | -                    | -         | CREV    | -            |
+| Freight Charge      | CREDVM | CREDV         | R     | CRE        | -                    | -         | R       | -            |
+| Tracking Event      | CREDVM | CRV           | R     | CR         | R                    | -         | -       | R            |
+| Delivery            | CREDVM | CREV          | -     | CRE        | R                    | -         | R       | R            |
+| Proof of Delivery   | CREDVM | CREV          | -     | CRE        | -                    | -         | R       | R            |
+| Invoice             | CREDVM | RV            | R     | R          | -                    | -         | CREV    | R            |
+| Invoice Line        | CREDVM | RV            | -     | -          | -                    | -         | CREDV   | R            |
+| Payment             | CREDVM | RV            | -     | -          | -                    | -         | CREV    | R            |
+| Return Request      | CREDVM | CREV          | R     | RE         | -                    | RE        | R       | CRE          |
+| Claim               | CREDVM | CREV          | -     | R          | -                    | -         | RE      | CRE          |
+| Integration Log     | CREDVM | RV            | -     | -          | -                    | -         | -       | -            |
 
 The generator enforces the platform's permission dependencies at build time. Every grant includes Read. Delete requires Edit. Modify All requires Edit, Delete and View All. A detail object needs Read on its master, and View All or Modify All on the detail needs the same on the master. Contact needs Account.
+
+**Phase 7 UI controllers.** Each role permission set gets Apex class access to a screen controller when it can read the screen's object (generated from `CONTROLLER_ACCESS`: Shipment, Quotation, Vehicle Assignment, Delivery, Tracking Event), and the Shipment, Fleet and Tracking Console tabs on the same basis. The controllers are thin, `with sharing`, read in user mode and delegate every write to the services, so the UI adds no access path. Details: [LWC_IMPLEMENTATION.md](LWC_IMPLEMENTATION.md) section 4.
 
 **`eLogix_GPS_Integration`** (Phase 6) is for the GPS provider's API-only integration user, and has no app.
 
@@ -70,40 +72,40 @@ No role except the Administrator can delete transactional records. Tracking even
 
 ## 4. Custom permissions
 
-| Custom permission | Held by | Gates |
-|---|---|---|
-| `eLogix_Override_Shipment_Status` | Admin, Logistics Mgr | Bypassing `ShipmentStatusPolicy` (still writes tracking history) |
-| `eLogix_Cancel_Confirmed_Shipment` | Admin, Logistics Mgr | Confirmed / Ready for Dispatch / On Hold → Cancelled (declared on the transition records) |
-| `eLogix_Approve_Quotation` | Admin, Logistics Mgr | Approving quotations above the discount threshold |
-| `eLogix_Correct_Dispatched_Allocation` | Admin, Logistics Mgr | Correct the allocation of a shipment that has reached dispatch: shipment On Hold, new reason, full revalidation, tracking event (P4 round 3). Needs `eLogix_Allocate_Fleet` too. |
-| `eLogix_Allocate_Fleet` | Admin, Logistics Mgr, Fleet | The trigger enforces it on every `Vehicle_Assignment__c` insert and update, on all paths (P4). The only exemption is the automatic release of a Planned assignment whose shipment is already Cancelled; it is recognised from the stored record state. |
-| `eLogix_Adjust_Inventory` | Admin, Warehouse | Manual `Adjustment` / `Damage Write Off` movements |
-| `eLogix_Approve_Return` | Admin, Logistics Mgr | `ReturnService` approve/reject (stamps `Approval_Date__c`) |
-| `eLogix_Settle_Claim` | Admin, Logistics Mgr, Finance | Claim approval and settlement |
-| `eLogix_Record_Advance_Payment` | Admin, Finance | Overpayment, only when setting `Allow_Advance_Payments` is true |
-| `eLogix_Modify_Paid_Invoice` | Admin | Editing a Paid invoice |
-| `eLogix_Ingest_GPS` | Admin, **`eLogix_GPS_Integration`** | Submitting GPS pings (REST endpoint and `GpsIngestionJob.submit`) |
-| `eLogix_Bypass_Validation_Rules` | **`eLogix_Data_Migration` only** | Bypassable validation rules during seeding or migration. Assign temporarily; never part of Admin. |
+| Custom permission                      | Held by                             | Gates                                                                                                                                                                                                                                                  |
+| -------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `eLogix_Override_Shipment_Status`      | Admin, Logistics Mgr                | Bypassing `ShipmentStatusPolicy` (still writes tracking history)                                                                                                                                                                                       |
+| `eLogix_Cancel_Confirmed_Shipment`     | Admin, Logistics Mgr                | Confirmed / Ready for Dispatch / On Hold → Cancelled (declared on the transition records)                                                                                                                                                              |
+| `eLogix_Approve_Quotation`             | Admin, Logistics Mgr                | Approving quotations above the discount threshold                                                                                                                                                                                                      |
+| `eLogix_Correct_Dispatched_Allocation` | Admin, Logistics Mgr                | Correct the allocation of a shipment that has reached dispatch: shipment On Hold, new reason, full revalidation, tracking event (P4 round 3). Needs `eLogix_Allocate_Fleet` too.                                                                       |
+| `eLogix_Allocate_Fleet`                | Admin, Logistics Mgr, Fleet         | The trigger enforces it on every `Vehicle_Assignment__c` insert and update, on all paths (P4). The only exemption is the automatic release of a Planned assignment whose shipment is already Cancelled; it is recognised from the stored record state. |
+| `eLogix_Adjust_Inventory`              | Admin, Warehouse                    | Manual `Adjustment` / `Damage Write Off` movements                                                                                                                                                                                                     |
+| `eLogix_Approve_Return`                | Admin, Logistics Mgr                | `ReturnService` approve/reject (stamps `Approval_Date__c`)                                                                                                                                                                                             |
+| `eLogix_Settle_Claim`                  | Admin, Logistics Mgr, Finance       | Claim approval and settlement                                                                                                                                                                                                                          |
+| `eLogix_Record_Advance_Payment`        | Admin, Finance                      | Overpayment, only when setting `Allow_Advance_Payments` is true                                                                                                                                                                                        |
+| `eLogix_Modify_Paid_Invoice`           | Admin                               | Editing a Paid invoice                                                                                                                                                                                                                                 |
+| `eLogix_Ingest_GPS`                    | Admin, **`eLogix_GPS_Integration`** | Submitting GPS pings (REST endpoint and `GpsIngestionJob.submit`)                                                                                                                                                                                      |
+| `eLogix_Bypass_Validation_Rules`       | **`eLogix_Data_Migration` only**    | Bypassable validation rules during seeding or migration. Assign temporarily; never part of Admin.                                                                                                                                                      |
 
 ## <a id="protected-fields"></a>5. Protected fields
 
 These fields hold system-derived values. FLS makes them read-only for every role except those listed. Their owning service writes them.
 
-| Field(s) | Editable by (besides Admin) | Written by |
-|---|---|---|
-| `Account.Credit_Limit__c`, `Credit_Terms_Days__c` | Finance | Users (Finance) |
-| `Quotation__c` pricing components, `Rate_Card__c`, `Tax_Percent__c`, `Version__c`, `Approved_By__c`, `Approval_Date__c` | - | `FreightCalculationService`, quotation approval |
-| `Delivery__c.Attempt_Number__c`, `Attempt_Key__c`; `Proof_of_Delivery__c.Shipment__c` | - | The Delivery and POD triggers (Phase 5) |
-| `Vehicle_Assignment__c.Correction_Reason__c` | Logistics Mgr | Users holding `eLogix_Correct_Dispatched_Allocation`; the trigger accepts a change only as a valid correction |
-| `Shipment__c.Freight_Amount__c`, `Vehicle__c`, `Driver__c`, `Latest_Location__c`, `Latest_Tracking_Timestamp__c` | - | `ShipmentService` and `TrackingService`. `Vehicle__c` and `Driver__c` are written only by the `Vehicle_Assignment__c` trigger mirror (`VehicleAssignmentDomain.MirrorWriter`, P4). |
-| `Inventory__c.Available_Quantity__c`, `Reserved_Quantity__c`, `Inventory_Key__c` | - | `InventoryService` (only through stock movements) |
-| `Stock_Movement__c.Quantity_Before__c`, `Quantity_After__c`, `Movement_Key__c`, `Performed_By__c` | - | `InventoryService` |
-| `Tracking_Event__c.Event_Key__c`, `From_Status__c`, `To_Status__c` | - | `TrackingService` |
-| `Invoice__c.Invoice_Key__c`; `Payment__c.Gateway_Transaction_Id__c`, `Idempotency_Key__c` | - | `InvoiceService`, `PaymentService` |
-| `Return_Request__c.Approved_By__c`, `Approval_Date__c` | - | `ReturnService` (after `eLogix_Approve_Return`) |
-| `Freight_Charge__c.Approved_By__c` | - | Charge approval |
-| `Claim__c.Approved_Amount__c`, `Settlement_Date__c` | Finance, Logistics Mgr | Users holding `eLogix_Settle_Claim` |
-| `Proof_of_Delivery__c.Verified_By__c` | Logistics Mgr | Users |
+| Field(s)                                                                                                                | Editable by (besides Admin) | Written by                                                                                                                                                                         |
+| ----------------------------------------------------------------------------------------------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Account.Credit_Limit__c`, `Credit_Terms_Days__c`                                                                       | Finance                     | Users (Finance)                                                                                                                                                                    |
+| `Quotation__c` pricing components, `Rate_Card__c`, `Tax_Percent__c`, `Version__c`, `Approved_By__c`, `Approval_Date__c` | -                           | `FreightCalculationService`, quotation approval                                                                                                                                    |
+| `Delivery__c.Attempt_Number__c`, `Attempt_Key__c`; `Proof_of_Delivery__c.Shipment__c`                                   | -                           | The Delivery and POD triggers (Phase 5)                                                                                                                                            |
+| `Vehicle_Assignment__c.Correction_Reason__c`                                                                            | Logistics Mgr               | Users holding `eLogix_Correct_Dispatched_Allocation`; the trigger accepts a change only as a valid correction                                                                      |
+| `Shipment__c.Freight_Amount__c`, `Vehicle__c`, `Driver__c`, `Latest_Location__c`, `Latest_Tracking_Timestamp__c`        | -                           | `ShipmentService` and `TrackingService`. `Vehicle__c` and `Driver__c` are written only by the `Vehicle_Assignment__c` trigger mirror (`VehicleAssignmentDomain.MirrorWriter`, P4). |
+| `Inventory__c.Available_Quantity__c`, `Reserved_Quantity__c`, `Inventory_Key__c`                                        | -                           | `InventoryService` (only through stock movements)                                                                                                                                  |
+| `Stock_Movement__c.Quantity_Before__c`, `Quantity_After__c`, `Movement_Key__c`, `Performed_By__c`                       | -                           | `InventoryService`                                                                                                                                                                 |
+| `Tracking_Event__c.Event_Key__c`, `From_Status__c`, `To_Status__c`                                                      | -                           | `TrackingService`                                                                                                                                                                  |
+| `Invoice__c.Invoice_Key__c`; `Payment__c.Gateway_Transaction_Id__c`, `Idempotency_Key__c`                               | -                           | `InvoiceService`, `PaymentService`                                                                                                                                                 |
+| `Return_Request__c.Approved_By__c`, `Approval_Date__c`                                                                  | -                           | `ReturnService` (after `eLogix_Approve_Return`)                                                                                                                                    |
+| `Freight_Charge__c.Approved_By__c`                                                                                      | -                           | Charge approval                                                                                                                                                                    |
+| `Claim__c.Approved_Amount__c`, `Settlement_Date__c`                                                                     | Finance, Logistics Mgr      | Users holding `eLogix_Settle_Claim`                                                                                                                                                |
+| `Proof_of_Delivery__c.Verified_By__c`                                                                                   | Logistics Mgr               | Users                                                                                                                                                                              |
 
 ## 6. Apex security model (applies from Phase 2)
 
@@ -122,12 +124,12 @@ These fields hold system-derived values. FLS makes them read-only for every role
 
 Role hierarchy: Logistics Manager at the top, with Sales Executive, Operations Executive, Fleet Manager, Warehouse Manager, Finance Executive and Customer Service Executive below. Planned sharing rules:
 
-| Object | Rule |
-|---|---|
-| Shipment | Read/Write to Operations Executive role; Read to Fleet, Warehouse, Finance, Customer Service roles |
-| Shipment Request, Quotation | Read to Operations and Customer Service roles |
-| Invoice | Read/Write to Finance role; Read to Customer Service role |
-| Return Request, Claim | Read/Write to Customer Service, Warehouse (returns) and Finance (claims) roles |
+| Object                      | Rule                                                                                               |
+| --------------------------- | -------------------------------------------------------------------------------------------------- |
+| Shipment                    | Read/Write to Operations Executive role; Read to Fleet, Warehouse, Finance, Customer Service roles |
+| Shipment Request, Quotation | Read to Operations and Customer Service roles                                                      |
+| Invoice                     | Read/Write to Finance role; Read to Customer Service role                                          |
+| Return Request, Claim       | Read/Write to Customer Service, Warehouse (returns) and Finance (claims) roles                     |
 
 Until then, the demo user (System Administrator plus `eLogix_Administrator`) sees all data. Role-based demos use managers, whose permission sets include View All.
 

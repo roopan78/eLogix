@@ -112,3 +112,14 @@ export function handleServiceResult(component, result, successMessage) {
   showError(component, messages.length ? messages : null);
   return false;
 }
+
+/** Fills {0}, {1}... placeholders of a Custom Label, like String.format in Apex. */
+export function formatLabel(template, ...values) {
+  return values.reduce(
+    (text, value, index) =>
+      text
+        .split(`{${index}}`)
+        .join(value === undefined || value === null ? "" : String(value)),
+    template || ""
+  );
+}

@@ -23,6 +23,7 @@ import {
     isComputedField,
     isFlsExempt,
     emitApplication,
+    emitPages,
     emitCustomPermissions,
     emitGlobalValueSets,
     emitMetadataTypes,
@@ -31,9 +32,10 @@ import {
 } from './lib/metadata-writer.mjs';
 import { GLOBAL_VALUE_SETS, OBJECTS, OBJECTS_BY_API } from './model/elogix-datamodel.mjs';
 import { VALIDATION_RULES } from './model/elogix-validation.mjs';
-import { EXPERIENCE, APPLICATION } from './model/elogix-experience.mjs';
+import { EXPERIENCE, APPLICATION, APP_PAGES, RECORD_PAGES } from './model/elogix-experience.mjs';
 import { CUSTOM_PERMISSIONS, METADATA_TYPES } from './model/elogix-config.mjs';
-import { ADMIN, PERMISSION_SETS, PROTECTED_FIELDS } from './model/elogix-security.mjs';
+import { ADMIN, CONTROLLER_ACCESS, PERMISSION_SETS, PROTECTED_FIELDS } from './model/elogix-security.mjs';
+import { existsSync } from 'node:fs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(here, '..', '..');
@@ -230,8 +232,32 @@ if (!permissionNames.has(BYPASS_PERMISSION)) fail(`bypass permission ${BYPASS_PE
 
 /* ---- application ---- */
 
+const appPagesByApi = new Map(APP_PAGES.map((page) => [page.api, page]));
 for (const tab of APPLICATION.tabs) {
-    if (!tab.startsWith('standard-') && !OBJECTS_BY_API.get(tab)?.tab) fail(`app ${APPLICATION.api}: no tab generated for ${tab}`);
+    if (!tab.startsWith('standard-') && !OBJECTS_BY_API.get(tab)?.tab && !appPagesByApi.has(tab)) {
+        fail(`app ${APPLICATION.api}: no tab generated for ${tab}`);
+    }
+}
+
+/* ---- Phase 7: Lightning pages and controllers ---- */
+
+const lwcRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'force-app', 'main', 'default', 'lwc');
+const pageComponents = (page) => (page.components ?? Object.values(page.regions).flat()).map((c) => (typeof c === 'string' ? c : c.name));
+for (const page of [...APP_PAGES, ...RECORD_PAGES]) {
+    for (const name of pageComponents(page)) {
+        if (!name.includes(':') && !existsSync(join(lwcRoot, name, `${name}.js-meta.xml`))) fail(`page ${page.api}: no LWC bundle ${name}`);
+    }
+}
+for (const page of APP_PAGES) {
+    if (!OBJECTS_BY_API.has(page.requires)) fail(`page ${page.api}: unknown object ${page.requires}`);
+    if (!APPLICATION.tabs.includes(page.api)) fail(`page ${page.api}: tab not in app ${APPLICATION.api}`);
+}
+for (const page of RECORD_PAGES) {
+    if (!OBJECTS_BY_API.has(page.object)) fail(`page ${page.api}: unknown object ${page.object}`);
+}
+APPLICATION.recordPages = RECORD_PAGES;
+for (const [controller, objectApi] of Object.entries(CONTROLLER_ACCESS)) {
+    if (!OBJECTS_BY_API.has(objectApi)) fail(`controller ${controller}: unknown object ${objectApi}`);
 }
 
 /* ---- custom metadata ---- */
@@ -333,14 +359,19 @@ function resolvePermissionSet(def) {
         if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(apexClass)) fail(`${def.api}: invalid Apex class name ${apexClass}`);
     }
 
+    // Phase 7: UI controllers and page tabs follow read access to the screen's object.
+    const canRead = (objectApi) => !def.noApp && (objects.get(objectApi) ?? '').includes('R');
+    const controllers = Object.entries(CONTROLLER_ACCESS).filter(([, objectApi]) => canRead(objectApi)).map(([name]) => name);
+    const pageTabs = APP_PAGES.filter((page) => canRead(page.requires)).map((page) => page.api);
+
     return {
         applications: def.noApp ? [] : [APPLICATION.api],
         metadataTypes: def.noApp ? [] : METADATA_TYPES.map((t) => t.api),
         customPermissions: def.customPermissions,
-        apexClasses: [...(def.apexClasses ?? [])].sort(),
+        apexClasses: [...new Set([...(def.apexClasses ?? []), ...controllers])].sort(),
         fields,
         objects,
-        tabs: [...objects.keys()].filter((api) => OBJECTS_BY_API.get(api).tab)
+        tabs: [...[...objects.keys()].filter((api) => OBJECTS_BY_API.get(api).tab), ...pageTabs]
     };
 }
 
@@ -363,7 +394,8 @@ const counts = {
     'list views': OBJECTS.filter((o) => o.listColumns).length + OBJECTS.reduce((n, o) => n + (o.listViews?.length ?? 0), 0),
     'compact layouts': OBJECTS.filter((o) => o.listColumns).length,
     'page layouts': customObjects.length + METADATA_TYPES.length,
-    tabs: OBJECTS.filter((o) => o.tab).length,
+    tabs: OBJECTS.filter((o) => o.tab).length + APP_PAGES.length,
+    'lightning pages': APP_PAGES.length + RECORD_PAGES.length,
     'global value sets': GLOBAL_VALUE_SETS.length,
     'custom metadata types': METADATA_TYPES.length,
     'custom metadata records': METADATA_TYPES.reduce((sum, t) => sum + t.records.length, 0),
@@ -450,6 +482,7 @@ if (dryRun) {
         ...emitMetadataTypes(METADATA_TYPES, sourceRoot),
         ...emitCustomPermissions(CUSTOM_PERMISSIONS, sourceRoot),
         ...emitApplication(APPLICATION, sourceRoot),
+        ...emitPages(APP_PAGES, RECORD_PAGES, sourceRoot),
         ...emitPermissionSets(resolvedSets, sourceRoot)
     ];
     const cataloguePath = join(projectRoot, 'docs', 'generated', 'DATA_MODEL_CATALOGUE.md');

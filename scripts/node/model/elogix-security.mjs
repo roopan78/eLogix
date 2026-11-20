@@ -80,6 +80,18 @@ export const PROTECTED_FIELDS = {
 
 const ALL = 'CREDVM';
 
+/**
+ * Phase 7: the LWC Apex controllers. Each permission set with an app gets a controller when it can
+ * read the object the screen is about; the services behind it still check every action.
+ */
+export const CONTROLLER_ACCESS = {
+    ShipmentConsoleController: 'Shipment__c',
+    QuotationConsoleController: 'Quotation__c',
+    FleetConsoleController: 'Vehicle_Assignment__c',
+    DeliveryConsoleController: 'Delivery__c',
+    TrackingConsoleController: 'Tracking_Event__c'
+};
+
 export const PERMISSION_SETS = [
     {
         api: ADMIN,

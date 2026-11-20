@@ -145,6 +145,81 @@ export const EXPERIENCE = {
     }
 };
 
+/* ------------------------------------------------------------------ */
+/* Phase 7: Lightning pages                                            */
+/* ------------------------------------------------------------------ */
+
+/** Standard record page components (no required properties). */
+const HIGHLIGHTS = { name: 'force:highlightsPanel', identifier: 'force_highlightsPanel' };
+const DETAIL = { name: 'force:detailPanel', identifier: 'force_detailPanel' };
+const RELATED_LISTS = {
+    name: 'force:relatedListContainer',
+    identifier: 'force_relatedListContainer',
+    properties: { relatedListComponentOverride: 'NONE', rowsToDisplay: '10', showActionBar: 'true' }
+};
+
+/**
+ * App pages (template flexipage:defaultAppHomeTemplate, one region "main"), each with a Lightning page
+ * tab in the eLogix ERP app. A permission set gets the tab when it can read `requires`. Components are
+ * LWC bundle names; `properties` set their design attributes.
+ */
+export const APP_PAGES = [
+    {
+        api: 'eLogix_Shipment_Console',
+        label: 'Shipment Console',
+        description: 'eLogix shipment list and shipment booking.',
+        motif: 'Custom98: Truck',
+        requires: 'Shipment__c',
+        components: ['shipmentManagement', { name: 'shipmentBooking', properties: { stayOnPage: 'true' } }]
+    },
+    {
+        api: 'eLogix_Fleet_Console',
+        label: 'Fleet Console',
+        description: 'eLogix fleet board: vehicles and drivers.',
+        motif: 'Custom73: Highway Sign',
+        requires: 'Vehicle__c',
+        components: ['fleetManagement']
+    },
+    {
+        api: 'eLogix_Tracking_Console',
+        label: 'Tracking Console',
+        description: 'eLogix tracking console: shipments on the road, history and manual events.',
+        motif: 'Custom30: Radar dish',
+        requires: 'Tracking_Event__c',
+        components: ['trackingConsole']
+    }
+];
+
+/**
+ * Record pages (template flexipage:recordHomeTemplateDesktop: header, main, sidebar), assigned as the
+ * eLogix ERP app default for the object on desktop. The standard highlights panel keeps the Edit and
+ * other record actions; related lists stay available.
+ */
+export const RECORD_PAGES = [
+    {
+        api: 'eLogix_Shipment_Record_Page',
+        label: 'eLogix Shipment Record Page',
+        description: 'Shipment details and status change, allocation, delivery and tracking history.',
+        object: 'Shipment__c',
+        regions: {
+            header: [HIGHLIGHTS],
+            main: ['shipmentDetails', 'vehicleAllocation', 'deliveryManagement', RELATED_LISTS],
+            sidebar: ['shipmentTimeline']
+        }
+    },
+    {
+        api: 'eLogix_Quotation_Record_Page',
+        label: 'eLogix Quotation Record Page',
+        description: 'Quotation pricing, charge lines and lifecycle actions.',
+        object: 'Quotation__c',
+        regions: {
+            header: [HIGHLIGHTS],
+            main: ['quotationBuilder', RELATED_LISTS],
+            sidebar: [DETAIL]
+        }
+    }
+];
+
 /**
  * Lightning app. Navigation follows CLAUDE.md section 8. The Executive Dashboard is a native
  * Salesforce dashboard (Phase 7), reached through the standard Dashboards tab.
@@ -157,6 +232,9 @@ export const APPLICATION = {
     tabs: [
         'standard-home',
         'standard-Dashboard',
+        'eLogix_Shipment_Console',
+        'eLogix_Fleet_Console',
+        'eLogix_Tracking_Console',
         'standard-Account',
         'Shipment_Request__c',
         'Quotation__c',

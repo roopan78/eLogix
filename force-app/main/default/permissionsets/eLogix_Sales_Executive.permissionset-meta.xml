@@ -1,9 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <applicationVisibilities>
         <application>eLogix_ERP</application>
         <visible>true</visible>
     </applicationVisibilities>
+    <classAccesses>
+        <apexClass>QuotationConsoleController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ShipmentConsoleController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TrackingConsoleController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
         <name>Shipment_Status_Transition__mdt</name>
@@ -12,7 +24,8 @@
         <enabled>true</enabled>
         <name>eLogix_Setting__mdt</name>
     </customMetadataTypeAccesses>
-    <description>Manages customers, captures shipment requests and builds quotations. Pricing components are computed by the freight service and are read-only.</description>
+    <description
+  >Manages customers, captures shipment requests and builds quotations. Pricing components are computed by the freight service and are read-only.</description>
     <fieldPermissions>
         <editable>true</editable>
         <field>Account.Customer_Code__c</field>
@@ -869,6 +882,14 @@
     </tabSettings>
     <tabSettings>
         <tab>Return_Request__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>eLogix_Shipment_Console</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>eLogix_Tracking_Console</tab>
         <visibility>Visible</visibility>
     </tabSettings>
 </PermissionSet>

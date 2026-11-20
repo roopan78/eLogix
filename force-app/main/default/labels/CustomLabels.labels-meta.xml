@@ -1012,12 +1012,78 @@
     >{0} events are recorded automatically when the shipment status changes. Change the shipment status instead.</value>
     </labels>
     <labels>
+        <fullName>eLogix_UI_Acceptance_Recorded</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Acceptance Recorded</shortDescription>
+        <value>Customer acceptance recorded.</value>
+    </labels>
+    <labels>
         <fullName>eLogix_UI_All_Statuses</fullName>
         <categories>eLogix,UI</categories>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>eLogix UI All Statuses</shortDescription>
         <value>All statuses</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Allocate</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Allocate</shortDescription>
+        <value>Allocate</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Allocated</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Allocated</shortDescription>
+        <value>Vehicle and driver allocated.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Allocation</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Allocation</shortDescription>
+        <value>Vehicle and driver allocation</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Allocation_Checked_On_Save</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription
+    >eLogix UI Allocation Checked On Save</shortDescription>
+        <value
+    >Suggestions are indicative; every allocation rule is checked when you save.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Approve</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Approve</shortDescription>
+        <value>Approve</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Approved</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Approved</shortDescription>
+        <value>Quotation approved.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Attempt_Started</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Attempt Started</shortDescription>
+        <value>Delivery attempt started.</value>
     </labels>
     <labels>
         <fullName>eLogix_UI_Book_Shipment</fullName>
@@ -1052,6 +1118,14 @@
         <value>Change status</value>
     </labels>
     <labels>
+        <fullName>eLogix_UI_Charge_Lines</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Charge Lines</shortDescription>
+        <value>Charge lines</value>
+    </labels>
+    <labels>
         <fullName>eLogix_UI_Checked_On_Save</fullName>
         <categories>eLogix,UI</categories>
         <language>en_US</language>
@@ -1068,12 +1142,125 @@
         <value>Confirm</value>
     </labels>
     <labels>
+        <fullName>eLogix_UI_Confirm_Convert</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Confirm Convert</shortDescription>
+        <value>Create a shipment from quotation {0}?</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Confirm_Delivery</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Confirm Delivery</shortDescription>
+        <value>Confirm delivery</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Confirm_Delivery_Question</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Confirm Delivery Question</shortDescription>
+        <value
+    >Confirm delivery of {0}? The proof of delivery is then locked.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Confirm_Reject</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Confirm Reject</shortDescription>
+        <value>Reject quotation {0}? It returns to Draft.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Confirm_Release</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Confirm Release</shortDescription>
+        <value>Release the vehicle and driver from {0}?</value>
+    </labels>
+    <labels>
         <fullName>eLogix_UI_Confirm_Status_Change</fullName>
         <categories>eLogix,UI</categories>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>eLogix UI Confirm Status Change</shortDescription>
         <value>Move {0} from {1} to {2}?</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Convert</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Convert</shortDescription>
+        <value>Convert to shipment</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Converted</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Converted</shortDescription>
+        <value>Shipment created from the quotation.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Correct_Allocation</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Correct Allocation</shortDescription>
+        <value>Correct dispatched allocation</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Corrected</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Corrected</shortDescription>
+        <value>Dispatched allocation corrected.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Correction_Reason</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Correction Reason</shortDescription>
+        <value>Correction reason</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Create_Quotation</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Create Quotation</shortDescription>
+        <value>Create quotation</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Delivery</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Delivery</shortDescription>
+        <value>Delivery</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Delivery_Confirmed</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Delivery Confirmed</shortDescription>
+        <value>Delivery confirmed.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Delivery_Notes</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Delivery Notes</shortDescription>
+        <value>Delivery notes</value>
     </labels>
     <labels>
         <fullName>eLogix_UI_Delivery_Statuses_Note</fullName>
@@ -1085,12 +1272,108 @@
     >Out for Delivery, Delivered and Failed Delivery are set by the delivery actions.</value>
     </labels>
     <labels>
+        <fullName>eLogix_UI_Driver</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Driver</shortDescription>
+        <value>Driver</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Drivers</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Drivers</shortDescription>
+        <value>Drivers</value>
+    </labels>
+    <labels>
         <fullName>eLogix_UI_Error_Title</fullName>
         <categories>eLogix,UI</categories>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>eLogix UI Error Title</shortDescription>
         <value>Error</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Event_Recorded</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Event Recorded</shortDescription>
+        <value>Tracking event recorded.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Event_Time</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Event Time</shortDescription>
+        <value>Event time</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Event_Type</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Event Type</shortDescription>
+        <value>Event type</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Evidence_Uploaded</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Evidence Uploaded</shortDescription>
+        <value>Delivery evidence uploaded.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Exception_Notes</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Exception Notes</shortDescription>
+        <value>Exception notes</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Failure_Notes</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Failure Notes</shortDescription>
+        <value>Failure notes</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Failure_Reason</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Failure Reason</shortDescription>
+        <value>Failure reason</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Failure_Recorded</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Failure Recorded</shortDescription>
+        <value>Failed attempt recorded.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Fleet</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Fleet</shortDescription>
+        <value>Fleet</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Has_Exception</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Has Exception</shortDescription>
+        <value>Delivered with an exception</value>
     </labels>
     <labels>
         <fullName>eLogix_UI_Hold_Reason</fullName>
@@ -1109,12 +1392,93 @@
         <value>Loading</value>
     </labels>
     <labels>
+        <fullName>eLogix_UI_Location</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Location</shortDescription>
+        <value>Location</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Mark_Sent</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Mark Sent</shortDescription>
+        <value>Mark as sent</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Marked_Sent</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Marked Sent</shortDescription>
+        <value>Quotation marked as sent to the customer.</value>
+    </labels>
+    <labels>
         <fullName>eLogix_UI_New_Status</fullName>
         <categories>eLogix,UI</categories>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>eLogix UI New Status</shortDescription>
         <value>New status</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_No_Active_Shipments</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI No Active Shipments</shortDescription>
+        <value>No shipments are on the road.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_No_Allocation_Permission</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI No Allocation Permission</shortDescription>
+        <value>Allocating needs the eLogix Allocate Fleet permission.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_No_Attempts</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI No Attempts</shortDescription>
+        <value>No delivery attempts yet.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_No_Candidates</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI No Candidates</shortDescription>
+        <value>No allocatable vehicle or driver fits this shipment.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_No_Charge_Lines</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI No Charge Lines</shortDescription>
+        <value>No charge lines.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_No_Drivers</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI No Drivers</shortDescription>
+        <value>No drivers to show.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_No_Quotation_Actions</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI No Quotation Actions</shortDescription>
+        <value
+    >No actions are available for this quotation in its current status.</value>
     </labels>
     <labels>
         <fullName>eLogix_UI_No_Records</fullName>
@@ -1149,6 +1513,22 @@
         <value>No tracking events yet.</value>
     </labels>
     <labels>
+        <fullName>eLogix_UI_No_Vehicles</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI No Vehicles</shortDescription>
+        <value>No vehicles to show.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Not_Allocated</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Not Allocated</shortDescription>
+        <value>No vehicle or driver is allocated.</value>
+    </labels>
+    <labels>
         <fullName>eLogix_UI_Override</fullName>
         <categories>eLogix,UI</categories>
         <language>en_US</language>
@@ -1157,12 +1537,180 @@
         <value>override</value>
     </labels>
     <labels>
+        <fullName>eLogix_UI_Proof_Recorded</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Proof Recorded</shortDescription>
+        <value>Proof of delivery recorded.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Proof_Verified</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Proof Verified</shortDescription>
+        <value>Proof of delivery verified.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Proofs</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Proofs</shortDescription>
+        <value>Proofs of delivery</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Quotation_Builder</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Quotation Builder</shortDescription>
+        <value>Quotation</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Quotation_Created</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Quotation Created</shortDescription>
+        <value>Quotation created.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Reallocate</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Reallocate</shortDescription>
+        <value>Reallocate</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Reallocated</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Reallocated</shortDescription>
+        <value>Allocation changed.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Recalculate</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Recalculate</shortDescription>
+        <value>Recalculate</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Recalculated</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Recalculated</shortDescription>
+        <value>Quotation repriced from the current rate card.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Received_At</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Received At</shortDescription>
+        <value>Received at</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Receiver_Name</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Receiver Name</shortDescription>
+        <value>Receiver name</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Record_Acceptance</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Record Acceptance</shortDescription>
+        <value>Record customer acceptance</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Record_Event</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Record Event</shortDescription>
+        <value>Record event</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Record_Failure</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Record Failure</shortDescription>
+        <value>Record failed attempt</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Record_Proof</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Record Proof</shortDescription>
+        <value>Record proof of delivery</value>
+    </labels>
+    <labels>
         <fullName>eLogix_UI_Refresh</fullName>
         <categories>eLogix,UI</categories>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>eLogix UI Refresh</shortDescription>
         <value>Refresh</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Reject</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Reject</shortDescription>
+        <value>Reject</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Rejected</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Rejected</shortDescription>
+        <value>Quotation rejected and returned to Draft.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Rejection_Reason</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Rejection Reason</shortDescription>
+        <value>Rejection reason</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Release</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Release</shortDescription>
+        <value>Release</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Released</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Released</shortDescription>
+        <value>Allocation released.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Remarks</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Remarks</shortDescription>
+        <value>Remarks</value>
     </labels>
     <labels>
         <fullName>eLogix_UI_Request_Saved</fullName>
@@ -1189,6 +1737,14 @@
         <value>Retry</value>
     </labels>
     <labels>
+        <fullName>eLogix_UI_Save</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Save</shortDescription>
+        <value>Save</value>
+    </labels>
+    <labels>
         <fullName>eLogix_UI_Save_Draft</fullName>
         <categories>eLogix,UI</categories>
         <language>en_US</language>
@@ -1213,6 +1769,14 @@
         <value>Search shipments</value>
     </labels>
     <labels>
+        <fullName>eLogix_UI_Select_Shipment</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Select Shipment</shortDescription>
+        <value>Select a shipment to see its history and record events.</value>
+    </labels>
+    <labels>
         <fullName>eLogix_UI_Shipment_Details</fullName>
         <categories>eLogix,UI</categories>
         <language>en_US</language>
@@ -1227,6 +1791,22 @@
         <protected>false</protected>
         <shortDescription>eLogix UI Shipments</shortDescription>
         <value>Shipments</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Signature_Reference</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Signature Reference</shortDescription>
+        <value>Signature reference</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Start_Attempt</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Start Attempt</shortDescription>
+        <value>Start delivery attempt</value>
     </labels>
     <labels>
         <fullName>eLogix_UI_Status</fullName>
@@ -1253,6 +1833,14 @@
         <value>Checked when you save: {0}</value>
     </labels>
     <labels>
+        <fullName>eLogix_UI_Submit_For_Approval</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Submit For Approval</shortDescription>
+        <value>Submit for approval</value>
+    </labels>
+    <labels>
         <fullName>eLogix_UI_Submit_Request</fullName>
         <categories>eLogix,UI</categories>
         <language>en_US</language>
@@ -1261,12 +1849,28 @@
         <value>Submit request</value>
     </labels>
     <labels>
+        <fullName>eLogix_UI_Submitted_For_Approval</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Submitted For Approval</shortDescription>
+        <value>Quotation submitted.</value>
+    </labels>
+    <labels>
         <fullName>eLogix_UI_Success_Title</fullName>
         <categories>eLogix,UI</categories>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>eLogix UI Success Title</shortDescription>
         <value>Success</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Tracking_Console</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Tracking Console</shortDescription>
+        <value>Tracking console</value>
     </labels>
     <labels>
         <fullName>eLogix_UI_Tracking_History</fullName>
@@ -1284,6 +1888,38 @@
         <shortDescription>eLogix UI Unexpected Error</shortDescription>
         <value
     >Something went wrong. Try again, or contact your administrator if the problem continues.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Upload_Evidence</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Upload Evidence</shortDescription>
+        <value>Upload delivery evidence</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Vehicle</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Vehicle</shortDescription>
+        <value>Vehicle</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Vehicles</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Vehicles</shortDescription>
+        <value>Vehicles</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Verify_Proof</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Verify Proof</shortDescription>
+        <value>Verify proof</value>
     </labels>
     <labels>
         <fullName>eLogix_UI_View</fullName>

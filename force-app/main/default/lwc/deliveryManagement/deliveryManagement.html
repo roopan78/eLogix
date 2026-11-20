@@ -1,0 +1,221 @@
+<template>
+  <lightning-card title={labels.title} icon-name="standard:shipment">
+    <div class="slds-p-horizontal_medium">
+      <template lwc:if={isLoading}>
+        <c-loading-indicator size="small"></c-loading-indicator>
+      </template>
+      <template lwc:elseif={loadError}>
+        <div class="slds-text-color_error elogix-error" role="alert">
+          {loadError}
+        </div>
+      </template>
+      <template lwc:else>
+        <c-reusable-data-table
+          columns={attemptColumns}
+          records={attemptRows}
+          empty-message={labels.noAttempts}
+          table-label={labels.title}
+          hide-checkbox-column
+        ></c-reusable-data-table>
+
+        <template lwc:if={isWorking}>
+          <c-loading-indicator size="small"></c-loading-indicator>
+        </template>
+
+        <div class="slds-m-top_small">
+          <template lwc:if={canStart}>
+            <lightning-button
+              class="elogix-start"
+              variant="brand"
+              label={labels.start}
+              disabled={isWorking}
+              onclick={handleStart}
+            ></lightning-button>
+          </template>
+
+          <template lwc:if={showOpenActions}>
+            <template lwc:if={canRecordProof}>
+              <lightning-button
+                class="elogix-show-proof"
+                variant="brand"
+                label={labels.recordProof}
+                disabled={isWorking}
+                onclick={handleShowProof}
+              ></lightning-button>
+            </template>
+            <template lwc:else>
+              <lightning-file-upload
+                class="elogix-upload"
+                label={labels.upload}
+                record-id={openProofId}
+                onuploadfinished={handleUploadFinished}
+              ></lightning-file-upload>
+              <lightning-button
+                class="elogix-confirm slds-m-top_x-small"
+                variant="brand"
+                label={labels.confirm}
+                disabled={isWorking}
+                onclick={handleConfirm}
+              ></lightning-button>
+            </template>
+            <lightning-button
+              class="elogix-show-failure slds-m-left_x-small slds-m-top_x-small"
+              variant="destructive-text"
+              label={labels.recordFailure}
+              disabled={isWorking}
+              onclick={handleShowFailure}
+            ></lightning-button>
+          </template>
+        </div>
+
+        <template lwc:if={showProofForm}>
+          <div class="slds-box slds-m-top_small elogix-proof-form">
+            <lightning-input
+              class="elogix-proof-field"
+              data-field="receiverName"
+              label={labels.receiver}
+              value={proofForm.receiverName}
+              required
+              max-length="255"
+              onchange={handleProofField}
+            ></lightning-input>
+            <lightning-input
+              class="elogix-proof-field"
+              data-field="receivedAt"
+              type="datetime"
+              label={labels.receivedAt}
+              value={proofForm.receivedAt}
+              onchange={handleProofField}
+            ></lightning-input>
+            <lightning-input
+              class="elogix-proof-field"
+              data-field="signatureReference"
+              label={labels.signature}
+              value={proofForm.signatureReference}
+              max-length="255"
+              onchange={handleProofField}
+            ></lightning-input>
+            <lightning-textarea
+              class="elogix-proof-field"
+              data-field="deliveryNotes"
+              label={labels.notes}
+              value={proofForm.deliveryNotes}
+              onchange={handleProofField}
+            ></lightning-textarea>
+            <lightning-input
+              class="elogix-proof-field"
+              data-field="hasException"
+              type="checkbox"
+              label={labels.hasException}
+              checked={proofForm.hasException}
+              onchange={handleProofField}
+            ></lightning-input>
+            <template lwc:if={proofForm.hasException}>
+              <lightning-textarea
+                class="elogix-proof-field"
+                data-field="exceptionNotes"
+                label={labels.exceptionNotes}
+                value={proofForm.exceptionNotes}
+                required
+                onchange={handleProofField}
+              ></lightning-textarea>
+            </template>
+            <div class="slds-m-top_small">
+              <lightning-button
+                class="elogix-cancel-form"
+                label={labels.cancel}
+                onclick={handleCancelForm}
+              ></lightning-button>
+              <lightning-button
+                class="elogix-save-proof slds-m-left_x-small"
+                variant="brand"
+                label={labels.save}
+                disabled={isWorking}
+                onclick={handleSaveProof}
+              ></lightning-button>
+            </div>
+          </div>
+        </template>
+
+        <template lwc:if={showFailureForm}>
+          <div class="slds-box slds-m-top_small elogix-failure-form">
+            <lightning-combobox
+              class="elogix-failure-field"
+              data-field="reason"
+              label={labels.failureReason}
+              value={failureForm.reason}
+              options={failureReasons}
+              required
+              onchange={handleFailureField}
+            ></lightning-combobox>
+            <lightning-textarea
+              class="elogix-failure-field"
+              data-field="notes"
+              label={labels.failureNotes}
+              value={failureForm.notes}
+              onchange={handleFailureField}
+            ></lightning-textarea>
+            <div class="slds-m-top_small">
+              <lightning-button
+                class="elogix-cancel-form"
+                label={labels.cancel}
+                onclick={handleCancelForm}
+              ></lightning-button>
+              <lightning-button
+                class="elogix-save-failure slds-m-left_x-small"
+                variant="destructive"
+                label={labels.save}
+                disabled={isWorking}
+                onclick={handleSaveFailure}
+              ></lightning-button>
+            </div>
+          </div>
+        </template>
+
+        <template lwc:if={hasProofs}>
+          <h3
+            class="slds-text-heading_small slds-m-top_medium slds-m-bottom_x-small"
+          >
+            {labels.proofs}
+          </h3>
+          <ul class="slds-has-dividers_bottom-space">
+            <template for:each={proofRows} for:item="proof">
+              <li key={proof.Id} class="slds-item elogix-proof">
+                <div class="slds-grid slds-grid_align-spread">
+                  <div>
+                    <p><strong>{proof.Receiver_Name__c}</strong></p>
+                    <p class="slds-text-body_small slds-text-color_weak">
+                      <lightning-formatted-date-time
+                        value={proof.Received_Date__c}
+                        year="numeric"
+                        month="short"
+                        day="2-digit"
+                        hour="2-digit"
+                        minute="2-digit"
+                      ></lightning-formatted-date-time>
+                    </p>
+                    <template lwc:if={proof.verifiedBy}>
+                      <c-status-badge
+                        status="Verified"
+                        label={proof.verifiedBy}
+                      ></c-status-badge>
+                    </template>
+                  </div>
+                  <template lwc:if={proof.canVerifyRow}>
+                    <lightning-button
+                      class="elogix-verify"
+                      data-id={proof.Id}
+                      label={labels.verify}
+                      disabled={isWorking}
+                      onclick={handleVerify}
+                    ></lightning-button>
+                  </template>
+                </div>
+              </li>
+            </template>
+          </ul>
+        </template>
+      </template>
+    </div>
+  </lightning-card>
+</template>

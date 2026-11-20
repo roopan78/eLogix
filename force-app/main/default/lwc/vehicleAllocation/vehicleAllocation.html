@@ -1,0 +1,143 @@
+<template>
+  <lightning-card title={labels.title} icon-name="custom:custom98">
+    <div class="slds-p-horizontal_medium">
+      <template lwc:if={isLoading}>
+        <c-loading-indicator size="small"></c-loading-indicator>
+      </template>
+      <template lwc:elseif={loadError}>
+        <div class="slds-text-color_error elogix-error" role="alert">
+          {loadError}
+        </div>
+      </template>
+      <template lwc:else>
+        <template lwc:if={hasAssignment}>
+          <div
+            class="slds-box slds-box_x-small slds-m-bottom_small elogix-assignment"
+          >
+            <div class="slds-grid slds-grid_align-spread">
+              <p>
+                <strong>{labels.vehicle}:</strong> {assignmentVehicle}
+                <span class="slds-p-left_small"
+                  ><strong>{labels.driver}:</strong> {assignmentDriver}</span
+                >
+              </p>
+              <c-status-badge status={assignment.Status__c}></c-status-badge>
+            </div>
+            <p class="slds-text-body_small slds-text-color_weak">
+              <lightning-formatted-date-time
+                value={assignment.Assignment_Start__c}
+                year="numeric"
+                month="short"
+                day="2-digit"
+                hour="2-digit"
+                minute="2-digit"
+              ></lightning-formatted-date-time>
+              <span aria-hidden="true"> – </span>
+              <lightning-formatted-date-time
+                value={assignment.Assignment_End__c}
+                year="numeric"
+                month="short"
+                day="2-digit"
+                hour="2-digit"
+                minute="2-digit"
+              ></lightning-formatted-date-time>
+            </p>
+          </div>
+        </template>
+        <template lwc:else>
+          <p
+            class="slds-m-bottom_small slds-text-color_weak elogix-not-allocated"
+          >
+            {labels.notAllocated}
+          </p>
+        </template>
+
+        <template lwc:if={showForm}>
+          <template lwc:if={hasCandidates}>
+            <lightning-combobox
+              class="elogix-vehicle"
+              label={labels.vehicle}
+              value={vehicleId}
+              options={vehicleOptions}
+              required
+              onchange={handleVehicle}
+            ></lightning-combobox>
+            <lightning-combobox
+              class="elogix-driver"
+              label={labels.driver}
+              value={driverId}
+              options={driverOptions}
+              required
+              onchange={handleDriver}
+            ></lightning-combobox>
+            <lightning-input
+              class="elogix-remarks"
+              label={labels.remarks}
+              value={remarks}
+              max-length="255"
+              onchange={handleRemarks}
+            ></lightning-input>
+            <p
+              class="slds-text-body_small slds-text-color_weak slds-m-top_x-small"
+            >
+              {labels.checkedOnSave}
+            </p>
+          </template>
+          <template lwc:else>
+            <p class="slds-text-color_weak elogix-no-candidates">
+              {labels.noCandidates}
+            </p>
+          </template>
+        </template>
+        <template lwc:if={showNoPermission}>
+          <p
+            class="slds-text-body_small slds-text-color_weak elogix-no-permission"
+          >
+            {labels.noPermission}
+          </p>
+        </template>
+
+        <div class="slds-m-top_small">
+          <template lwc:if={isWorking}>
+            <c-loading-indicator size="small"></c-loading-indicator>
+          </template>
+          <template lwc:if={showAllocate}>
+            <lightning-button
+              class="elogix-allocate"
+              variant="brand"
+              label={allocateLabel}
+              disabled={isSaveDisabled}
+              onclick={handleAllocate}
+            ></lightning-button>
+          </template>
+          <template lwc:if={showReallocate}>
+            <lightning-button
+              class="elogix-reallocate"
+              label={reallocateLabel}
+              disabled={isSaveDisabled}
+              onclick={handleReallocate}
+            ></lightning-button>
+          </template>
+          <template lwc:if={showRelease}>
+            <lightning-button
+              class="elogix-release slds-m-left_x-small"
+              variant="destructive-text"
+              label={releaseLabel}
+              disabled={isWorking}
+              onclick={handleRelease}
+            ></lightning-button>
+          </template>
+          <template lwc:if={showCorrect}>
+            <lightning-button
+              class="elogix-correct"
+              variant="brand"
+              label={correctLabel}
+              disabled={isSaveDisabled}
+              onclick={handleCorrect}
+            ></lightning-button>
+          </template>
+        </div>
+      </template>
+    </div>
+  </lightning-card>
+</template>
