@@ -1012,12 +1012,52 @@
     >{0} events are recorded automatically when the shipment status changes. Change the shipment status instead.</value>
     </labels>
     <labels>
+        <fullName>eLogix_UI_All_Statuses</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI All Statuses</shortDescription>
+        <value>All statuses</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Book_Shipment</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Book Shipment</shortDescription>
+        <value>Book a shipment</value>
+    </labels>
+    <labels>
         <fullName>eLogix_UI_Cancel</fullName>
         <categories>eLogix,UI</categories>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>eLogix UI Cancel</shortDescription>
         <value>Cancel</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Cancellation_Reason</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Cancellation Reason</shortDescription>
+        <value>Cancellation reason</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Change_Status</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Change Status</shortDescription>
+        <value>Change status</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Checked_On_Save</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Checked On Save</shortDescription>
+        <value>checked on save</value>
     </labels>
     <labels>
         <fullName>eLogix_UI_Confirm</fullName>
@@ -1028,12 +1068,37 @@
         <value>Confirm</value>
     </labels>
     <labels>
+        <fullName>eLogix_UI_Confirm_Status_Change</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Confirm Status Change</shortDescription>
+        <value>Move {0} from {1} to {2}?</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Delivery_Statuses_Note</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Delivery Statuses Note</shortDescription>
+        <value
+    >Out for Delivery, Delivered and Failed Delivery are set by the delivery actions.</value>
+    </labels>
+    <labels>
         <fullName>eLogix_UI_Error_Title</fullName>
         <categories>eLogix,UI</categories>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>eLogix UI Error Title</shortDescription>
         <value>Error</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Hold_Reason</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Hold Reason</shortDescription>
+        <value>Hold reason</value>
     </labels>
     <labels>
         <fullName>eLogix_UI_Loading</fullName>
@@ -1044,12 +1109,76 @@
         <value>Loading</value>
     </labels>
     <labels>
+        <fullName>eLogix_UI_New_Status</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI New Status</shortDescription>
+        <value>New status</value>
+    </labels>
+    <labels>
         <fullName>eLogix_UI_No_Records</fullName>
         <categories>eLogix,UI</categories>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>eLogix UI No Records</shortDescription>
         <value>No records to display.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_No_Shipments</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI No Shipments</shortDescription>
+        <value>No shipments match these filters.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_No_Status_Options</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI No Status Options</shortDescription>
+        <value>No status changes are available to you for this shipment.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_No_Tracking_Events</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI No Tracking Events</shortDescription>
+        <value>No tracking events yet.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Override</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Override</shortDescription>
+        <value>override</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Refresh</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Refresh</shortDescription>
+        <value>Refresh</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Request_Saved</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Request Saved</shortDescription>
+        <value>Shipment request saved as a draft.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Request_Submitted</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Request Submitted</shortDescription>
+        <value>Shipment request submitted for quotation.</value>
     </labels>
     <labels>
         <fullName>eLogix_UI_Retry</fullName>
@@ -1060,12 +1189,92 @@
         <value>Retry</value>
     </labels>
     <labels>
+        <fullName>eLogix_UI_Save_Draft</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Save Draft</shortDescription>
+        <value>Save as draft</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Search_Placeholder</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Search Placeholder</shortDescription>
+        <value>Number, origin or destination</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Search_Shipments</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Search Shipments</shortDescription>
+        <value>Search shipments</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Shipment_Details</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Shipment Details</shortDescription>
+        <value>Shipment details</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Shipments</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Shipments</shortDescription>
+        <value>Shipments</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Status</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Status</shortDescription>
+        <value>Status</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Status_Changed</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Status Changed</shortDescription>
+        <value>Status changed to {0}.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Status_Checked_On_Save</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Status Checked On Save</shortDescription>
+        <value>Checked when you save: {0}</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Submit_Request</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Submit Request</shortDescription>
+        <value>Submit request</value>
+    </labels>
+    <labels>
         <fullName>eLogix_UI_Success_Title</fullName>
         <categories>eLogix,UI</categories>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>eLogix UI Success Title</shortDescription>
         <value>Success</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_Tracking_History</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI Tracking History</shortDescription>
+        <value>Tracking history</value>
     </labels>
     <labels>
         <fullName>eLogix_UI_Unexpected_Error</fullName>
@@ -1075,6 +1284,14 @@
         <shortDescription>eLogix UI Unexpected Error</shortDescription>
         <value
     >Something went wrong. Try again, or contact your administrator if the problem continues.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_UI_View</fullName>
+        <categories>eLogix,UI</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix UI View</shortDescription>
+        <value>View</value>
     </labels>
     <labels>
         <fullName>eLogix_Unexpected_Error</fullName>

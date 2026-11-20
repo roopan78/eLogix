@@ -1,0 +1,114 @@
+<template>
+  <lightning-card title={labels.title} icon-name="custom:custom98">
+    <div slot="actions">
+      <c-status-badge status={status}></c-status-badge>
+    </div>
+    <div class="slds-p-horizontal_medium">
+      <lightning-record-view-form
+        record-id={recordId}
+        object-api-name="Shipment__c"
+      >
+        <div class="slds-grid slds-wrap slds-gutters_small">
+          <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+            <lightning-output-field
+              field-name="Customer__c"
+            ></lightning-output-field>
+            <lightning-output-field
+              field-name="Origin__c"
+            ></lightning-output-field>
+            <lightning-output-field
+              field-name="Destination__c"
+            ></lightning-output-field>
+            <lightning-output-field
+              field-name="Weight__c"
+            ></lightning-output-field>
+            <lightning-output-field
+              field-name="Distance__c"
+            ></lightning-output-field>
+            <lightning-output-field
+              field-name="Priority__c"
+            ></lightning-output-field>
+            <lightning-output-field
+              field-name="Freight_Amount__c"
+            ></lightning-output-field>
+          </div>
+          <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+            <lightning-output-field
+              field-name="Pickup_Date__c"
+            ></lightning-output-field>
+            <lightning-output-field
+              field-name="Expected_Delivery_Date__c"
+            ></lightning-output-field>
+            <lightning-output-field
+              field-name="Actual_Delivery_Date__c"
+            ></lightning-output-field>
+            <lightning-output-field
+              field-name="Vehicle__c"
+            ></lightning-output-field>
+            <lightning-output-field
+              field-name="Driver__c"
+            ></lightning-output-field>
+            <lightning-output-field
+              field-name="Latest_Location__c"
+            ></lightning-output-field>
+            <lightning-output-field
+              field-name="Latest_Tracking_Timestamp__c"
+            ></lightning-output-field>
+          </div>
+        </div>
+      </lightning-record-view-form>
+    </div>
+
+    <div class="slds-p-around_medium slds-border_top elogix-status-panel">
+      <h3 class="slds-text-heading_small slds-m-bottom_x-small">
+        {labels.changeStatus}
+      </h3>
+      <template lwc:if={isLoadingOptions}>
+        <c-loading-indicator size="small"></c-loading-indicator>
+      </template>
+      <template lwc:elseif={optionsError}>
+        <div class="slds-text-color_error elogix-options-error" role="alert">
+          {optionsError}
+        </div>
+      </template>
+      <template lwc:elseif={hasOptions}>
+        <div
+          class="slds-grid slds-wrap slds-grid_vertical-align-end slds-gutters_small"
+        >
+          <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3">
+            <lightning-combobox
+              class="elogix-status-select"
+              label={labels.newStatus}
+              value={selectedStatus}
+              options={comboboxOptions}
+              onchange={handleSelect}
+            ></lightning-combobox>
+          </div>
+          <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+            <lightning-button
+              class="elogix-change-status"
+              variant="brand"
+              label={labels.changeStatus}
+              disabled={isChangeDisabled}
+              onclick={handleChangeStatus}
+            ></lightning-button>
+          </div>
+        </div>
+        <template lwc:if={selectedNote}>
+          <p
+            class="slds-text-color_weak slds-m-top_x-small elogix-selected-note"
+            aria-live="polite"
+          >
+            {selectedNote}
+          </p>
+        </template>
+      </template>
+      <template lwc:else>
+        <p class="slds-text-color_weak elogix-no-options">{labels.noOptions}</p>
+      </template>
+      <p class="slds-text-body_small slds-text-color_weak slds-m-top_small">
+        {labels.deliveryNote}
+      </p>
+    </div>
+  </lightning-card>
+</template>

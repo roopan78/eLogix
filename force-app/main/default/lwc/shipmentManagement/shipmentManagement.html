@@ -1,0 +1,47 @@
+<template>
+  <lightning-card title={labels.title} icon-name="custom:custom98">
+    <lightning-button-icon
+      slot="actions"
+      class="elogix-refresh"
+      icon-name="utility:refresh"
+      alternative-text={labels.refresh}
+      title={labels.refresh}
+      onclick={handleRefresh}
+    ></lightning-button-icon>
+    <div
+      class="slds-p-horizontal_medium slds-grid slds-wrap slds-gutters_small"
+    >
+      <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+        <lightning-combobox
+          class="elogix-status-filter"
+          label={labels.status}
+          value={status}
+          options={statusOptions}
+          onchange={handleStatusChange}
+        ></lightning-combobox>
+      </div>
+      <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3">
+        <lightning-input
+          class="elogix-search"
+          type="search"
+          label={labels.search}
+          placeholder={labels.searchPlaceholder}
+          onchange={handleSearchChange}
+        ></lightning-input>
+      </div>
+    </div>
+    <div class="slds-p-around_medium">
+      <c-reusable-data-table
+        columns={columns}
+        records={records}
+        is-loading={isLoading}
+        error={error}
+        empty-message={labels.noShipments}
+        table-label={labels.title}
+        hide-checkbox-column
+        onrowaction={handleRowAction}
+        onretry={handleRefresh}
+      ></c-reusable-data-table>
+    </div>
+  </lightning-card>
+</template>

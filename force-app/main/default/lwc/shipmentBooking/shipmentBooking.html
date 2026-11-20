@@ -1,0 +1,87 @@
+<template>
+  <lightning-card title={labels.title} icon-name="custom:custom98">
+    <lightning-record-edit-form
+      object-api-name="Shipment_Request__c"
+      onsubmit={handleSubmit}
+      onsuccess={handleSuccess}
+      onerror={handleError}
+    >
+      <div class="slds-p-horizontal_medium">
+        <lightning-messages></lightning-messages>
+        <template lwc:if={isSaving}>
+          <c-loading-indicator size="small"></c-loading-indicator>
+        </template>
+        <div class="slds-grid slds-wrap slds-gutters_small">
+          <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+            <lightning-input-field
+              field-name="Customer__c"
+              value={customerId}
+              required
+            ></lightning-input-field>
+            <lightning-input-field
+              field-name="Business_Unit__c"
+              required
+            ></lightning-input-field>
+            <lightning-input-field
+              field-name="Route__c"
+            ></lightning-input-field>
+            <lightning-input-field
+              field-name="Origin__c"
+              required
+            ></lightning-input-field>
+            <lightning-input-field
+              field-name="Destination__c"
+              required
+            ></lightning-input-field>
+            <lightning-input-field
+              field-name="Cargo_Description__c"
+            ></lightning-input-field>
+          </div>
+          <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+            <lightning-input-field
+              field-name="Requested_Pickup_Date__c"
+              required
+            ></lightning-input-field>
+            <lightning-input-field
+              field-name="Expected_Delivery_Date__c"
+            ></lightning-input-field>
+            <lightning-input-field
+              field-name="Total_Weight__c"
+            ></lightning-input-field>
+            <lightning-input-field
+              field-name="Declared_Value__c"
+            ></lightning-input-field>
+            <lightning-input-field
+              field-name="Requested_Vehicle_Type__c"
+            ></lightning-input-field>
+            <lightning-input-field
+              field-name="Priority__c"
+            ></lightning-input-field>
+          </div>
+          <div class="slds-col slds-size_1-of-1">
+            <lightning-input-field
+              field-name="Special_Instructions__c"
+            ></lightning-input-field>
+          </div>
+        </div>
+      </div>
+      <div class="slds-p-around_medium slds-text-align_right">
+        <lightning-button
+          class="elogix-save-draft"
+          type="submit"
+          label={labels.saveDraft}
+          disabled={isSaving}
+          onclick={handleSaveDraft}
+        ></lightning-button>
+        <lightning-button
+          class="elogix-submit slds-m-left_x-small"
+          type="submit"
+          variant="brand"
+          label={labels.submit}
+          disabled={isSaving}
+          onclick={handleSubmitRequest}
+        ></lightning-button>
+      </div>
+    </lightning-record-edit-form>
+  </lightning-card>
+</template>
