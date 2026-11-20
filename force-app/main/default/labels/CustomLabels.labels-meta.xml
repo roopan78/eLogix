@@ -873,6 +873,14 @@
         <value>A shipment cannot move from {0} to {1}.</value>
     </labels>
     <labels>
+        <fullName>eLogix_Status_Use_Delivery_Actions</fullName>
+        <categories>eLogix,Shipment</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Status Use Delivery Actions</shortDescription>
+        <value>{0} is set by the delivery actions (start attempt, confirm delivery, record failure), not by a status change.</value>
+    </labels>
+    <labels>
         <fullName>eLogix_Tracking_Event_Failed</fullName>
         <categories>eLogix,Tracking</categories>
         <language>en_US</language>
