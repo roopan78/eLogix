@@ -167,6 +167,23 @@ Coverage of Phase 4 classes before the fixes:
 - `VehicleAssignmentDomain` 97.3%; `FleetAllocationService` 95.3%; `AllocationRequest` 88.9%; `FleetSelector` 87.4%.
 - Org-wide 97.1% (2,005 lines).
 
+## 7. Phase 5 scenarios (check-only validation `0Afg700000KXB1BCAX`: 229/229 tests, 28 new)
+
+| Scenario | Test(s) |
+|---|---|
+| Attempt, proof, file, confirmation; trip Active then Completed; repeat confirmation refused with no event | `DeliveryServiceTest.aDeliveryWithProofAndEvidenceCompletesTheTrip` |
+| Three failures on one trip, fourth attempt refused (D4); attempts numbered and keyed; no duplicate events; On Hold afterwards | `failedAttemptsRetryOnTheSameTripUpToTheLimit` |
+| Proof and evidence required; nothing half-saved; second-step failure rolled back for that record only | `confirmationNeedsAProofAndEvidenceAndIsAllOrNothing`, `aFailureInTheShipmentStepLeavesNoPartialUpdate` |
+| Duplicate requests, open attempt and proof already recorded | `duplicateRequestsAreRefused` |
+| Access; verification once, by the manager | `accessIsEnforced`, `aManagerVerifiesADeliveredProofOnce` |
+| Cancellation after dispatch (D2) | `cancellationAfterDispatchClosesTheAttemptAndCompletesTheTrip` |
+| Direct DML: numbering, keys, status and transition rules, Delivered checks, history lock, two-layer field protection | `DeliveryTriggerHandlerTest` (8) |
+| Shipment guards on direct DML and under override; guard fails closed outside the trigger | `shipmentDeliveryStatusesFollowTheAttempts`, `theDeliveryGuardFailsClosedOutsideTheShipmentTrigger` |
+| Evidence files: no delete, unlink or new version, even for an administrator; unrelated files untouched | `ProofEvidenceProtectionTest` (3) |
+| Revalidation at Dispatched; On Hold → In Transit activation; Damaged and Lost completion; Active trip holds its truck (D3); lock timeouts | `FleetLifecycleTest` (4) |
+| 200 shipments started, proved and confirmed in single calls | `DeliveryBulkTest` |
+| Event-key fix: the same transition repeated within one second gets its own event; positions contiguous per shipment; 50 shipments in bulk; re-fire of a save with an identity seen earlier in the same second writes nothing; legacy keys kept | `TrackingEventSequenceTest` (4); `DeliveryServiceTest.failedAttemptsRetryOnTheSameTripUpToTheLimit` (six events, alternating) |
+
 ## 4. How to run
 
 ```bash

@@ -41,9 +41,16 @@ public with sharing class VehicleAssignmentDomain {
     /** Shipment statuses in which a vehicle may be allocated, changed or released (Q9). */
     @TestVisible
     private static final Set<String> ALLOCATABLE_SHIPMENT_STATUSES = new Set<String>{ 'Confirmed', 'On Hold' };
-    /** Shipment statuses in which a Planned assignment may become Active (Phase 5 dispatch wiring). */
+    /**
+     * Phase 5: a Planned assignment becomes Active only once its shipment has been dispatched: through
+     * Ready for Dispatch to Dispatched, or the configured On Hold -> In Transit route. Both transitions
+     * pass the allocation guard, so the stored status proves a validated transition.
+     */
     @TestVisible
-    private static final Set<String> ACTIVATABLE_SHIPMENT_STATUSES = new Set<String>{ 'Ready for Dispatch', 'Dispatched' };
+    private static final Set<String> ACTIVATING_SHIPMENT_STATUSES = new Set<String>{ 'Dispatched', 'In Transit' };
+    /** Phase 5: an Active assignment is Completed only once its shipment's trip has ended (D2 includes Cancelled). */
+    @TestVisible
+    private static final Set<String> TRIP_ENDING_SHIPMENT_STATUSES = new Set<String>{ 'Delivered', 'Damaged', 'Lost', 'Return Initiated', 'Cancelled' };
     /**
      * Q9: statuses a shipment can hold before it is first dispatched. A status event to any other
      * status (Ready for Dispatch, Dispatched, In Transit and every later or exception status, including
@@ -226,7 +233,7 @@ public with sharing class VehicleAssignmentDomain {
                 return format(Label.eLogix_Fleet_Assignment_Locked, fromStatus, null);
             }
         }
-        if (!allowed && !isAutomaticRelease(assignment, previous, shipment)) {
+        if (!allowed && !isAutomaticRelease(assignment, previous, shipment) && !isAutomaticLifecycle(assignment, previous, shipment)) {
             return Label.eLogix_Fleet_Permission_Required;
         }
         // Once Active, the vehicle, driver and window are fixed; only completion may set the end.
@@ -235,10 +242,13 @@ public with sharing class VehicleAssignmentDomain {
             if (allocationChanged(assignment, previous) || (endChanged && !COMPLETED.equals(toStatus))) {
                 return format(Label.eLogix_Fleet_Assignment_Locked, ACTIVE, null);
             }
+            if (COMPLETED.equals(toStatus) && !TRIP_ENDING_SHIPMENT_STATUSES.contains(shipment?.Status__c)) {
+                return format(Label.eLogix_Fleet_Completion_Status, shipment?.Name, shipment?.Status__c);
+            }
         }
         if (PLANNED.equals(fromStatus)) {
             String shipmentStatus = shipment?.Status__c;
-            if (ACTIVE.equals(toStatus) && !ACTIVATABLE_SHIPMENT_STATUSES.contains(shipmentStatus)) {
+            if (ACTIVE.equals(toStatus) && !ACTIVATING_SHIPMENT_STATUSES.contains(shipmentStatus)) {
                 return format(Label.eLogix_Fleet_Activation_Status, shipment?.Name, shipmentStatus);
             }
             Boolean releasing = CANCELLED.equals(toStatus);
@@ -263,6 +273,28 @@ public with sharing class VehicleAssignmentDomain {
             assignment.Remarks__c == previous.Remarks__c &&
             shipment != null &&
             SHIPMENT_CANCELLED.equals(shipment.Status__c);
+    }
+
+    /**
+     * Phase 5: the automatic lifecycle, justified only by the stored shipment status that a validated
+     * transition produced, never by a caller-set value. Planned -> Active with nothing else changed
+     * while the shipment is Dispatched or In Transit; Active -> Completed, changing at most the actual
+     * end, once the shipment's trip has ended. Anything else still needs eLogix_Allocate_Fleet.
+     */
+    private static Boolean isAutomaticLifecycle(Vehicle_Assignment__c assignment, Vehicle_Assignment__c previous, Shipment__c shipment) {
+        if (shipment == null || allocationChanged(assignment, previous) || !sameText(assignment.Remarks__c, previous.Remarks__c)) {
+            return false;
+        }
+        Boolean activating =
+            PLANNED.equals(previous.Status__c) &&
+            ACTIVE.equals(assignment.Status__c) &&
+            !endChanged(assignment, previous) &&
+            ACTIVATING_SHIPMENT_STATUSES.contains(shipment.Status__c);
+        Boolean completing =
+            ACTIVE.equals(previous.Status__c) &&
+            COMPLETED.equals(assignment.Status__c) &&
+            TRIP_ENDING_SHIPMENT_STATUSES.contains(shipment.Status__c);
+        return activating || completing;
     }
 
     private static Boolean endChanged(Vehicle_Assignment__c assignment, Vehicle_Assignment__c previous) {
@@ -475,7 +507,9 @@ public with sharing class VehicleAssignmentDomain {
             current.Expected_Delivery_Date__c = shipment.Expected_Delivery_Date__c;
 
             VehicleAvailabilityService.Candidate candidate = candidateFor(assignment, current, candidates.size());
-            if (candidate.startAt != null && (candidate.startAt != assignment.Assignment_Start__c || candidate.endAt != assignment.Assignment_End__c)) {
+            // Phase 5 (D3): an Active trip is open-ended, so its planned window cannot go stale.
+            Boolean planned = !ACTIVE.equals(assignment.Status__c);
+            if (planned && candidate.startAt != null && (candidate.startAt != assignment.Assignment_Start__c || candidate.endAt != assignment.Assignment_End__c)) {
                 violations.put(
                     shipment.Id,
                     new VehicleAvailabilityService.Violation(ALLOCATION_INVALID, format(Label.eLogix_Fleet_Window_Changed, current.Name, null))

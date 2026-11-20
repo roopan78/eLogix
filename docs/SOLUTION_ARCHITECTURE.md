@@ -138,8 +138,9 @@ flowchart LR
     P1[Phase 1<br/>Metadata foundation<br/>DONE] --> P2[Phase 2<br/>Apex foundation +<br/>status policy + tracking<br/>DONE]
     P2 --> P3[Phase 3<br/>Pricing + quotation<br/>DONE]
     P2 --> P4[Phase 4<br/>Fleet allocation]
-    P3 --> P5[Phase 5<br/>Inventory, delivery,<br/>invoicing, payments + flows]
+    P3 --> P5[Phase 5<br/>Dispatch + delivery]
     P4 --> P5
+    P5 --> P5B[Phase 5B<br/>Inventory, invoicing,<br/>payments + flows]
     P5 --> P6[Phase 6<br/>Returns, claims,<br/>integration mocks, events]
     P2 --> P7[Phase 7<br/>LWCs]
     P5 --> P7

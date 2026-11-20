@@ -24,7 +24,10 @@ public with sharing class ShipmentAllocationGuard implements ShipmentStatusGuard
     private static final String READY_FOR_DISPATCH = 'Ready for Dispatch';
     @TestVisible
     private static final String IN_TRANSIT = 'In Transit';
-    private static final Set<String> GUARDED = new Set<String>{ READY_FOR_DISPATCH, IN_TRANSIT };
+    @TestVisible
+    private static final String DISPATCHED = 'Dispatched';
+    /** Phase 5: also revalidated at Dispatched, the moment the assignment becomes Active. */
+    private static final Set<String> GUARDED = new Set<String>{ READY_FOR_DISPATCH, DISPATCHED, IN_TRANSIT };
 
     public Set<String> targetStatuses() {
         return GUARDED.clone();

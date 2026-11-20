@@ -180,7 +180,9 @@ public with sharing class VehicleAvailabilityService {
             if (existing.Id != null && existing.Id == candidate.assignmentId) {
                 continue;
             }
-            if (!AssignmentWindow.overlaps(candidate.startAt, candidate.endAt, existing.Assignment_Start__c, existing.Assignment_End__c)) {
+            // Phase 5 (D3): an Active trip is open-ended until it is Completed.
+            Datetime existingEnd = 'Active'.equals(existing.Status__c) ? null : existing.Assignment_End__c;
+            if (!AssignmentWindow.overlaps(candidate.startAt, candidate.endAt, existing.Assignment_Start__c, existingEnd)) {
                 continue;
             }
             if (existing.Vehicle__c == candidate.vehicleId) {

@@ -155,9 +155,13 @@ private class FleetDispatchRulesTest {
         // In Transit event still locks the allocation.
         walk(shipments[1].Id, new List<String>{ 'On Hold', 'In Transit', 'On Hold' });
 
-        Assert.areEqual(lockedMessage(shipments[0].Id), reallocate(shipments[0].Id, vehicles[2].Id, drivers[0].Id).errors[0].message);
-        Assert.areEqual(lockedMessage(shipments[1].Id), reallocate(shipments[1].Id, vehicles[2].Id, drivers[1].Id).errors[0].message);
-        Assert.areEqual(2, [SELECT COUNT() FROM Vehicle_Assignment__c WHERE Status__c = 'Planned' AND Vehicle__c != :vehicles[2].Id]);
+        // Phase 5: once on the road (Dispatched or In Transit) the trip is Active, so there is no
+        // Planned assignment left to reallocate or release, and the Active one is frozen.
+        for (Integer i = 0; i < 2; i++) {
+            ServiceResult moved = reallocate(shipments[i].Id, vehicles[2].Id, drivers[i].Id);
+            Assert.areEqual(FleetAllocationService.NO_OPEN_ASSIGNMENT, moved.errors[0].code);
+        }
+        Assert.areEqual(2, [SELECT COUNT() FROM Vehicle_Assignment__c WHERE Status__c = 'Active' AND Vehicle__c != :vehicles[2].Id]);
     }
 
     @IsTest

@@ -146,7 +146,14 @@ private class VehicleAssignmentTriggerHandlerTest {
             update new Shipment__c(Id = shipments[2].Id, Status__c = 'Ready for Dispatch');
         }
         System.runAs(TestDataFactory.getUser(FLEET)) {
-            update new Vehicle_Assignment__c(Id = active.Id, Status__c = 'Active');
+            // Phase 5: not even the Fleet Manager can activate before dispatch.
+            Assert.isTrue(firstError(Database.update(new Vehicle_Assignment__c(Id = active.Id, Status__c = 'Active'), false)).contains('Dispatched or In Transit'));
+        }
+        System.runAs(TestDataFactory.getUser(OPS)) {
+            update new Shipment__c(Id = shipments[2].Id, Status__c = 'Dispatched'); // activates the assignment
+        }
+        Assert.areEqual('Active', [SELECT Status__c FROM Vehicle_Assignment__c WHERE Id = :active.Id].Status__c);
+        System.runAs(TestDataFactory.getUser(FLEET)) {
             Assert.isTrue(firstError(Database.update(new Vehicle_Assignment__c(Id = active.Id, Driver__c = relief.Id), false)).contains('Active'));
             Assert.isTrue(
                 firstError(Database.update(new Vehicle_Assignment__c(Id = active.Id, Assignment_End__c = System.now().addDays(30)), false)).contains('Active')
@@ -286,13 +293,11 @@ private class VehicleAssignmentTriggerHandlerTest {
         System.runAs(TestDataFactory.getUser(FLEET)) {
             insert assignment;
         }
+        // Phase 5: the trip is completed by the shipment lifecycle (here: lost in transit).
         System.runAs(TestDataFactory.getUser(OPS)) {
-            update new Shipment__c(Id = shipment.Id, Status__c = 'Ready for Dispatch');
-        }
-        System.runAs(TestDataFactory.getUser(FLEET)) {
-            FleetAllocationService service = new FleetAllocationService();
-            Assert.isTrue(service.activate(new List<Id>{ assignment.Id }).isSuccess);
-            Assert.isTrue(service.complete(new List<Id>{ assignment.Id }).isSuccess);
+            for (String status : new List<String>{ 'Ready for Dispatch', 'Dispatched', 'In Transit', 'Lost' }) {
+                update new Shipment__c(Id = shipment.Id, Status__c = status);
+            }
         }
 
         Database.DeleteResult adminDelete = Database.delete(assignment.Id, false);
@@ -329,10 +334,9 @@ private class VehicleAssignmentTriggerHandlerTest {
         }
         System.runAs(TestDataFactory.getUser(OPS)) {
             update new Shipment__c(Id = shipments[1].Id, Status__c = 'Ready for Dispatch');
+            update new Shipment__c(Id = shipments[1].Id, Status__c = 'Dispatched'); // Phase 5: activates it
         }
-        System.runAs(TestDataFactory.getUser(FLEET)) {
-            Assert.isTrue(new FleetAllocationService().activate(new List<Id>{ active.Id }).isSuccess);
-        }
+        Assert.areEqual('Active', [SELECT Status__c FROM Vehicle_Assignment__c WHERE Id = :active.Id].Status__c);
         Map<Id, String> names = new Map<Id, String>();
         for (Shipment__c shipment : [SELECT Id, Name FROM Shipment__c WHERE Id IN :shipments]) {
             names.put(shipment.Id, shipment.Name);

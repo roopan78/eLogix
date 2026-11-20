@@ -222,8 +222,14 @@ private class FleetCorrectionTest {
         step(shipments, new List<Integer>{ 2, 3, 4 }, 'In Transit');
         step(shipments, new List<Integer>{ 5 }, 'Confirmed');
         step(shipments, new List<Integer>{ 3 }, 'Delayed');
-        step(shipments, new List<Integer>{ 4 }, 'Out for Delivery');
-        step(shipments, new List<Integer>{ 4 }, 'Failed Delivery');
+        // Phase 5: Out for Delivery and Failed Delivery go through a delivery attempt.
+        System.runAs(TestDataFactory.getUser(OPS)) {
+            DeliveryService deliveries = new DeliveryService();
+            Assert.isTrue(deliveries.startAttempts(new List<Id>{ shipments[4].Id }).isSuccess);
+            Assert.isTrue(
+                deliveries.recordFailures(new List<DeliveryFailureRequest>{ new DeliveryFailureRequest(shipments[4].Id, 'Consignee Unavailable') }).isSuccess
+            );
+        }
 
         Test.startTest();
         for (Integer i = 0; i < 6; i++) {

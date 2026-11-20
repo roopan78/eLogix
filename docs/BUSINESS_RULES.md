@@ -88,6 +88,20 @@ The `Vehicle_Assignment__c` trigger enforces all fleet rules on every entry path
 | Assignment end after start | Validation rule | `VA_End_After_Start`, `VA_End_Required_When_Completed` | Live |
 | Capacity positive | Validation rule | `VEH_Capacity_Positive` | Live |
 
+## Dispatch and delivery rules (Phase 5)
+
+Details: [DELIVERY_IMPLEMENTATION.md](DELIVERY_IMPLEMENTATION.md). "Built (P5)" means implemented and check-only verified, not yet deployed.
+
+| Rule | Owner | Component | Status |
+|---|---|---|---|
+| The allocation is revalidated at Dispatched; the assignment becomes Active at Dispatched (or In Transit via On Hold) and Completed at Delivered, Damaged, Lost, Return Initiated or Cancelled; a failed delivery keeps it Active | Apex | `ShipmentAllocationGuard`, `FleetAllocationService.advanceAssignmentLifecycle` | Built (P5) |
+| An Active trip holds its vehicle and driver until Completed (D3) | Apex | `FleetSelector`, `VehicleAvailabilityService` | Built (P5) |
+| One open and at most one Delivered attempt per shipment; attempts only from In Transit, Delayed or Failed Delivery; at most `Max_Delivery_Attempts` (3, D4); numbered under the shipment lock with a unique key | Apex | `DeliveryDomain` | Built (P5) |
+| Delivered needs a proof of delivery with the receiver, the time received and (`POD_File_Required`, D5) an evidence file | Apex | `DeliveryDomain` | Built (P5) |
+| The shipment's Out for Delivery, Delivered and Failed Delivery match its latest attempt, also under override | Apex guard | `ShipmentDeliveryGuard` | Built (P5) |
+| Proofs are locked once their attempt closes, except a single verification by the verifier; evidence files cannot be deleted, unlinked or replaced; attempts, proofs, and shipments with proofs cannot be deleted | Apex | `ProofOfDeliveryDomain`, `ProofEvidenceProtection`, Delivery and POD triggers | Built (P5) |
+| Cancellation after dispatch closes the open attempt (Failed, Other) and completes the trip (D2) | Apex | `DeliveryService.closeAttemptsOfCancelledShipments` | Built (P5) |
+
 ## Warehouse rules
 
 | Rule | Owner | Component | Status |
@@ -95,7 +109,7 @@ The `Vehicle_Assignment__c` trigger enforces all fleet rules on every entry path
 | Stock cannot become negative | Validation rule (not bypassable) | `STK_Quantities_Not_Negative` | Live |
 | Reserved stock cannot exceed available | Validation rule (not bypassable) | `STK_Reserved_Within_Available` | Live, verified |
 | Stock changes only through movements, with an audit trail | Security + Apex | Quantity fields are protected (read-only for every role); `InventoryService` posts a `Stock_Movement__c` and applies it under lock; movements are immutable (`SM_Movements_Are_Immutable`) | Security and immutability live; service planned (P5) |
-| Dispatch must validate required inventory | Apex policy | Guard on `Ready for Dispatch → Dispatched` | Planned (P5) |
+| Dispatch must validate required inventory | Apex policy | Guard on `Ready for Dispatch → Dispatched` | Planned (Phase 5B, decision D1) |
 | Returns inspected before restocking | Validation rule + Apex | `RET_Inspection_Before_Resolution`; `ReturnService` posts `Return Restock` only after `Inspection Passed` | Rule live; service planned (P6) |
 
 ## Invoice and payment rules

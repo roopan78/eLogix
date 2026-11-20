@@ -45,21 +45,11 @@ public inherited sharing virtual class FleetSelector {
     /** "Object.OPERATION" of the trigger that is executing now, or null outside a trigger. */
     @TestVisible
     private static String currentTriggerContext() {
-        if (!Trigger.isExecuting || Trigger.operationType == null) {
-            return null;
-        }
-        List<SObject> records = Trigger.new != null ? Trigger.new : Trigger.old;
-        if (records == null) {
-            return null;
-        }
-        return String.valueOf(records.getSObjectType()) + '.' + Trigger.operationType.name();
+        return TriggerContext.current();
     }
 
     private static void requireContext(Set<String> permitted) {
-        String context = currentTriggerContext();
-        if (context == null || !permitted.contains(context)) {
-            throw new AuthorizationException(Label.eLogix_Access_Denied).withCode(ENFORCEMENT_TRIGGER_ONLY);
-        }
+        TriggerContext.require(permitted, ENFORCEMENT_TRIGGER_ONLY);
     }
 
     /* ---------------- enforcement reads (trigger context only, without sharing) ---------------- */
@@ -119,6 +109,15 @@ public inherited sharing virtual class FleetSelector {
     public List<Vehicle_Assignment__c> openAssignmentsOfShipments(Set<Id> shipmentIds) {
         requireContext(SHIPMENT_BEFORE_UPDATE_OR_DELETE);
         return ENFORCEMENT.openAssignmentsOfShipments(shipmentIds);
+    }
+
+    /**
+     * Planned and Active assignments of the given shipments, locked (Phase 5 automatic lifecycle:
+     * activation at dispatch, completion when the trip ends). Shipment after update only.
+     */
+    public virtual List<Vehicle_Assignment__c> lockOpenAssignmentsOfShipments(Set<Id> shipmentIds) {
+        requireContext(SHIPMENT_AFTER_UPDATE);
+        return ENFORCEMENT.lockOpenAssignmentsOfShipments(shipmentIds);
     }
 
     /** Planned assignments of the given shipments, locked (automatic release on cancellation, Q11). */
@@ -289,8 +288,10 @@ public inherited sharing virtual class FleetSelector {
         ) {
             Set<String> openStatuses = OPEN_STATUSES;
             Set<Id> excluded = excludeIds == null ? new Set<Id>() : excludeIds;
+            // Phase 5 (D3): an Active trip holds its vehicle and driver until it is Completed, so its
+            // planned end does not release them.
             return [
-                SELECT Id, Shipment__c, Vehicle__c, Driver__c, Assignment_Start__c, Assignment_End__c
+                SELECT Id, Shipment__c, Vehicle__c, Driver__c, Assignment_Start__c, Assignment_End__c, Status__c
                 FROM Vehicle_Assignment__c
                 WHERE
                     Status__c IN :openStatuses
@@ -300,7 +301,8 @@ public inherited sharing virtual class FleetSelector {
                     OR Driver__c IN :driverIds)
                     AND Assignment_Start__c < :toAt
                     AND (Assignment_End__c = NULL
-                    OR Assignment_End__c > :fromAt)))
+                    OR Assignment_End__c > :fromAt
+                    OR Status__c = 'Active')))
                 WITH SYSTEM_MODE
             ];
         }
@@ -345,6 +347,20 @@ public inherited sharing virtual class FleetSelector {
                 FROM Vehicle_Assignment__c
                 WHERE Shipment__c IN :shipmentIds AND Status__c IN :openStatuses
                 WITH SYSTEM_MODE
+            ];
+        }
+
+        public List<Vehicle_Assignment__c> lockOpenAssignmentsOfShipments(Set<Id> shipmentIds) {
+            if (shipmentIds == null || shipmentIds.isEmpty()) {
+                return new List<Vehicle_Assignment__c>();
+            }
+            Set<String> openStatuses = OPEN_STATUSES;
+            return [
+                SELECT Id, Shipment__c, Status__c, Assignment_Start__c
+                FROM Vehicle_Assignment__c
+                WHERE Shipment__c IN :shipmentIds AND Status__c IN :openStatuses
+                WITH SYSTEM_MODE
+                FOR UPDATE
             ];
         }
 

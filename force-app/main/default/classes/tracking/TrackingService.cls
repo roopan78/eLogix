@@ -6,12 +6,15 @@
  * from the before-trigger, and suppresses duplicates with a deterministic Event_Key__c checked
  * against the database (docs/APEX_ARCHITECTURE.md section 5.3):
  *
- *     {shipmentId}:{FromCode}>{ToCode}:{version}
+ *     {shipmentId}:{FromCode}>{ToCode}:{version}:{sequence}
  *
  * FromCode and ToCode are status names without spaces (NEW on creation). version is the old
- * record's SystemModstamp in milliseconds, or CreatedDate on insert. A workflow re-fire produces
- * the same key and finds the event already written; a partial-success retry runs after rollback,
- * finds nothing and writes it again. If an event cannot be written, the shipment row gets an
+ * record's SystemModstamp in milliseconds, or CreatedDate on insert; together they identify the
+ * save. sequence (added in Phase 5) is the event's position in the shipment's status history, so
+ * the same transition repeated within one second (the stored precision of SystemModstamp) still
+ * gets a key of its own. A workflow re-fire finds its first event as the latest one and writes
+ * nothing; a partial-success retry runs after rollback, finds nothing and writes it again. Keys
+ * stored before Phase 5 have no sequence and are left as they are. If an event cannot be written, the shipment row gets an
  * error, so the status change is rolled back with it.
  *
  * recordEvents is the API for operational events (location updates, hub scans) from users and
@@ -89,33 +92,61 @@ public with sharing class TrackingService {
             ? policy.evaluateCreation(newList)
             : policy.evaluateStatusChanges(newList, oldById);
 
-        Map<String, Tracking_Event__c> eventByKey = new Map<String, Tracking_Event__c>();
-        Map<String, Shipment__c> shipmentByKey = new Map<String, Shipment__c>();
+        // The save identity ({shipmentId}:{From}>{To}:{previous version}) is the same when a workflow or
+        // flow field update re-fires this trigger for the same save, but it can repeat for two real
+        // saves of the same transition within one second (SystemModstamp is stored to the second).
+        // The key therefore adds a per-shipment sequence: the event's position in the shipment's
+        // status history. With T status events stored, a save writes identity:(T+1). A re-fire of the
+        // same save finds its first event as the latest one, identity:T, and writes nothing; a later
+        // save of the same transition comes after at least one other transition, so its key differs.
+        // Sequences are taken while this save holds the shipment's row lock, so concurrent saves of a
+        // shipment cannot share one, and the unique index on Event_Key__c remains the backstop.
+        // Stored keys are never rewritten.
+        Map<Id, String> identityByShipment = new Map<Id, String>();
+        Map<Id, ShipmentStatusPolicy.Decision> decisionByShipment = new Map<Id, ShipmentStatusPolicy.Decision>();
         for (ShipmentStatusPolicy.Decision decision : decisions) {
             if (!decision.requiresTrackingEvent()) {
                 continue;
             }
             Shipment__c record = newList[decision.index];
             Shipment__c previous = oldById == null ? null : oldById.get(record.Id);
-            String key = statusEventKey(record, previous, decision);
-            eventByKey.put(key, buildStatusEvent(record, decision, key));
-            shipmentByKey.put(key, record);
+            identityByShipment.put(record.Id, statusEventKey(record, previous, decision));
+            decisionByShipment.put(record.Id, decision);
         }
-        if (eventByKey.isEmpty()) {
+        if (identityByShipment.isEmpty()) {
             return;
         }
 
-        Set<String> existingKeys = new TrackingEventSelector().selectExistingKeys(eventByKey.keySet());
+        TrackingEventSelector selector = new TrackingEventSelector();
+        Map<Id, Integer> stored = selector.countStatusEvents(identityByShipment.keySet());
+        Map<Id, String> recordedKey = new Map<Id, String>();
+        Map<Id, String> nextKey = new Map<Id, String>();
+        Set<String> candidates = new Set<String>();
+        for (Id shipmentId : identityByShipment.keySet()) {
+            Integer count = stored.containsKey(shipmentId) ? stored.get(shipmentId) : 0;
+            String identity = identityByShipment.get(shipmentId);
+            recordedKey.put(shipmentId, sequencedKey(identity, count));
+            nextKey.put(shipmentId, sequencedKey(identity, count + 1));
+            candidates.add(recordedKey.get(shipmentId));
+            candidates.add(nextKey.get(shipmentId));
+        }
+        Set<String> existingKeys = selector.selectExistingKeys(candidates);
         List<Tracking_Event__c> toInsert = new List<Tracking_Event__c>();
         List<Shipment__c> owners = new List<Shipment__c>();
-        for (String key : eventByKey.keySet()) {
-            if (!existingKeys.contains(key)) {
-                toInsert.add(eventByKey.get(key));
-                owners.add(shipmentByKey.get(key));
+        Integer skipped = 0;
+        for (Id shipmentId : identityByShipment.keySet()) {
+            String key = nextKey.get(shipmentId);
+            if (existingKeys.contains(recordedKey.get(shipmentId)) || existingKeys.contains(key)) {
+                skipped++; // this save's event is already recorded (re-fired trigger)
+                continue;
             }
+            ShipmentStatusPolicy.Decision decision = decisionByShipment.get(shipmentId);
+            Shipment__c record = newList[decision.index];
+            toInsert.add(buildStatusEvent(record, decision, key));
+            owners.add(record);
         }
         if (toInsert.isEmpty()) {
-            Logger.debug(STATUS_CONTEXT, 'All ' + existingKeys.size() + ' status events already recorded; nothing to insert.');
+            Logger.debug(STATUS_CONTEXT, 'All ' + skipped + ' status events already recorded; nothing to insert.');
             return;
         }
 
@@ -128,9 +159,10 @@ public with sharing class TrackingService {
                 Logger.error(STATUS_CONTEXT, 'Tracking event insert failed for shipment ' + owners[i].Id + ' status=' + firstStatusCode(results[i]), null);
             }
         }
-        Logger.debug(STATUS_CONTEXT, 'inserted=' + (toInsert.size() - failures) + ' skipped=' + existingKeys.size() + ' failed=' + failures);
+        Logger.debug(STATUS_CONTEXT, 'inserted=' + (toInsert.size() - failures) + ' skipped=' + skipped + ' failed=' + failures);
     }
 
+    /** The save identity: {shipmentId}:{FromCode}>{ToCode}:{version} (the whole key before Phase 5). */
     @TestVisible
     private static String statusEventKey(Shipment__c record, Shipment__c previous, ShipmentStatusPolicy.Decision decision) {
         Datetime version = previous == null ? record.CreatedDate : previous.SystemModstamp;
@@ -141,6 +173,12 @@ public with sharing class TrackingService {
             statusCode(decision.toStatus) +
             ':' +
             (version == null ? '0' : String.valueOf(version.getTime()));
+    }
+
+    /** The stored key: the save identity followed by the per-shipment sequence. */
+    @TestVisible
+    private static String sequencedKey(String identity, Integer sequence) {
+        return identity + ':' + sequence;
     }
 
     private static String statusCode(String status) {

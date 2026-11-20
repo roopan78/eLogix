@@ -22,23 +22,35 @@
    | `Event_Timestamp__c` | Now |
    | `Source__c` | `Manual` when the request came from Lightning, Visualforce or a quick action (`Request.getQuiddity()`); otherwise `Apex Service` |
    | `Remarks__c` | Override note, then `Hold_Reason__c` or `Cancellation_Reason__c`, truncated to 255 characters |
-   | `Event_Key__c` | `{shipmentId}:{FromCode}>{ToCode}:{version}` |
+   | `Event_Key__c` | `{shipmentId}:{FromCode}>{ToCode}:{version}:{sequence}` (sequence added in Phase 5) |
 
-3. One query: which keys already exist (`TrackingEventSelector.selectExistingKeys`). Existing keys are skipped.
+3. Two queries:
+   - `TrackingEventSelector.countStatusEvents`, an aggregate count of each shipment's status events (since Phase 5);
+   - `selectExistingKeys`, which of the candidate keys already exist.
+
+   A key that already exists is skipped.
 4. One insert (`allOrNone=false`, system mode). A failed row puts `addError(eLogix_Tracking_Event_Failed)` on its shipment, so **the status change and its history commit together or not at all**.
 
 ### Event key
 
 - `FromCode` and `ToCode` are status names without spaces. `NEW` stands for creation.
-- `version` is the old record's `SystemModstamp` in milliseconds (`CreatedDate` on insert).
-- Example (illustrative Id): `a0Eg700000AbCdEFGH:Draft>Requested:1763538000123`. The maximum length is 66 characters, within `Event_Key__c` (80, unique, external ID).
+- `version` is the old record's `SystemModstamp` in milliseconds (`CreatedDate` on insert). `{shipmentId}:{FromCode}>{ToCode}:{version}` is the **save identity**: the same on a re-fired trigger for the same save.
+- `sequence` (Phase 5): the event's position in the shipment's status history.
+  - **The rule:** with T status events stored, the save writes `identity:(T+1)`, unless `identity:T` already exists.
+  - **Why it is needed:** `SystemModstamp` is stored to the second, so two real saves of the same transition within one second share an identity.
+  - **A re-fired save:** its first run's event is necessarily the latest one, so `identity:T` exists and it writes nothing.
+  - **Two real saves:** the second comes after at least one other transition, so its key differs.
+  - **Concurrency:** sequences are taken while the save holds the shipment's row lock, so concurrent saves of one shipment cannot share one. The unique index is the backstop.
+- Example (illustrative Id): `a0Eg700000AbCdEFGH:Draft>Requested:1763538000123:2`. The maximum length is about 73 characters, within `Event_Key__c` (80, unique, external ID).
+- **History:** keys stored before Phase 5 have no sequence and are never rewritten. They count in the history like any other status event.
 
 | Situation | What happens | Verified by |
 |---|---|---|
 | Workflow or flow field update re-fires the trigger (`Trigger.old` is still the original) | Same key; the existing event is found and skipped | `reEntryWithTheSameVersionDoesNotDuplicateEvents`. Through the real trigger: the test stores the event the re-fire would compute, then saves the change. |
 | Partial-success retry (the platform rolls back and re-runs triggers; statics survive) | Same key; the first attempt was rolled back, so the key is absent and the event is written again | The normal write path with a deterministic key: `allowedTransitionRecordsOneEvent`, `partialSuccessKeepsValidRowsAndRejectsInvalidOnes` |
 | Two different transitions in one transaction | Different from/to codes, different keys | `consecutiveTransitionsInOneTransactionEachRecordAnEvent` |
-| The same from → to pair twice in one transaction from the same version | One event (accepted edge case, decision D6) | Not reachable from the UI |
+| The same from → to pair repeated within one second (one transaction, or fast automation) | **One event per save** (Phase 5: the sequence differs). Previously one event in total, accepted as decision D6. | `TrackingEventSequenceTest`, `DeliveryServiceTest.failedAttemptsRetryOnTheSameTripUpToTheLimit` |
+| Re-fire of a save whose identity already occurred earlier in the same second | Same key; skipped | `TrackingEventSequenceTest.aReFiredSaveStillWritesNothing` |
 
 ## 2. Operational events (API)
 

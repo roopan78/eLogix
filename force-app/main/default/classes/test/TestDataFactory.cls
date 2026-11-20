@@ -209,6 +209,47 @@ public class TestDataFactory {
         return shipments;
     }
 
+    /* ------------------------------------------------------------------ */
+    /* Phase 5: delivery builders                                          */
+    /* ------------------------------------------------------------------ */
+
+    /**
+     * As the running user (who needs fleet allocation and delivery access, for example a Logistics
+     * Manager or an administrator): one shipment taken through the real lifecycle to Delivered, with a
+     * proof of delivery and an evidence file, on the given compliant vehicle and driver.
+     */
+    public static Shipment__c deliveredShipment(Id customerId, Id businessUnitId, Id vehicleId, Id driverId) {
+        Shipment__c shipment = confirmedShipments(1, customerId, businessUnitId)[0];
+        // Delivered today: the actual delivery date cannot be before pickup (SHP_Actual_Delivery_After_Pickup).
+        shipment.Pickup_Date__c = Date.today();
+        update new Shipment__c(Id = shipment.Id, Pickup_Date__c = Date.today());
+        ServiceResult allocated = new FleetAllocationService().allocate(new List<AllocationRequest>{ new AllocationRequest(shipment.Id, vehicleId, driverId) });
+        Assert.isTrue(allocated.isSuccess, 'Allocation: ' + allocated.errors);
+        advance(new List<Shipment__c>{ shipment }, new List<String>{ 'Ready for Dispatch', 'Dispatched', 'In Transit' });
+        DeliveryService deliveries = new DeliveryService();
+        ServiceResult started = deliveries.startAttempts(new List<Id>{ shipment.Id });
+        Assert.isTrue(started.isSuccess, 'Attempt: ' + started.errors);
+        ServiceResult proof = deliveries.recordProofs(new List<ProofOfDeliveryRequest>{ new ProofOfDeliveryRequest(shipment.Id, 'Receiver at the dock') });
+        Assert.isTrue(proof.isSuccess, 'Proof: ' + proof.errors);
+        attachEvidence(proof.recordIds[0]);
+        ServiceResult confirmed = deliveries.confirmDeliveries(new List<Id>{ shipment.Id });
+        Assert.isTrue(confirmed.isSuccess, 'Confirmation: ' + confirmed.errors);
+        shipment.Status__c = 'Delivered';
+        return shipment;
+    }
+
+    /** Uploads a small evidence file to a proof of delivery; returns its ContentDocumentId. */
+    public static Id attachEvidence(Id proofId) {
+        ContentVersion version = new ContentVersion(
+            Title = 'Delivery photo',
+            PathOnClient = 'delivery-photo.jpg',
+            VersionData = Blob.valueOf('evidence'),
+            FirstPublishLocationId = proofId
+        );
+        insert version;
+        return [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :version.Id].ContentDocumentId;
+    }
+
     /** A Standard Platform User with the given eLogix permission sets, inserted without mixed-DML errors. */
     public static User createUser(String lastName, List<String> permissionSetNames) {
         Profile platformProfile = [SELECT Id FROM Profile WHERE Name = 'Standard Platform User' LIMIT 1];

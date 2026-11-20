@@ -754,6 +754,11 @@ export const OBJECTS = [
                 'Other'
             ]),
             num('Attempt_Number__c', 2, 0, { default: 1 }),
+            text('Attempt_Key__c', 80, {
+                unique: true,
+                externalId: true,
+                helpText: 'Shipment Id and attempt number, set by the system. The unique index makes a duplicate attempt number impossible, even under concurrency.'
+            }),
             lookup('Delivered_By__c', 'Driver__c', 'Deliveries', { relationshipLabel: 'Deliveries' }),
             formula('Is_Successful__c', 'Checkbox', 'ISPICKVAL(Delivery_Status__c, "Delivered")'),
             area('Failure_Notes__c')

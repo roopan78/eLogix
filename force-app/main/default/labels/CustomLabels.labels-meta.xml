@@ -9,12 +9,228 @@
         <value>You do not have access to perform this operation.</value>
     </labels>
     <labels>
+        <fullName>eLogix_Delivery_Already_Delivered</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Already Delivered</shortDescription>
+        <value>Shipment {0} has already been delivered.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Attempt_Immutable</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Attempt Immutable</shortDescription>
+        <value>The shipment, attempt number and attempt key of a delivery attempt cannot change.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Attempt_Locked</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Attempt Locked</shortDescription>
+        <value>This delivery attempt is {0} and can no longer change.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Attempt_Not_Allowed</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Attempt Not Allowed</shortDescription>
+        <value>A delivery attempt can start only while shipment {0} is In Transit, Delayed or Failed Delivery.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Attempt_Open</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Attempt Open</shortDescription>
+        <value>Shipment {0} already has an open delivery attempt.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Busy</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Busy</shortDescription>
+        <value>The shipment or its delivery is being updated by someone else right now. Try again in a moment.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Cancelled_Notes</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Cancelled Notes</shortDescription>
+        <value>Closed automatically because the shipment was cancelled after dispatch.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Confirm_Status</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Confirm Status</shortDescription>
+        <value>Shipment {0} must be Out for Delivery for its delivery attempt to be confirmed.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Delete_Not_Allowed</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Delete Not Allowed</shortDescription>
+        <value>Delivery attempts and proofs of delivery are delivery history and cannot be deleted.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Duplicate_Request</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Duplicate Request</shortDescription>
+        <value>Shipment {0} appears more than once in this request.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Evidence_Protected</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Evidence Protected</shortDescription>
+        <value>This file is evidence for a proof of delivery and cannot be deleted, unlinked or replaced. Add another file instead.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Evidence_Required</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Evidence Required</shortDescription>
+        <value>Attach at least one file to the proof of delivery before confirming the delivery.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Fail_Status</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Fail Status</shortDescription>
+        <value>Shipment {0} must be Out for Delivery for its delivery attempt to fail.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Guard_Delivered</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Guard Delivered</shortDescription>
+        <value>Confirm the delivery attempt with its proof of delivery before the shipment is marked Delivered.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Guard_Failed</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Guard Failed</shortDescription>
+        <value>Record the failed delivery attempt and its reason before the shipment is marked Failed Delivery.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Guard_Open_Attempt</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Guard Open Attempt</shortDescription>
+        <value>Start a delivery attempt before the shipment goes out for delivery.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Max_Attempts</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Max Attempts</shortDescription>
+        <value>Shipment {0} has used all {1} delivery attempts. Put it On Hold or start a return.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_No_Open_Attempt</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery No Open Attempt</shortDescription>
+        <value>Shipment {0} has no open delivery attempt.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Not_Completed</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Not Completed</shortDescription>
+        <value>The delivery update could not be completed because of conflicting changes. Try again.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Pod_Attempt_Closed</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Pod Attempt Closed</shortDescription>
+        <value>A proof of delivery can be recorded only for an open delivery attempt.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Pod_Exists</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Pod Exists</shortDescription>
+        <value>This delivery attempt already has a proof of delivery.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Pod_Locked</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Pod Locked</shortDescription>
+        <value>This proof of delivery belongs to a closed delivery attempt and can no longer change, except to record its verification.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Pod_Required</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Pod Required</shortDescription>
+        <value>Record the proof of delivery, with the receiver and the time received, before confirming the delivery.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Pod_Verification</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Pod Verification</shortDescription>
+        <value>A proof of delivery is verified once, after the delivery is confirmed, and only in the name of the verifying user.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Shipment_Delete_Blocked</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Shipment Delete Blocked</shortDescription>
+        <value>Shipment {0} has proof of delivery records and cannot be deleted.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Status_Not_Supported</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Status Not Supported</shortDescription>
+        <value>Delivery status {0} is not supported. Use Scheduled, Out for Delivery, Delivered or Failed.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Delivery_Transition_Not_Allowed</fullName>
+        <categories>eLogix,Delivery</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Delivery Transition Not Allowed</shortDescription>
+        <value>A delivery attempt cannot move from {0} to {1}.</value>
+    </labels>
+    <labels>
         <fullName>eLogix_Fleet_Activation_Status</fullName>
         <categories>eLogix,Fleet</categories>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>eLogix Fleet Activation Status</shortDescription>
-        <value>Shipment {0} is {1}. An assignment can become Active only when its shipment is Ready for Dispatch or Dispatched.</value>
+        <value>Shipment {0} is {1}. An assignment becomes Active only when its shipment is Dispatched or In Transit.</value>
     </labels>
     <labels>
         <fullName>eLogix_Fleet_Allocation_Invalid</fullName>
@@ -63,6 +279,14 @@
         <protected>false</protected>
         <shortDescription>eLogix Fleet Capacity Insufficient</shortDescription>
         <value>Vehicle {0} carries up to {1} kg, but the shipment weighs {2} kg.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Completion_Status</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Completion Status</shortDescription>
+        <value>Shipment {0} is {1}. An assignment is completed only when its shipment is Delivered, Damaged, Lost, Return Initiated or Cancelled.</value>
     </labels>
     <labels>
         <fullName>eLogix_Fleet_Correction_Event</fullName>
@@ -127,6 +351,14 @@
         <protected>false</protected>
         <shortDescription>eLogix Fleet Driver Unavailable</shortDescription>
         <value>Driver {0} is {1} and cannot be allocated.</value>
+    </labels>
+    <labels>
+        <fullName>eLogix_Fleet_Lifecycle_Failed</fullName>
+        <categories>eLogix,Fleet</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>eLogix Fleet Lifecycle Failed</shortDescription>
+        <value>The vehicle assignment of shipment {0} could not follow its status change: {1}</value>
     </labels>
     <labels>
         <fullName>eLogix_Fleet_Locked_After_Dispatch</fullName>

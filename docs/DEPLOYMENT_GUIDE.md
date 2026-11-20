@@ -86,6 +86,16 @@ sf apex run --file scripts/apex/verify-phase4-fleet.apex --target-org eLogixDev
 
 Expect `SMOKE SUMMARY checks=20 failures=0`.
 
+```bash
+# Verify Phase 5 in three rolled-back scripts (run as a user with eLogix_Administrator).
+# Each runs one full shipment lifecycle in its own transaction, within the 100-query limit for anonymous Apex.
+sf apex run --file scripts/apex/verify-phase5-delivery.apex --target-org eLogixDev      # checks=11: dispatch, confirmation, evidence
+sf apex run --file scripts/apex/verify-phase5-retries.apex --target-org eLogixDev       # checks=7: failed attempts, retries, guards
+sf apex run --file scripts/apex/verify-phase5-cancellation.apex --target-org eLogixDev  # checks=3: Active trips (D3), cancellation after dispatch (D2)
+```
+
+Expect `failures=0` in each `SMOKE SUMMARY` (11, 7 and 3 checks). Since Phase 5, check 8 of the Phase 2 script verifies that the override cannot reach Delivered without a confirmed delivery; the delivery-reversal rule moved to the Phase 5 script.
+
 For data seeding (Phase 9), temporarily assign `eLogix_Data_Migration` so that historical dates pass the bypassable validation rules. Remove it afterwards:
 
 ```bash
@@ -127,6 +137,9 @@ Do this **before** loading demo data. Changing the currency locale relabels amou
 | 2026-11-19 19:32 | `0Afg700000KSngbCAD` | **Check-only** Phase 4: fleet allocation Apex, `VehicleAssignmentTrigger`, 27 labels, expiry formulas and list views, `Document_Expiry_Warning_Days`, Fleet Manager Shipment View All (`RunLocalTests`: 173/173 passed, coverage 97.1%) | 765 / 765 | Superseded by the audit-fix validation below |
 | 2026-11-20 02:47 | `0Afg700000KVnYnCAL` | **Check-only** Phase 4 with the six audit fixes: no delete or undelete of assignments, dispatch-history lock, Ready for Dispatch revalidation, lock timeouts at every lock point, trigger-only enforcement reads; Fleet Manager without Delete on Vehicle Assignment; 4 labels (`RunLocalTests`: 190/190 passed, coverage 96.6%) | 771 / 771 | Superseded by the round 3 validation below |
 | 2026-11-20 03:44 | `0Afg700000KW0hJCAT` | **Check-only** Phase 4 round 3: controlled correction of dispatched allocations (`eLogix_Correct_Dispatched_Allocation`, `Vehicle_Assignment__c.Correction_Reason__c`), allocation guard on In Transit, shipment deletion blocked while an open assignment exists (`ShipmentTrigger` before delete); 5 new labels and 2 reworded (`RunLocalTests`: 201/201 passed, coverage 96.4%) | 779 / 779 | Validated, **not deployed** |
+| 2026-11-20 03:48 | `0Afg700000KW3FNCA1` | Phase 4 quick deploy of the validation above | 779 / 779 | **Deployed** |
+| 2026-11-20 07:08 | `0Afg700000KWxZJCA1` | **Check-only** Phase 5: dispatch and delivery (delivery and POD triggers, file protection, trip lifecycle, `DeliveryService`), 2 settings, attempt key, 30 labels (`RunLocalTests`: 225/225 passed, coverage 95.33%) | 833 / 833 | Superseded by the event-key fix below |
+| 2026-11-20 07:59 | `0Afg700000KXB1BCAX` | **Check-only** Phase 5 with the tracking event-key fix (per-shipment sequence in `TrackingService` status-event keys) (`RunLocalTests`: 229/229 passed, coverage 95.34%) | 834 / 834 | Validated, **not deployed** |
 
 Each deploy was preceded by a successful `--dry-run`. The only dry-run failure in the phase was the first one: `isNavAutomaticallyAdded` is not a valid `CustomApplication` element. The writer now copies the element set of a Lightning app retrieved from the org.
 

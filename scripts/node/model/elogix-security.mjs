@@ -45,6 +45,11 @@ export const PROTECTED_FIELDS = {
     // accepts only with eLogix_Correct_Dispatched_Allocation.
     'Vehicle_Assignment__c.Correction_Reason__c': [LOGISTICS_MANAGER],
 
+    // Phase 5: numbered and linked by the delivery triggers, never by users.
+    'Delivery__c.Attempt_Number__c': [],
+    'Delivery__c.Attempt_Key__c': [],
+    'Proof_of_Delivery__c.Shipment__c': [],
+
     'Freight_Charge__c.Approved_By__c': [],
 
     'Inventory__c.Available_Quantity__c': [],

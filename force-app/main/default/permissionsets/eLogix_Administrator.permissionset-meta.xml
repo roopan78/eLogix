@@ -935,6 +935,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Delivery__c.Attempt_Key__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Delivery__c.Delivered_By__c</field>
         <readable>true</readable>
     </fieldPermissions>

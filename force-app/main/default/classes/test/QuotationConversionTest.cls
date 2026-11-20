@@ -210,7 +210,7 @@ private class QuotationConversionTest {
 
         Assert.isTrue(result.isSuccess, String.valueOf(result.errors));
         Assert.areEqual(200, result.recordIds.size());
-        Assert.areEqual(4, queries, 'Quotations, existing shipments, the request lock (A3), and the tracking-key check in ShipmentTrigger.');
+        Assert.areEqual(5, queries, 'Quotations, existing shipments, the request lock (A3), and the two tracking-key queries in ShipmentTrigger (Phase 5 sequence).');
         Assert.areEqual(3, dml, 'Shipment insert, tracking insert, request update.');
         Assert.areEqual(200, [SELECT COUNT() FROM Shipment__c WHERE Status__c = 'Quoted']);
         Assert.areEqual(200, [SELECT COUNT() FROM Tracking_Event__c WHERE Event_Type__c = 'Created']);

@@ -89,7 +89,9 @@ stateDiagram-v2
    | `Confirmed` | `Item_Count__c ≥ 1` (`ShipmentItemsRequiredGuard`; applies under override too) | **Live (P2)** |
    | `Ready for Dispatch` | `Vehicle__c` and `Driver__c` matching an open `Vehicle_Assignment__c` that still passes every allocation rule (`ShipmentAllocationGuard`; applies under override too) | **Built (P4)**: check-only verified, deployment pending |
 | `In Transit` | Same allocation check, from any source status (Dispatched, Delayed, or the configured On Hold → In Transit) | **Built (P4, round 3)**: check-only verified, deployment pending |
-   | `Dispatched` | Warehouse-sourced items have reserved stock | P5 (not enforced until then, decision D3) |
+   | `Dispatched` | Allocation revalidated (as at Ready for Dispatch); the assignment becomes Active | **Built (P5)** |
+   | `Dispatched` | Warehouse-sourced items have reserved stock | Phase 5B (decision D1) |
+   | `Out for Delivery` / `Delivered` / `Failed Delivery` | Match the shipment's latest delivery attempt: open / Delivered (with proof and evidence) / Failed (`ShipmentDeliveryGuard`; applies under override too) | **Built (P5)** |
    | `Delivered` | `Actual_Delivery_Date__c` set (validation rule `SHP_Delivered_Requires_Delivery_Date`, live) | Live |
    | `On Hold` / `Cancelled` | Reason entered (validation rules, live) | Live |
 6. **Tracking event mapping.** `Tracking_Event_Type__c` on each transition record names the event type. It equals the target status, except that creation writes `Created`. The event's `From_Status__c` and `To_Status__c` fields record the actual change.

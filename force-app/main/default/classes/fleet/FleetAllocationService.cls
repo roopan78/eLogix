@@ -17,6 +17,10 @@ public with sharing class FleetAllocationService {
     public static final String CANCELLATION_TRIGGER_ONLY = 'FLEET_CANCELLATION_TRIGGER_ONLY';
     public static final String DELETION_TRIGGER_ONLY = 'FLEET_SHIPMENT_DELETION_TRIGGER_ONLY';
     public static final String CORRECTION_REASON_REQUIRED = 'CORRECTION_REASON_REQUIRED';
+    public static final String LIFECYCLE_TRIGGER_ONLY = 'FLEET_LIFECYCLE_TRIGGER_ONLY';
+    /** Phase 5: shipment statuses that start the trip, and those that end it. */
+    private static final Set<String> ACTIVATING = new Set<String>{ 'Dispatched', 'In Transit' };
+    private static final Set<String> TRIP_ENDING = new Set<String>{ 'Delivered', 'Damaged', 'Lost', 'Return Initiated', 'Cancelled' };
     private static final String SHIPMENT_CANCELLED = 'Cancelled';
     private static final String CONTEXT = 'FleetAllocationService';
 
@@ -154,15 +158,9 @@ public with sharing class FleetAllocationService {
         return changeStatus(assignmentIds, VehicleAssignmentDomain.PLANNED, VehicleAssignmentDomain.CANCELLED);
     }
 
-    /** Planned -> Active, for the Phase 5 dispatch wiring (shipment Ready for Dispatch or Dispatched). */
-    public ServiceResult activate(List<Id> assignmentIds) {
-        return changeStatus(assignmentIds, VehicleAssignmentDomain.PLANNED, VehicleAssignmentDomain.ACTIVE);
-    }
-
-    /** Active -> Completed, recording the actual end; the shipment keeps its vehicle and driver as history. */
-    public ServiceResult complete(List<Id> assignmentIds) {
-        return changeStatus(assignmentIds, VehicleAssignmentDomain.ACTIVE, VehicleAssignmentDomain.COMPLETED);
-    }
+    // Phase 5: activation and completion are no longer service operations. They follow the shipment's
+    // validated status transitions automatically (advanceAssignmentLifecycle), so they cannot drift
+    // from the shipment.
 
     private ServiceResult changeStatus(List<Id> assignmentIds, String fromStatus, String toStatus) {
         ServiceResult result = new ServiceResult();
@@ -187,7 +185,6 @@ public with sharing class FleetAllocationService {
 
         List<Vehicle_Assignment__c> updates = new List<Vehicle_Assignment__c>();
         List<Integer> indexes = new List<Integer>();
-        Datetime now = System.now();
         for (Integer i = 0; i < assignmentIds.size(); i++) {
             Vehicle_Assignment__c assignment = assignments.get(assignmentIds[i]);
             if (assignment == null) {
@@ -203,11 +200,7 @@ public with sharing class FleetAllocationService {
                 );
                 continue;
             }
-            Vehicle_Assignment__c change = new Vehicle_Assignment__c(Id = assignment.Id, Status__c = toStatus);
-            if (VehicleAssignmentDomain.COMPLETED.equals(toStatus) && now > assignment.Assignment_Start__c) {
-                change.Assignment_End__c = now;
-            }
-            updates.add(change);
+            updates.add(new Vehicle_Assignment__c(Id = assignment.Id, Status__c = toStatus));
             indexes.add(i);
         }
         recordResults(result, Database.update(updates, false, AccessLevel.USER_MODE), indexes, assignmentIds);
@@ -317,6 +310,79 @@ public with sharing class FleetAllocationService {
         for (Id shipmentId : blocked) {
             Shipment__c shipment = deleting.get(shipmentId);
             shipment.addError(String.format(Label.eLogix_Fleet_Shipment_Delete_Blocked, new List<Object>{ shipment.Name }));
+        }
+    }
+
+    /**
+     * Phase 5: the assignment lifecycle follows the shipment. Shipment after update only, for the
+     * shipments whose status changed in this save:
+     *   into Dispatched or In Transit         its Planned assignment becomes Active;
+     *   into Delivered, Damaged, Lost,        its Active assignment becomes Completed, with the actual
+     *   Return Initiated or Cancelled (D2)    end recorded (when it is after the planned start).
+     * Failed Delivery keeps the trip Active. Locks the assignments after the shipment (the cancellation
+     * order). Writes in system mode because the user moving the shipment (Operations) does not hold
+     * eLogix_Allocate_Fleet; the assignment trigger accepts these two changes only because the stored
+     * shipment status justifies them (VehicleAssignmentDomain.isAutomaticLifecycle). Stateless, so a
+     * re-fired trigger finds nothing left to do. A failure refuses the shipment's save.
+     */
+    public void advanceAssignmentLifecycle() {
+        if (!isShipmentUpdateTrigger(false)) {
+            throw new AuthorizationException(Label.eLogix_Access_Denied).withCode(LIFECYCLE_TRIGGER_ONLY);
+        }
+        Map<Id, Shipment__c> changed = new Map<Id, Shipment__c>();
+        Map<Id, Shipment__c> oldById = (Map<Id, Shipment__c>) Trigger.oldMap;
+        for (Shipment__c shipment : (List<Shipment__c>) Trigger.new) {
+            Boolean statusChanged = shipment.Status__c != oldById.get(shipment.Id).Status__c;
+            if (statusChanged && (ACTIVATING.contains(shipment.Status__c) || TRIP_ENDING.contains(shipment.Status__c))) {
+                changed.put(shipment.Id, shipment);
+            }
+        }
+        if (changed.isEmpty()) {
+            return;
+        }
+        List<Vehicle_Assignment__c> open;
+        try {
+            open = selector.lockOpenAssignmentsOfShipments(changed.keySet());
+        } catch (QueryException e) {
+            if (!VehicleAssignmentDomain.isLockTimeout(e)) {
+                throw e;
+            }
+            for (Shipment__c shipment : changed.values()) {
+                shipment.addError(Label.eLogix_Fleet_Busy);
+            }
+            return;
+        }
+        Datetime now = System.now();
+        List<Vehicle_Assignment__c> updates = new List<Vehicle_Assignment__c>();
+        List<Id> owners = new List<Id>();
+        for (Vehicle_Assignment__c assignment : open) {
+            String shipmentStatus = changed.get(assignment.Shipment__c).Status__c;
+            if (VehicleAssignmentDomain.PLANNED.equals(assignment.Status__c) && ACTIVATING.contains(shipmentStatus)) {
+                updates.add(new Vehicle_Assignment__c(Id = assignment.Id, Status__c = VehicleAssignmentDomain.ACTIVE));
+                owners.add(assignment.Shipment__c);
+            } else if (VehicleAssignmentDomain.ACTIVE.equals(assignment.Status__c) && TRIP_ENDING.contains(shipmentStatus)) {
+                Vehicle_Assignment__c change = new Vehicle_Assignment__c(Id = assignment.Id, Status__c = VehicleAssignmentDomain.COMPLETED);
+                if (assignment.Assignment_Start__c == null || now > assignment.Assignment_Start__c) {
+                    change.Assignment_End__c = now;
+                }
+                updates.add(change);
+                owners.add(assignment.Shipment__c);
+            }
+        }
+        if (updates.isEmpty()) {
+            return;
+        }
+        List<Database.SaveResult> results = Database.update(updates, false, AccessLevel.SYSTEM_MODE);
+        for (Integer i = 0; i < results.size(); i++) {
+            if (!results[i].isSuccess()) {
+                Database.Error error = results[i].getErrors()[0];
+                Shipment__c shipment = changed.get(owners[i]);
+                shipment.addError(
+                    VehicleAssignmentDomain.isLockTimeout(error)
+                        ? Label.eLogix_Fleet_Busy
+                        : String.format(Label.eLogix_Fleet_Lifecycle_Failed, new List<Object>{ shipment.Name, error.getMessage() })
+                );
+            }
         }
     }
 

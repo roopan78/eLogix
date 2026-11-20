@@ -50,6 +50,13 @@
   - **Verification scripts:** Phase 1 19/19, Phase 2 12/12, Phase 3 19/19.
 - **Found during validation:** enforcement reads applied the caller's sharing, so the quoted-vehicle-type rule was skipped for a Fleet Manager. Fixed with a `without sharing` reader; the test now proves the precondition.
 
+## 2d. Phase 5 results (2026-11-20, `eLogixDev`, check-only)
+
+- **Apex tests:** 225 of 225 passed in validation `0Afg700000KWxZJCA1`, 24 of them new; coverage 95.33%. Scenarios are in [APEX_TEST_MATRIX.md](APEX_TEST_MATRIX.md) section 7.
+- **Earlier tests changed (test data only):** one Phase 2 test now builds a real delivery, because guards apply under override; Phase 4 tests drive the lifecycle through shipment statuses.
+- **Verification scripts against the Phase 4 org:** Phase 1 19/19, Phase 3 19/19, Phase 4 20/20, Phase 2 11/12 (the changed check needs Phase 5 deployed). The Phase 5 script runs after deployment.
+- **Event-key fix (validation `0Afg700000KXB1BCAX`, 229/229, coverage 95.34%):** status-event keys carry a per-shipment sequence, so the same transition repeated within one second is recorded once per save. Re-fired triggers still record nothing twice. Tests: `TrackingEventSequenceTest` (4).
+
 ## 3. Phase 1 results (2026-11-19, `eLogixDev`)
 
 **Model validation.** It passes. Three deliberately injected faults (an unknown cross-object field, a misspelled picklist value and a broken View All dependency) were each reported by the validator.

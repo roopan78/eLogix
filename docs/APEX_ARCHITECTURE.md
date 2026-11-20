@@ -233,7 +233,7 @@ sequenceDiagram
 ```
 
 - **No state passes from before to after.** The after-trigger recomputes decisions from `Trigger.old` and `Trigger.new`. CMDT reads and `FeatureManagement` cost no SOQL.
-- **Event key** (deterministic, at most 66 characters): `{shipmentId}:{FromCode}>{ToCode}:{version}`.
+- **Event key** (deterministic, at most about 73 characters): `{shipmentId}:{FromCode}>{ToCode}:{version}:{sequence}`. The sequence was added in Phase 5 and resolves D6; see [TRACKING_IMPLEMENTATION.md](TRACKING_IMPLEMENTATION.md).
   - `FromCode` and `ToCode` are the status names without spaces; `NEW` stands for creation.
   - `version` is the old record's `SystemModstamp` in milliseconds, or `CreatedDate` in milliseconds on insert.
   - A workflow re-fire or partial-success retry produces the same key. Retries run after rollback, so the existing-key query finds nothing and the event is recreated. Re-fires within the same save find the existing event and skip it.
@@ -348,7 +348,7 @@ Rules: no `SeeAllData`; `Assert` class; tests that exercise permissions run as t
 | D3 | Vehicle/driver and inventory guards                                                                  | Defer to Phases 4 and 5, where the allocation and stock services that set those values exist. Until then, Confirmed → Ready for Dispatch is not guarded. The guard interface makes adding them a one-class change.                                      |
 | D4 | Persistent application log                                                                           | **Not in Phase 2.** `Logger` writes to the debug log. Business audit is covered by tracking events and field history. A persisted log object would change the Phase 1 data model and use scarce storage (5 MB), so it would need its own review. |
 | D5 | Seed data in advanced statuses (Phase 9)                                                             | Seed user holds the override permission; seeded shipments get an `Exception` event, or the seed walks real transitions. To be decided in Phase 9. No bypass switch is added now.                                                                       |
-| D6 | Known edge case                                                                                      | The same from → to pair applied twice to one shipment within a single Apex transaction, from identical `SystemModstamp` versions, records one event. This cannot happen through the UI.                                                               |
+| D6 | Known edge case                                                                                      | The same from → to pair applied twice to one shipment within a single Apex transaction, from identical `SystemModstamp` versions, records one event. This cannot happen through the UI. **Resolved in Phase 5** by the per-shipment sequence in the key.                                                               |
 | D7 | Implementation approach                                                                              | Implement it myself in one pass (no subagents), dry-run, then one deploy with `RunLocalTests`. Commit only after your approval.                                                                                                                        |
 
 ## 11. Implementation notes and deviations from the approved text

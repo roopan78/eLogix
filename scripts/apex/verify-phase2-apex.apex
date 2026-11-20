@@ -97,13 +97,13 @@ try {
     update overridden;
     smoke.check('override records an Exception event', smoke.lastEventType(overridden.Id) == 'Exception', smoke.lastEventType(overridden.Id));
 
+    // Since Phase 5, Delivered needs a confirmed delivery attempt with its proof of delivery, and the
+    // override cannot skip a guard. (The delivery-reversal hard rule is verified by the Phase 5 script.)
     Shipment__c delivered = shipments[2];
     delivered.Status__c = 'Delivered';
     delivered.Actual_Delivery_Date__c = Date.today().addDays(2);
-    update delivered;
-    delivered.Status__c = 'Dispatched';
-    Database.SaveResult reverse = Database.update(delivered, false);
-    smoke.check('override cannot reverse a delivery', !reverse.isSuccess() && smoke.firstError(reverse).contains('delivered shipment'), smoke.firstError(reverse));
+    Database.SaveResult jump = Database.update(delivered, false);
+    smoke.check('override cannot reach Delivered without a confirmed delivery (guards apply under override)', !jump.isSuccess() && smoke.firstError(jump).contains('proof of delivery'), smoke.firstError(jump));
 
     Shipment__c unconfirmed = shipments[3];
     unconfirmed.Status__c = 'Confirmed';

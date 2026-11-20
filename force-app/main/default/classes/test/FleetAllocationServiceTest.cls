@@ -317,18 +317,20 @@ private class FleetAllocationServiceTest {
         Driver__c driver = drivers(1)[0];
         Id assignmentId = allocate(shipment.Id, vehicle.Id, driver.Id).recordIds[0];
 
-        System.runAs(TestDataFactory.getUser(FLEET)) {
-            ServiceResult early = new FleetAllocationService().activate(new List<Id>{ assignmentId });
-            Assert.isTrue(early.errors[0].message.contains('Ready for Dispatch or Dispatched'), early.errors[0].message);
-        }
+        // Phase 5: the lifecycle follows the shipment. Planned until dispatch, Active on the road,
+        // Completed when the trip ends.
         Assert.isNull(move(shipment, 'Ready for Dispatch'));
+        Assert.areEqual('Planned', [SELECT Status__c FROM Vehicle_Assignment__c WHERE Id = :assignmentId].Status__c);
+        Assert.isNull(move(shipment, 'Dispatched'));
+        Assert.areEqual('Active', [SELECT Status__c FROM Vehicle_Assignment__c WHERE Id = :assignmentId].Status__c);
+        Assert.isNull(move(shipment, 'In Transit'));
         System.runAs(TestDataFactory.getUser(FLEET)) {
             FleetAllocationService service = new FleetAllocationService();
-            Assert.isTrue(service.activate(new List<Id>{ assignmentId }).isSuccess);
             Assert.areEqual(FleetAllocationService.STATUS_NOT_ALLOWED, service.release(new List<Id>{ assignmentId }).errors[0].code, 'Active cannot be released.');
-            Assert.isTrue(service.complete(new List<Id>{ assignmentId }).isSuccess);
-            Assert.areEqual(FleetAllocationService.STATUS_NOT_ALLOWED, service.complete(new List<Id>{ assignmentId }).errors[0].code, 'Completed is terminal.');
+            Database.SaveResult early = Database.update(new Vehicle_Assignment__c(Id = assignmentId, Status__c = 'Completed'), false);
+            Assert.isTrue(early.getErrors()[0].getMessage().contains('completed only when its shipment'), 'No completion while the trip is on the road.');
         }
+        Assert.isNull(move(shipment, 'Lost'));
 
         Vehicle_Assignment__c completed = [SELECT Status__c, Assignment_Start__c, Assignment_End__c FROM Vehicle_Assignment__c WHERE Id = :assignmentId];
         Assert.areEqual('Completed', completed.Status__c);

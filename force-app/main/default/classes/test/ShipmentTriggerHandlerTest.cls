@@ -64,7 +64,7 @@ private class ShipmentTriggerHandlerTest {
             Assert.isNull(events[0].From_Status__c);
             Assert.areEqual('Draft', events[0].To_Status__c);
             Assert.areEqual(TrackingService.SOURCE_APEX, events[0].Source__c);
-            Assert.areEqual(saved.Id + ':NEW>Draft:' + saved.CreatedDate.getTime(), events[0].Event_Key__c);
+            Assert.areEqual(saved.Id + ':NEW>Draft:' + saved.CreatedDate.getTime() + ':1', events[0].Event_Key__c, 'Save identity plus the per-shipment sequence (Phase 5).');
             Assert.isNotNull(saved.Latest_Tracking_Timestamp__c, 'An allowed status change stamps the tracking summary.');
         }
     }
@@ -100,7 +100,7 @@ private class ShipmentTriggerHandlerTest {
             Assert.areEqual('Requested', event.Event_Type__c);
             Assert.areEqual('Draft', event.From_Status__c);
             Assert.areEqual('Requested', event.To_Status__c);
-            Assert.areEqual(shipment.Id + ':Draft>Requested:' + before.SystemModstamp.getTime(), event.Event_Key__c);
+            Assert.areEqual(shipment.Id + ':Draft>Requested:' + before.SystemModstamp.getTime() + ':2', event.Event_Key__c);
         }
     }
 
@@ -188,17 +188,24 @@ private class ShipmentTriggerHandlerTest {
 
     @IsTest
     static void overrideCannotReopenFinalStatusesOrReverseDelivery() {
+        // Phase 5: Delivered needs a confirmed delivery attempt even under the override (guards always
+        // apply), so the delivered shipment is taken through the real lifecycle. Vehicles and drivers
+        // are created by the running administrator; the Logistics Manager does the rest.
+        Account customer = [SELECT Id, Business_Unit__c FROM Account WHERE Customer_Code__c = 'CUST-TRG'];
+        Vehicle__c vehicle = TestDataFactory.buildVehicle('TN-TRG-1', customer.Business_Unit__c);
+        Driver__c driver = TestDataFactory.buildDriver('DL-TRG-1', customer.Business_Unit__c);
+        insert vehicle;
+        insert driver;
         System.runAs(TestDataFactory.getUser(MANAGER)) {
-            List<Shipment__c> shipments = build(2, 'Draft');
-            insert shipments;
-            Shipment__c cancelled = shipments[0];
-            Shipment__c delivered = shipments[1];
+            Shipment__c cancelled = build(1, 'Draft')[0];
+            insert cancelled;
+            Shipment__c delivered = TestDataFactory.deliveredShipment(customer.Id, customer.Business_Unit__c, vehicle.Id, driver.Id);
+            List<Shipment__c> shipments = new List<Shipment__c>{ cancelled, new Shipment__c(Id = delivered.Id) };
+            delivered = shipments[1];
 
             cancelled.Status__c = 'Cancelled';
             cancelled.Cancellation_Reason__c = 'Duplicate booking.';
-            delivered.Status__c = 'Delivered';
-            delivered.Actual_Delivery_Date__c = Date.today().addDays(2);
-            update shipments; // Draft -> Cancelled is configured; Draft -> Delivered uses the override.
+            update cancelled; // Draft -> Cancelled is configured.
 
             cancelled.Status__c = 'Draft';
             delivered.Status__c = 'Dispatched';
@@ -247,9 +254,9 @@ private class ShipmentTriggerHandlerTest {
             Integer updateDml = Limits.getDmlStatements() - dmlBefore;
             Test.stopTest();
 
-            Assert.areEqual(1, insertQueries, 'Insert: one query for existing event keys.');
+            Assert.areEqual(2, insertQueries, 'Insert: the status-event count (aggregate) and the identity keys (Phase 5 sequence).');
             Assert.areEqual(2, insertDml, 'Insert: the shipment insert plus one tracking insert.');
-            Assert.areEqual(1, updateQueries, 'Update: one query for existing event keys.');
+            Assert.areEqual(2, updateQueries, 'Update: the status-event count (aggregate) and the identity keys (Phase 5 sequence).');
             Assert.areEqual(2, updateDml, 'Update: the shipment update plus one tracking insert.');
             Assert.areEqual(200, [SELECT COUNT() FROM Tracking_Event__c WHERE Event_Type__c = 'Created']);
             Assert.areEqual(200, [SELECT COUNT() FROM Tracking_Event__c WHERE Event_Type__c = 'Requested']);
@@ -319,7 +326,8 @@ private class ShipmentTriggerHandlerTest {
             insert shipment;
         }
         Shipment__c original = reload(shipment.Id);
-        String expectedKey = original.Id + ':Draft>Requested:' + original.SystemModstamp.getTime();
+        // The key the first run of this save would write: its identity and sequence 2 (after Created).
+        String expectedKey = original.Id + ':Draft>Requested:' + original.SystemModstamp.getTime() + ':2';
         insert new Tracking_Event__c(
             Shipment__c = original.Id,
             Event_Type__c = 'Requested',

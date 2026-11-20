@@ -35,11 +35,17 @@ public with sharing class ShipmentTriggerHandler extends TriggerHandler {
     /** Phase 4 (audit round 3): a shipment with a Planned or Active vehicle assignment cannot be deleted. */
     protected override void beforeDelete() {
         new FleetAllocationService().rejectDeletionWithOpenAssignments();
+        // Phase 5 (D5): proof of delivery evidence keeps its shipment.
+        new DeliveryService().rejectDeletionWithProofOfDelivery();
     }
 
     protected override void afterUpdate() {
         new TrackingService().recordStatusEvents();
         // Phase 4 (Q11): ...and its Planned assignment is cancelled, freeing the vehicle and driver.
         new FleetAllocationService().releaseCancelledShipmentAssignments();
+        // Phase 5: Dispatched / In Transit activate the assignment; a trip-ending status completes it.
+        new FleetAllocationService().advanceAssignmentLifecycle();
+        // Phase 5 (D2): a shipment cancelled after dispatch closes its open delivery attempt.
+        new DeliveryService().closeAttemptsOfCancelledShipments();
     }
 }

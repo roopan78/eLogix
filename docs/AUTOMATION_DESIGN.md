@@ -21,9 +21,9 @@ Each behaviour has exactly one owner (CLAUDE.md section 10). Flows orchestrate; 
 |---|---|---|---|---|---|
 | Shipment Request Validation Flow | Record-triggered, before save | Request created or submitted | Defaults the business unit from the customer, the route from origin and destination, and the expected delivery date from route transit hours. Moves Draft → Submitted when complete. | Validation rules own the hard checks (active customer, dates, weight) | P5 |
 | Quotation Approval Flow | Record-triggered, after save | Quotation set to Pending Approval | Routes to users holding `eLogix_Approve_Quotation`; on decision calls `QuotationService.approve` / `reject` through invocables. Within-threshold quotations are already approved automatically by `QuotationService.submitForApproval` (Phase 3), so the Flow does not re-implement the threshold. | `QuotationDomain` verifies the stamp and threshold (live since P3) | P5 |
-| Delivery Completion Flow | Record-triggered, after save | Delivery status becomes Delivered | Calls `DeliveryService` to set the shipment Delivered and the actual delivery date, and to write tracking | `ShipmentStatusPolicy` | P5 |
-| Invoice Generation Flow | Record-triggered, after save | Shipment becomes Delivered | Calls `InvoiceService.generate` (idempotent through `Invoice_Key__c`) | `InvoiceService` | P5 |
-| Payment Status Update Flow | Record-triggered, after save | Payment Completed, Failed or Reversed | Recomputes invoice status (Partially Paid / Paid) through an invocable | `PaymentService` | P5 |
+| ~~Delivery Completion Flow~~ | - | - | **Dropped (Phase 5).** `DeliveryService.confirmDeliveries` and the Delivery trigger own this rule; a Flow would duplicate it. | `DeliveryService` | - |
+| Invoice Generation Flow | Record-triggered, after save | Shipment becomes Delivered | Calls `InvoiceService.generate` (idempotent through `Invoice_Key__c`) | `InvoiceService` | Phase 5B |
+| Payment Status Update Flow | Record-triggered, after save | Payment Completed, Failed or Reversed | Recomputes invoice status (Partially Paid / Paid) through an invocable | `PaymentService` | Phase 5B |
 | Return Approval Flow | Record-triggered, after save | Return Submitted | Routes to `eLogix_Approve_Return` holders; on approval calls `ReturnService.approve` | `RET_Approval_Before_Pickup` | P6 |
 | SLA Monitoring Flow | Scheduled, hourly | Active shipments past expected delivery plus `Delay_Grace_Hours` | Transitions to Delayed through the policy and notifies the owner | `ShipmentStatusPolicy` | P5 |
 

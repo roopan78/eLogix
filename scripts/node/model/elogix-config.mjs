@@ -240,6 +240,14 @@ export const METADATA_TYPES = [
             setting('Document_Expiry_Warning_Days', 'Document Expiry Warning Days', {
                 number: 30,
                 description: 'Vehicle documents and driver licences expiring within this many days are shown as Expiring Soon.'
+            }),
+            setting('Max_Delivery_Attempts', 'Max Delivery Attempts', {
+                number: 3,
+                description: 'Delivery attempts allowed per shipment. After the last failed attempt the shipment can only go On Hold or start a return.'
+            }),
+            setting('POD_File_Required', 'POD File Required', {
+                bool: true,
+                description: 'When true, a delivery can be confirmed only when its proof of delivery has at least one file attached.'
             })
         ]
     }

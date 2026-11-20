@@ -540,7 +540,8 @@ Standard object - eLogix custom fields only.
 | `Delivery_Date__c` | Datetime |  |  |
 | `Delivery_Status__c` | Picklist: Scheduled, Out for Delivery, Delivered, Partially Delivered, Failed, Rescheduled, Returned |  |  |
 | `Failure_Reason__c` | Picklist: Consignee Unavailable, Address Incorrect, Refused by Consignee, Payment Not Ready, Damaged Goods, Access Restricted, Other |  |  |
-| `Attempt_Number__c` | Number(2,0) |  |  |
+| `Attempt_Number__c` | Number(2,0) |  | Protected (service-written) |
+| `Attempt_Key__c` | Text(80) |  | Unique. External ID. Protected (service-written). Shipment Id and attempt number, set by the system. The unique index makes a duplicate attempt number impossible, even under concurrency. |
 | `Delivered_By__c` | Lookup → Driver__c |  |  |
 | `Is_Successful__c` | Formula(Checkbox): `ISPICKVAL(Delivery_Status__c, "Delivered")` |  |  |
 | `Failure_Notes__c` | Text Area(255) |  |  |
@@ -561,7 +562,7 @@ Standard object - eLogix custom fields only.
 | Field | Type | Req | Notes |
 |---|---|---|---|
 | `Delivery__c` | Master-Detail → Delivery__c | ✓ |  |
-| `Shipment__c` | Lookup → Shipment__c |  |  |
+| `Shipment__c` | Lookup → Shipment__c |  | Protected (service-written) |
 | `Receiver_Name__c` | Text(120) | ✓ |  |
 | `Signature_Reference__c` | Text(255) |  | ContentDocument reference or external signature capture id. |
 | `Received_Date__c` | Datetime |  |  |
@@ -827,4 +828,6 @@ Named configuration values for eLogix business rules. Read through a single sett
 | `Delay_Grace_Hours` |  | 6 | false | Hours past the expected delivery date before SLA monitoring flags a shipment as Delayed. |
 | `Default_Billing_Milestone` | On Delivery |  | false | Billing milestone used for automatically generated invoices. |
 | `Document_Expiry_Warning_Days` |  | 30 | false | Vehicle documents and driver licences expiring within this many days are shown as Expiring Soon. |
+| `Max_Delivery_Attempts` |  | 3 | false | Delivery attempts allowed per shipment. After the last failed attempt the shipment can only go On Hold or start a return. |
+| `POD_File_Required` |  |  | true | When true, a delivery can be confirmed only when its proof of delivery has at least one file attached. |
 
