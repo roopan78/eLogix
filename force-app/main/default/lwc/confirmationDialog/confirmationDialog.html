@@ -1,0 +1,31 @@
+<template>
+  <lightning-modal-header label={label}></lightning-modal-header>
+  <lightning-modal-body>
+    <template lwc:if={message}>
+      <p class="slds-text-body_regular elogix-message">{message}</p>
+    </template>
+    <template lwc:if={showReason}>
+      <lightning-textarea
+        class="slds-m-top_small"
+        label={reasonLabel}
+        value={reason}
+        required={reasonRequired}
+        max-length={reasonMaxLength}
+        onchange={handleReasonChange}
+      ></lightning-textarea>
+    </template>
+  </lightning-modal-body>
+  <lightning-modal-footer>
+    <lightning-button
+      class="elogix-cancel"
+      label={cancelText}
+      onclick={handleCancel}
+    ></lightning-button>
+    <lightning-button
+      class="elogix-confirm slds-m-left_x-small"
+      label={confirmText}
+      variant={confirmVariant}
+      onclick={handleConfirm}
+    ></lightning-button>
+  </lightning-modal-footer>
+</template>
