@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<SharingRules xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sharingOwnerRules>
+        <fullName>eLogix_Shipment_To_Operations_Executive</fullName>
+        <accessLevel>Edit</accessLevel>
+        <description
+    >All shipments owned by eLogix roles, read/write for the role. Object permissions still limit what the role can do.</description>
+        <label>eLogix Shipments to Operations Executive</label>
+        <sharedFrom>
+            <roleAndSubordinates>eLogix_Logistics_Manager</roleAndSubordinates>
+        </sharedFrom>
+        <sharedTo>
+            <role>eLogix_Operations_Executive</role>
+        </sharedTo>
+    </sharingOwnerRules>
+    <sharingOwnerRules>
+        <fullName>eLogix_Shipment_To_Fleet_Manager</fullName>
+        <accessLevel>Read</accessLevel>
+        <description
+    >All shipments owned by eLogix roles, read-only for the role. Object permissions still limit what the role can do.</description>
+        <label>eLogix Shipments to Fleet Manager</label>
+        <sharedFrom>
+            <roleAndSubordinates>eLogix_Logistics_Manager</roleAndSubordinates>
+        </sharedFrom>
+        <sharedTo>
+            <role>eLogix_Fleet_Manager</role>
+        </sharedTo>
+    </sharingOwnerRules>
+    <sharingOwnerRules>
+        <fullName>eLogix_Shipment_To_Warehouse_Manager</fullName>
+        <accessLevel>Read</accessLevel>
+        <description
+    >All shipments owned by eLogix roles, read-only for the role. Object permissions still limit what the role can do.</description>
+        <label>eLogix Shipments to Warehouse Manager</label>
+        <sharedFrom>
+            <roleAndSubordinates>eLogix_Logistics_Manager</roleAndSubordinates>
+        </sharedFrom>
+        <sharedTo>
+            <role>eLogix_Warehouse_Manager</role>
+        </sharedTo>
+    </sharingOwnerRules>
+    <sharingOwnerRules>
+        <fullName>eLogix_Shipment_To_Finance_Executive</fullName>
+        <accessLevel>Read</accessLevel>
+        <description
+    >All shipments owned by eLogix roles, read-only for the role. Object permissions still limit what the role can do.</description>
+        <label>eLogix Shipments to Finance Executive</label>
+        <sharedFrom>
+            <roleAndSubordinates>eLogix_Logistics_Manager</roleAndSubordinates>
+        </sharedFrom>
+        <sharedTo>
+            <role>eLogix_Finance_Executive</role>
+        </sharedTo>
+    </sharingOwnerRules>
+    <sharingOwnerRules>
+        <fullName>eLogix_Shipment_To_Customer_Service_Executive</fullName>
+        <accessLevel>Read</accessLevel>
+        <description
+    >All shipments owned by eLogix roles, read-only for the role. Object permissions still limit what the role can do.</description>
+        <label>eLogix Shipments to Customer Service Executive</label>
+        <sharedFrom>
+            <roleAndSubordinates>eLogix_Logistics_Manager</roleAndSubordinates>
+        </sharedFrom>
+        <sharedTo>
+            <role>eLogix_Customer_Service_Executive</role>
+        </sharedTo>
+    </sharingOwnerRules>
+</SharingRules>

@@ -34,7 +34,8 @@ import { GLOBAL_VALUE_SETS, OBJECTS, OBJECTS_BY_API } from './model/elogix-datam
 import { VALIDATION_RULES } from './model/elogix-validation.mjs';
 import { EXPERIENCE, APPLICATION, APP_PAGES, RECORD_PAGES } from './model/elogix-experience.mjs';
 import { CUSTOM_PERMISSIONS, METADATA_TYPES } from './model/elogix-config.mjs';
-import { ADMIN, CONTROLLER_ACCESS, PERMISSION_SETS, PROTECTED_FIELDS } from './model/elogix-security.mjs';
+import { ADMIN, CONTROLLER_ACCESS, PERMISSION_SETS, PROTECTED_FIELDS, ROLES, SHARING_RULES } from './model/elogix-security.mjs';
+import { emitSharing } from './lib/sharing-writer.mjs';
 import { existsSync } from 'node:fs';
 import { REPORT_TYPES, REPORTS, DASHBOARDS, REPORT_FOLDER, DASHBOARD_FOLDER } from './model/elogix-analytics.mjs';
 import { emitAnalytics, isStandardField } from './lib/analytics-writer.mjs';
@@ -313,6 +314,35 @@ for (const dashboard of DASHBOARDS) {
     }
 }
 
+/* ---- Phase 9: roles and sharing rules ---- */
+
+const roleNames = new Set(ROLES.map((r) => r.api));
+if (roleNames.size !== ROLES.length) fail('roles: API names must be unique');
+const topRoles = ROLES.filter((role) => !role.parent);
+if (topRoles.length !== 1 || topRoles[0]?.api !== 'eLogix_Logistics_Manager') {
+    fail('roles: Logistics Manager must be the only top-level eLogix role');
+}
+for (const role of ROLES) {
+    if (role.parent && !roleNames.has(role.parent)) fail(`role ${role.api}: unknown parent ${role.parent}`);
+    if (role.parent === role.api) fail(`role ${role.api}: a role cannot be its own parent`);
+    if (role.parent && role.parent !== 'eLogix_Logistics_Manager') fail(`role ${role.api}: eLogix roles must report directly to Logistics Manager`);
+}
+const sharingRuleNames = new Set();
+const phaseNineSharingObjects = new Set(['Shipment__c', 'Shipment_Request__c', 'Quotation__c']);
+for (const rule of SHARING_RULES) {
+    if (sharingRuleNames.has(rule.api)) fail(`sharing rule ${rule.api}: duplicate API name`);
+    sharingRuleNames.add(rule.api);
+    const object = OBJECTS_BY_API.get(rule.object);
+    if (!phaseNineSharingObjects.has(rule.object)) fail(`sharing rule ${rule.api}: object is outside the approved Phase 9 sharing scope`);
+    if (!object) fail(`sharing rule ${rule.api}: unknown object ${rule.object}`);
+    else if (object.sharingModel !== 'Private') fail(`sharing rule ${rule.api}: ${rule.object} is not Private, so the rule adds nothing`);
+    if (!roleNames.has(rule.toRole) || !roleNames.has(rule.fromRoleAndSubordinates)) fail(`sharing rule ${rule.api}: unknown role`);
+    if (!['Read', 'Edit'].includes(rule.access)) fail(`sharing rule ${rule.api}: access must be Read or Edit`);
+}
+for (const role of DASHBOARD_FOLDER.sharedToRoles ?? []) {
+    if (!roleNames.has(role)) fail(`dashboard folder: unknown role ${role}`);
+}
+
 /* ---- custom metadata ---- */
 
 const shipmentStatuses = gvsByApi.get('eLogix_Shipment_Status').values.map(valueName);
@@ -452,6 +482,8 @@ const counts = {
     'report types': REPORT_TYPES.length,
     reports: REPORTS.length,
     dashboards: DASHBOARDS.length,
+    roles: ROLES.length,
+    'sharing rules': SHARING_RULES.length,
     'global value sets': GLOBAL_VALUE_SETS.length,
     'custom metadata types': METADATA_TYPES.length,
     'custom metadata records': METADATA_TYPES.reduce((sum, t) => sum + t.records.length, 0),
@@ -539,6 +571,7 @@ if (dryRun) {
         ...emitCustomPermissions(CUSTOM_PERMISSIONS, sourceRoot),
         ...emitApplication(APPLICATION, sourceRoot),
         ...emitPages(APP_PAGES, RECORD_PAGES, sourceRoot),
+        ...emitSharing(ROLES, SHARING_RULES, sourceRoot),
         ...emitAnalytics(
             { reportTypes: REPORT_TYPES, reports: REPORTS, dashboards: DASHBOARDS, reportFolder: REPORT_FOLDER, dashboardFolder: DASHBOARD_FOLDER },
             sourceRoot,

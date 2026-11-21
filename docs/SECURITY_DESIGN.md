@@ -1,10 +1,10 @@
 # eLogix ERP - Security Design
 
-|                     |                                                                                                                                                          |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Live in `eLogixDev` | 9 permission sets, 10 custom permissions, org-wide defaults on all 26 objects, field-level security on every non-required field                          |
-| Source              | `scripts/node/model/elogix-security.mjs` (matrix) and `elogix-config.mjs` (custom permissions) → generated into `force-app/main/default/permissionsets/` |
-| Not yet deployed    | Role hierarchy and sharing rules (Phase 9), Apex sharing enforcement (from Phase 2)                                                                      |
+|                       |                                                                                                                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Live in `eLogixDev`   | 9 eLogix permission sets, custom permissions, private OWD on transactional objects, field-level security on non-required fields (Phase 1)                                  |
+| Local Phase 9 source  | `scripts/node/model/elogix-security.mjs` and `scripts/node/lib/sharing-writer.mjs` generate seven roles and nine owner-based sharing rules under `force-app/main/default/` |
+| Salesforce validation | Phase 9 role, sharing and permission changes are local and **not deployed or validated against Salesforce**.                                                               |
 
 ## 1. Principles
 
@@ -12,6 +12,7 @@
 2. **Field-level security is derived, not hand-listed.** Every non-required field of a readable object is readable. It is editable only when the role can create or edit the object, the field is not a formula or roll-up, and it is not a protected field the role isn't entitled to. Required and master-detail fields are always visible to anyone with object access (platform rule).
 3. **Sensitive operations need a custom permission**, checked in Apex with `FeatureManagement.checkPermission()` and in validation rules with `$Permission`.
 4. **Private by default for commercial and financial data.** Requests, quotations, shipments, invoices, returns and claims are Private. Master data is Public Read Only. External sharing is Private everywhere until Experience Cloud is introduced.
+5. **Business Unit isolation is a known production security gap.** `Business_Unit__c` lookups describe ownership context only. OWD, roles, sharing rules, services and tests do not filter or enforce access by Business Unit. Users with object and record access can see records across units. Phase 9 does not add a BU-sharing mechanism.
 
 ## 2. Org-wide defaults
 
@@ -59,7 +60,7 @@ Letters: **C**reate, **R**ead, **E**dit, **D**elete, **V**iew All, **M**odify Al
 
 The generator enforces the platform's permission dependencies at build time. Every grant includes Read. Delete requires Edit. Modify All requires Edit, Delete and View All. A detail object needs Read on its master, and View All or Modify All on the detail needs the same on the master. Contact needs Account.
 
-**Phase 8 analytics.** The eLogix Reports and eLogix Dashboards folders are shared View with all internal users. Reports run as the viewer (CRUD, FLS, sharing). Dashboards run as one fixed administrator, so their totals are org-wide for anyone who can open the folder; restricting the folder to manager roles is a Phase 9 task. Details: [ANALYTICS_IMPLEMENTATION.md](ANALYTICS_IMPLEMENTATION.md) section 5.
+**Phase 8 analytics.** The eLogix Reports folder is shared View with all internal users. Reports run as the viewer (CRUD, FLS, sharing). Dashboards run as one fixed administrator and show org-wide totals; the dashboard folder is restricted to Logistics Manager. Details: [ANALYTICS_IMPLEMENTATION.md](ANALYTICS_IMPLEMENTATION.md) section 5.
 
 **Phase 7 UI controllers.** Each role permission set gets Apex class access to a screen controller when it can read the screen's object (generated from `CONTROLLER_ACCESS`: Shipment, Quotation, Vehicle Assignment, Delivery, Tracking Event), and the Shipment, Fleet and Tracking Console tabs on the same basis. The controllers are thin, `with sharing`, read in user mode and delegate every write to the services, so the UI adds no access path. Details: [LWC_IMPLEMENTATION.md](LWC_IMPLEMENTATION.md) section 4.
 
@@ -114,6 +115,7 @@ These fields hold system-derived values. FLS makes them read-only for every role
 - All services and controllers are declared `with sharing`. Selectors query `WITH USER_MODE`, so CRUD, FLS and sharing apply to what a user can read.
 - User-supplied input is written with `Database.insert/update(records, AccessLevel.USER_MODE)` or after `Security.stripInaccessible(AccessType.UPDATABLE, ...)`.
 - **Protected fields** are written in system mode by their owning service. This happens only after the service has checked object access and the relevant custom permission. Each such write is a named, reviewed code path (for example `InventoryService.applyMovement`). It is not a general escape hatch.
+- **System-mode business writers still honor sharing.** The protected quotation approval writer and quotation-driven request status writer are explicitly `with sharing`; hierarchy access supports the Logistics Manager's subordinate-owned records. Trigger-only integrity readers and writers remain private and narrowly guarded.
 - Custom permission checks go through one `PermissionService` so tests can assert them and messages come from Custom Labels.
 - No hardcoded record IDs, profile names or user names in Apex.
 - **Integrity reads ignore sharing on purpose (Phase 4).** `WITH SYSTEM_MODE` skips CRUD and FLS but still applies the sharing of the calling class. Fleet conflict, maintenance, lock and quoted-vehicle-type reads must see every record, whoever owns it. They therefore run in the private `without sharing` `FleetSelector.EnforcementReader`. Their results go only to the rule evaluator. Violation messages name only the shipment, vehicle and driver the caller supplied. Without this, a Fleet Manager (no Quotation access) would bypass the quoted-type rule silently; this was found during the Phase 4 check-only run.
@@ -122,21 +124,32 @@ These fields hold system-derived values. FLS makes them read-only for every role
 - **Phase 5 delivery paths.** `DeliverySelector` enforcement reads (attempt numbering under the shipment lock, proof and evidence checks, file protection) are without sharing and limited to their trigger contexts (`DELIVERY_ENFORCEMENT_TRIGGER_ONLY`). The trip lifecycle (`FleetAllocationService.advanceAssignmentLifecycle`) and the closure of attempts on cancellation (`DeliveryService.closeAttemptsOfCancelledShipments`) run in system mode from the shipment after-update trigger only; each change is accepted by its own trigger only because the stored shipment status justifies it. Proof of delivery evidence (Salesforce Files linked to a proof) cannot be deleted, unlinked or replaced by any user through the `ContentDocument`, `ContentDocumentLink` and `ContentVersion` triggers; other files are untouched. Attempts, proofs, and shipments with proofs cannot be deleted. Proof verification is limited by field access to the Logistics Manager and recorded once, in the verifier's own name.
 - **Trigger-only system paths (Phase 4).** The shipment mirror (`VehicleAssignmentDomain.syncShipments`) and the cancellation release (`FleetAllocationService.clearCancelledShipmentAllocations`, `releaseCancelledShipmentAssignments`) take no arguments. They read `Trigger.new` and `Trigger.oldMap` and refuse any other caller with an `AuthorizationException`. This is the same pattern as Phase 2 F1. There is no caller-controlled bypass flag.
 
-## 7. Planned (Phase 9): roles and sharing
+## 7. Phase 9 local role and sharing design
 
-Role hierarchy: Logistics Manager at the top, with Sales Executive, Operations Executive, Fleet Manager, Warehouse Manager, Finance Executive and Customer Service Executive below. Planned sharing rules:
+The hierarchy has Logistics Manager at the top. Sales Executive, Operations Executive, Fleet Manager, Warehouse Manager, Finance Executive and Customer Service Executive report directly to that role. Role hierarchy grants access to subordinate-owned records; permission sets still control object and field access. The Administrator keeps access through `eLogix_Administrator` and has no eLogix role.
 
-| Object                      | Rule                                                                                               |
-| --------------------------- | -------------------------------------------------------------------------------------------------- |
-| Shipment                    | Read/Write to Operations Executive role; Read to Fleet, Warehouse, Finance, Customer Service roles |
-| Shipment Request, Quotation | Read to Operations and Customer Service roles                                                      |
-| Invoice                     | Read/Write to Finance role; Read to Customer Service role                                          |
-| Return Request, Claim       | Read/Write to Customer Service, Warehouse (returns) and Finance (claims) roles                     |
+The role metadata uses `Edit` for Case and Opportunity to meet this target org's Public Read/Write defaults. Contact remains at `None`. These levels do not exceed the corresponding org-wide defaults.
 
-Until then, the demo user (System Administrator plus `eLogix_Administrator`) sees all data. Role-based demos use managers, whose permission sets include View All.
+Implemented owner-based rules (only these three objects are in Phase 9):
 
-## 8. Verification performed (Phase 1)
+| Object                      | Rule                                                                                       |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| Shipment                    | Read/Write to Operations Executive; Read to Fleet, Warehouse, Finance and Customer Service |
+| Shipment Request, Quotation | Read to Operations Executive and Customer Service                                          |
+
+Invoice, Return Request and Claim sharing rules are future work. Their Private OWD currently limits access to owners and hierarchy access, subject to object permissions. The same applies to any other private object without a listed rule.
+
+The model files and generated metadata are not deployed. After manual deployment and sharing recalculation, run the Apex `RoleSharingAccessTest` tests to confirm sales-owned requests and quotations reach Operations and Customer Service and that Operations-owned shipments reach Finance as read-only. These checks rely on actual Salesforce roles and sharing metadata.
+
+## 8. Known production security limitations
+
+- **No Business Unit isolation:** see Principle 5. This is an accepted production gap and must be addressed by a separately approved design before using BU as a confidentiality boundary.
+- **Future sharing work:** Invoice, Return Request and Claim rules have not been implemented.
+- **Org-specific verification remains:** role hierarchy, sharing-rule recalculation, dashboard folder membership, user licenses and login-as behavior must be validated in the target org by the project owner.
+- **Role hierarchy does not grant object permission:** users still need their eLogix permission set. Administrator is not assigned an eLogix role; its access is through `eLogix_Administrator`.
+
+## 9. Verification performed and remaining
 
 - All 9 permission sets deployed. `eLogix_Administrator` is assigned to the org admin user.
 - The rolled-back smoke test (`scripts/apex/verify-phase1-metadata.apex`) ran as that user without the bypass permission. Validation rules fired as expected, which confirms the bypass is not part of the Admin set.
-- Not yet verified: login-as tests for each role. These need named test users and are scheduled with the Phase 9 security validation.
+- Phase 9 is not deployed or org-validated. `RoleSharingAccessTest` is a deploy-time regression for sharing behavior; named login-as checks remain a manual target-org task.

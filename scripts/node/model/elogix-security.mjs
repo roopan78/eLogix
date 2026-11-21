@@ -92,6 +92,52 @@ export const CONTROLLER_ACCESS = {
     TrackingConsoleController: 'Tracking_Event__c'
 };
 
+/* ------------------------------------------------------------------ */
+/* Phase 9: role hierarchy and sharing (SECURITY_DESIGN.md section 7)  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Role hierarchy, decision of 2026-11-21: Logistics Manager at the top (as designed); the six
+ * executive and manager roles directly below. Roles give hierarchy visibility only; object and field
+ * access stays with the permission sets. Role API names match the permission sets of the same role.
+ */
+export const ROLES = [
+    { api: 'eLogix_Logistics_Manager', label: 'Logistics Manager', description: 'eLogix: oversees operations; sees and edits the records of every role below.' },
+    { api: 'eLogix_Sales_Executive', label: 'Sales Executive', parent: 'eLogix_Logistics_Manager', description: 'eLogix: customers, shipment requests and quotations.' },
+    { api: 'eLogix_Operations_Executive', label: 'Operations Executive', parent: 'eLogix_Logistics_Manager', description: 'eLogix: shipments, dispatch, tracking and delivery.' },
+    { api: 'eLogix_Fleet_Manager', label: 'Fleet Manager', parent: 'eLogix_Logistics_Manager', description: 'eLogix: vehicles, drivers and allocation.' },
+    { api: 'eLogix_Warehouse_Manager', label: 'Warehouse Manager', parent: 'eLogix_Logistics_Manager', description: 'eLogix: warehouses and inventory.' },
+    { api: 'eLogix_Finance_Executive', label: 'Finance Executive', parent: 'eLogix_Logistics_Manager', description: 'eLogix: billing and payments.' },
+    { api: 'eLogix_Customer_Service_Executive', label: 'Customer Service Executive', parent: 'eLogix_Logistics_Manager', description: 'eLogix: customer enquiries, returns and claims.' }
+];
+
+const TOP_ROLE = 'eLogix_Logistics_Manager';
+const shareRule = (object, toRole, access, what) => ({
+    object,
+    api: `eLogix_${object.replace(/__c$/, '')}_To_${toRole.replace(/^eLogix_/, '')}`,
+    label: `eLogix ${what} to ${toRole.replace(/^eLogix_/, '').replace(/_/g, ' ')}`,
+    description: `All ${what.toLowerCase()} owned by eLogix roles, ${access === 'Edit' ? 'read/write' : 'read-only'} for the role. Object permissions still limit what the role can do.`,
+    access,
+    toRole,
+    fromRoleAndSubordinates: TOP_ROLE
+});
+
+/**
+ * Owner-based sharing rules for the implemented modules only (decision of 2026-11-21). The Invoice,
+ * Return Request and Claim rules of the design are added when those modules are built.
+ */
+export const SHARING_RULES = [
+    shareRule('Shipment__c', 'eLogix_Operations_Executive', 'Edit', 'Shipments'),
+    shareRule('Shipment__c', 'eLogix_Fleet_Manager', 'Read', 'Shipments'),
+    shareRule('Shipment__c', 'eLogix_Warehouse_Manager', 'Read', 'Shipments'),
+    shareRule('Shipment__c', 'eLogix_Finance_Executive', 'Read', 'Shipments'),
+    shareRule('Shipment__c', 'eLogix_Customer_Service_Executive', 'Read', 'Shipments'),
+    shareRule('Shipment_Request__c', 'eLogix_Operations_Executive', 'Read', 'Shipment Requests'),
+    shareRule('Shipment_Request__c', 'eLogix_Customer_Service_Executive', 'Read', 'Shipment Requests'),
+    shareRule('Quotation__c', 'eLogix_Operations_Executive', 'Read', 'Quotations'),
+    shareRule('Quotation__c', 'eLogix_Customer_Service_Executive', 'Read', 'Quotations')
+];
+
 export const PERMISSION_SETS = [
     {
         api: ADMIN,

@@ -14,7 +14,11 @@
  */
 
 export const REPORT_FOLDER = { api: 'eLogix_Reports', label: 'eLogix Reports' };
-export const DASHBOARD_FOLDER = { api: 'eLogix_Dashboards', label: 'eLogix Dashboards' };
+/**
+ * Dashboards run as a fixed administrator and show org-wide totals, so their folder is shared with the
+ * Logistics Manager role only (Phase 9). Reports run as the viewer and stay open to all internal users.
+ */
+export const DASHBOARD_FOLDER = { api: 'eLogix_Dashboards', label: 'eLogix Dashboards', sharedToRoles: ['eLogix_Logistics_Manager'] };
 
 /** Statuses of a shipment that has been confirmed and is not yet finished. */
 export const ACTIVE_SHIPMENT_STATUSES = [

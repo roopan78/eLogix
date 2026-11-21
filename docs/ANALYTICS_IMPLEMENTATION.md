@@ -60,7 +60,7 @@
 
 ## 5. Access
 
-- **Folders:** both folders are shared **View** with the `AllInternalUsers` group. Editing stays with administrators. Role-based folder sharing comes with the Phase 9 role hierarchy.
+- **Folders:** the Reports folder remains shared **View** with the `AllInternalUsers` group; reports execute as the viewer. The local Phase 9 model restricts the Dashboards folder to the Logistics Manager role because dashboards run as a fixed administrator and show org-wide totals. Editing stays with administrators. The role-restricted dashboard folder is not deployed or org-verified yet.
 - **Reports** run as the viewer, so CRUD, FLS and sharing apply. Users need the **Run Reports** user permission; the Standard Platform User profile used for eLogix users is expected to have it, which the verification checks.
 - **Dashboards** run as the fixed running user. Anyone who can open the dashboard folder sees the same totals. This is the accepted trade-off of the fixed-running-user decision; Phase 9 can restrict the folder to manager roles.
 

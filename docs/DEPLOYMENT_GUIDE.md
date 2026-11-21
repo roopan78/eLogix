@@ -117,13 +117,27 @@ GPS integration user (optional; only for a live or simulated provider calling th
 3. The provider posts to `/services/apexrest/elogix/gps/v1/pings` as that user, for example through an External Client App with the client credentials flow.
 4. Without a provider, the mock feeds the same asynchronous path. Run `GpsIngestionJob.submit(new MockGpsProvider().currentPositions());` in anonymous Apex as a user with `eLogix_Ingest_GPS`; it returns the batch id. The batch log is the `Integration_Log__c` whose `Correlation_Id__c` matches it.
 
-For data seeding (Phase 9), temporarily assign `eLogix_Data_Migration` so that historical dates pass the bypassable validation rules. Remove it afterwards:
+The Phase 9 demo seed uses future dates and does not need the validation bypass. Run the three stages separately as an administrator assigned `eLogix_Administrator`; each `sf apex run` call is its own transaction and the scripts use deterministic `DEMO-` keys:
 
 ```bash
-sf org assign permset --name eLogix_Data_Migration --target-org eLogixDev
-# ... run seed ...
-# Remove: Setup → Users → <user> → Permission Set Assignments (the CLI has no unassign command)
+sf apex run --file scripts/apex/seed-phase9-1-master-data.apex --target-org eLogixDev
+sf apex run --file scripts/apex/seed-phase9-2-requests-and-quotations.apex --target-org eLogixDev
+sf apex run --file scripts/apex/seed-phase9-3-shipments.apex --target-org eLogixDev
 ```
+
+Stage 1 upserts business unit, customers, routes, rate cards, vehicles and drivers by unique external IDs. Stage 2 creates 20 requests, prices missing quotations, and advances them through approval and acceptance triggers. Stage 3 converts accepted quotations through `QuotationService`, creates items for 15 shipments, and confirms them through `ShipmentService`; five shipments remain Quoted. Production triggers validate each change and create tracking history. To remove only this seed set, run `scripts/apex/cleanup-phase9-demo.apex`; every query is constrained to seeded `DEMO-` keys. Do not run stage 2 or 3 before their prerequisites exist.
+
+This seed covers the currently implemented master-data, request, quotation and shipment workflow. It does not create invoices, payments, inventory movements, returns or claims because those production services and workflows are not implemented yet.
+
+After deploying Phase 9 metadata and Apex, run `RoleSharingAccessTest` with the org's Apex test runner. It requires the generated roles, permission sets and sharing rules. Then perform login-as checks for the six roles and confirm dashboard folder visibility. These org-specific checks cannot be completed locally.
+
+Salesforce check-only deployment command for manual use after local review:
+
+```bash
+sf project deploy validate --source-dir force-app --target-org eLogixDev --test-level RunLocalTests
+```
+
+This command is documented for the project owner and has not been run in this implementation session.
 
 ## 4. Org settings for the Indian demo
 

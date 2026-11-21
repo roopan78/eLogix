@@ -2,8 +2,8 @@
 <DashboardFolder xmlns="http://soap.sforce.com/2006/04/metadata">
     <folderShares>
         <accessLevel>View</accessLevel>
-        <sharedTo>AllInternalUsers</sharedTo>
-        <sharedToType>Group</sharedToType>
+        <sharedTo>eLogix_Logistics_Manager</sharedTo>
+        <sharedToType>Role</sharedToType>
     </folderShares>
     <name>eLogix Dashboards</name>
 </DashboardFolder>

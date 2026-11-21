@@ -1,0 +1,12 @@
+{
+  "pings": [
+    {
+      "messageId": "DEMO-GPS-REQ01-20261121",
+      "vehicleNumber": "DEMO-VEH-01",
+      "latitude": 13.0827,
+      "longitude": 80.2707,
+      "recordedAt": "2026-11-21T10:17:31.871Z",
+      "location": "Chennai - demo fixture"
+    }
+  ]
+}

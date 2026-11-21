@@ -56,20 +56,23 @@ export function buildReportType(def) {
     return lines;
 }
 
-/** Report and dashboard folders, viewable by every internal user (role-based sharing is Phase 9). */
+/** Report and dashboard folders: View for the listed roles, or for every internal user. */
 export function buildFolder(kind, folder) {
     const root = kind === 'report' ? 'ReportFolder' : 'DashboardFolder';
-    return [
-        XML_HEADER,
-        `<${root} xmlns="${NS}">`,
-        `${I}<folderShares>`,
-        tag('accessLevel', 'View', `${I}${I}`),
-        tag('sharedTo', 'AllInternalUsers', `${I}${I}`),
-        tag('sharedToType', 'Group', `${I}${I}`),
-        `${I}</folderShares>`,
-        tag('name', folder.label, I),
-        `</${root}>`
-    ];
+    const shares = folder.sharedToRoles?.length
+        ? folder.sharedToRoles.map((role) => [role, 'Role'])
+        : [['AllInternalUsers', 'Group']];
+    const lines = [XML_HEADER, `<${root} xmlns="${NS}">`];
+    for (const [sharedTo, type] of shares) {
+        lines.push(`${I}<folderShares>`);
+        lines.push(tag('accessLevel', 'View', `${I}${I}`));
+        lines.push(tag('sharedTo', sharedTo, `${I}${I}`));
+        lines.push(tag('sharedToType', type, `${I}${I}`));
+        lines.push(`${I}</folderShares>`);
+    }
+    lines.push(tag('name', folder.label, I));
+    lines.push(`</${root}>`);
+    return lines;
 }
 
 /* ------------------------------------------------------------------ */
