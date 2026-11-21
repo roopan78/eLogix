@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description
+  >eLogix tracking console: shipments on the road, history and manual events.</description>
+    <flexiPage>eLogix_Tracking_Console</flexiPage>
+    <label>Tracking Console</label>
+    <motif>Custom30: Radar dish</motif>
+</CustomTab>

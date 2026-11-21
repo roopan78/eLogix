@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomPermission xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Correct the vehicle, driver or booking window of a dispatched shipment while it is On Hold, with a reason. Needs Allocate Fleet too. Each correction is fully revalidated and written to tracking history.</description>
+    <isLicensed>false</isLicensed>
+    <label>eLogix: Correct Dispatched Allocation</label>
+</CustomPermission>

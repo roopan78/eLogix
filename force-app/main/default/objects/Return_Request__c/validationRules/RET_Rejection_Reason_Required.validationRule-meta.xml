@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>RET_Rejection_Reason_Required</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    AND(ISPICKVAL(Status__c, &quot;Rejected&quot;), ISBLANK(Rejection_Reason__c))
+)</errorConditionFormula>
+    <errorDisplayField>Rejection_Reason__c</errorDisplayField>
+    <errorMessage>Enter a rejection reason before rejecting the return.</errorMessage>
+</ValidationRule>

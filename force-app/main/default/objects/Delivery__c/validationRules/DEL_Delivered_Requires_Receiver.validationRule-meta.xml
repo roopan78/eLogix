@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DEL_Delivered_Requires_Receiver</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    AND(
+        OR(ISPICKVAL(Delivery_Status__c, &quot;Delivered&quot;), ISPICKVAL(Delivery_Status__c, &quot;Partially Delivered&quot;)),
+        OR(ISBLANK(Receiver_Name__c), ISBLANK(Delivery_Date__c))
+    )
+)</errorConditionFormula>
+    <errorDisplayField>Receiver_Name__c</errorDisplayField>
+    <errorMessage>A completed delivery must record the receiver name and delivery date.</errorMessage>
+</ValidationRule>

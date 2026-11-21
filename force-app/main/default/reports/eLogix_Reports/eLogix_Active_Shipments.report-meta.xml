@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>Shipment__c$Name</field>
+    </columns>
+    <columns>
+        <field>Shipment__c$Customer__c</field>
+    </columns>
+    <columns>
+        <field>Shipment__c$Origin__c</field>
+    </columns>
+    <columns>
+        <field>Shipment__c$Destination__c</field>
+    </columns>
+    <columns>
+        <field>Shipment__c$Expected_Delivery_Date__c</field>
+    </columns>
+    <columns>
+        <field>Shipment__c$Vehicle__c</field>
+    </columns>
+    <columns>
+        <field>Shipment__c$Latest_Location__c</field>
+    </columns>
+    <columns>
+        <aggregateTypes>Sum</aggregateTypes>
+        <field>Shipment__c$Freight_Amount__c</field>
+    </columns>
+    <description
+  >Confirmed shipments that are not yet delivered, closed or cancelled.</description>
+    <filter>
+        <criteriaItems>
+            <column>Shipment__c$Status__c</column>
+            <isUnlocked>true</isUnlocked>
+            <operator>equals</operator>
+            <value
+      >Confirmed,Ready for Dispatch,Dispatched,In Transit,Out for Delivery,On Hold,Delayed,Failed Delivery</value>
+        </criteriaItems>
+        <language>en_US</language>
+    </filter>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Shipment__c$Status__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Active Shipments</name>
+    <reportType>eLogix_Shipments__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>Shipment__c$CreatedDate</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>

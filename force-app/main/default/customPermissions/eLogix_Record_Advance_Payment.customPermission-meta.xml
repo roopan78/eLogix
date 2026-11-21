@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomPermission xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Record a payment above the outstanding invoice balance. Also requires the Allow_Advance_Payments setting.</description>
+    <isLicensed>false</isLicensed>
+    <label>eLogix: Record Advance Payment</label>
+</CustomPermission>

@@ -1,0 +1,85 @@
+<template>
+  <lightning-card title={labels.title} icon-name="standard:location">
+    <lightning-button-icon
+      slot="actions"
+      class="elogix-refresh"
+      icon-name="utility:refresh"
+      alternative-text={labels.refresh}
+      title={labels.refresh}
+      onclick={handleRefresh}
+    ></lightning-button-icon>
+    <div class="slds-p-horizontal_medium">
+      <c-reusable-data-table
+        columns={columns}
+        records={shipments}
+        is-loading={isLoading}
+        error={error}
+        empty-message={labels.noActive}
+        table-label={labels.title}
+        max-row-selection="1"
+        onrowselection={handleRowSelection}
+        onretry={handleRefresh}
+      ></c-reusable-data-table>
+    </div>
+
+    <div class="slds-p-around_medium">
+      <template lwc:if={hasSelection}>
+        <div class="slds-grid slds-wrap slds-gutters_small">
+          <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+            <c-shipment-timeline record-id={selectedId}></c-shipment-timeline>
+          </div>
+          <div
+            class="slds-col slds-size_1-of-1 slds-large-size_1-of-2 elogix-event-form"
+          >
+            <h3 class="slds-text-heading_small slds-m-bottom_x-small">
+              {labels.recordEvent}: {selectedShipment.Name}
+            </h3>
+            <lightning-combobox
+              class="elogix-event-field"
+              data-field="eventType"
+              label={labels.eventType}
+              value={form.eventType}
+              options={eventTypes}
+              required
+              onchange={handleField}
+            ></lightning-combobox>
+            <lightning-input
+              class="elogix-event-field"
+              data-field="location"
+              label={labels.location}
+              value={form.location}
+              max-length="255"
+              onchange={handleField}
+            ></lightning-input>
+            <lightning-input
+              class="elogix-event-field"
+              data-field="eventTimestamp"
+              type="datetime"
+              label={labels.eventTime}
+              value={form.eventTimestamp}
+              onchange={handleField}
+            ></lightning-input>
+            <lightning-textarea
+              class="elogix-event-field"
+              data-field="remarks"
+              label={labels.remarks}
+              value={form.remarks}
+              max-length="1000"
+              onchange={handleField}
+            ></lightning-textarea>
+            <lightning-button
+              class="elogix-save slds-m-top_small"
+              variant="brand"
+              label={labels.save}
+              disabled={isSaveDisabled}
+              onclick={handleSave}
+            ></lightning-button>
+          </div>
+        </div>
+      </template>
+      <template lwc:else>
+        <p class="slds-text-color_weak elogix-select-hint">{labels.select}</p>
+      </template>
+    </div>
+  </lightning-card>
+</template>

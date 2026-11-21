@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Documents_Expired</fullName>
+    <columns>NAME</columns>
+    <columns>Vehicle_Number__c</columns>
+    <columns>Status__c</columns>
+    <columns>Registration_Expiry__c</columns>
+    <columns>Insurance_Expiry__c</columns>
+    <columns>Fitness_Expiry__c</columns>
+    <columns>Business_Unit__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Document_Status__c</field>
+        <operation>equals</operation>
+        <value>Expired</value>
+    </filters>
+    <label>Documents Expired</label>
+</ListView>

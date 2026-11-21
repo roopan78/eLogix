@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>RET_Inspection_Before_Resolution</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    AND(
+        OR(ISPICKVAL(Status__c, &quot;Inspection Passed&quot;), ISPICKVAL(Status__c, &quot;Inspection Failed&quot;), ISPICKVAL(Status__c, &quot;Restocked&quot;)),
+        OR(ISBLANK(Inspection_Completed_Date__c), ISBLANK(Inspection_Notes__c))
+    )
+)</errorConditionFormula>
+    <errorDisplayField>Inspection_Notes__c</errorDisplayField>
+    <errorMessage>Complete the inspection (completion date and notes) before resolving the return.</errorMessage>
+</ValidationRule>

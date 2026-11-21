@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CompactLayout xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>eLogix_Compact</fullName>
+    <fields>Name</fields>
+    <fields>Vehicle__c</fields>
+    <fields>Maintenance_Type__c</fields>
+    <fields>Scheduled_Date__c</fields>
+    <fields>Completion_Date__c</fields>
+    <label>eLogix Compact</label>
+</CompactLayout>

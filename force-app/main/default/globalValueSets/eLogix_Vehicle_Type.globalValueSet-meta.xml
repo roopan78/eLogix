@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Mini Truck</fullName>
+        <default>false</default>
+        <label>Mini Truck</label>
+    </customValue>
+    <customValue>
+        <fullName>LCV</fullName>
+        <default>true</default>
+        <label>LCV</label>
+    </customValue>
+    <customValue>
+        <fullName>Container Truck</fullName>
+        <default>false</default>
+        <label>Container Truck</label>
+    </customValue>
+    <customValue>
+        <fullName>Trailer</fullName>
+        <default>false</default>
+        <label>Trailer</label>
+    </customValue>
+    <customValue>
+        <fullName>Refrigerated Truck</fullName>
+        <default>false</default>
+        <label>Refrigerated Truck</label>
+    </customValue>
+    <customValue>
+        <fullName>Tanker</fullName>
+        <default>false</default>
+        <label>Tanker</label>
+    </customValue>
+    <description>Shared by Vehicle__c and Rate_Card__c so freight rates always key off the same vocabulary.</description>
+    <masterLabel>eLogix Vehicle Type</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

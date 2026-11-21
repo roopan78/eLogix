@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>QTL_Quantity_Positive</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    AND(NOT(ISBLANK(Quantity__c)), Quantity__c &lt;= 0)
+)</errorConditionFormula>
+    <errorDisplayField>Quantity__c</errorDisplayField>
+    <errorMessage>Quantity must be greater than zero.</errorMessage>
+</ValidationRule>

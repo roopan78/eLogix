@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Billable__c</fullName>
+    <formula>OR(ISPICKVAL(Status__c, &quot;Delivered&quot;), ISPICKVAL(Status__c, &quot;Closed&quot;))</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Is Billable</label>
+    <type>Checkbox</type>
+</CustomField>

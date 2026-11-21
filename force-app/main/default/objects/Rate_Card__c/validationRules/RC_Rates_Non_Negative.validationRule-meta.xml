@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>RC_Rates_Non_Negative</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    OR(Base_Freight__c &lt; 0, Rate_Per_KG__c &lt; 0, Rate_Per_KM__c &lt; 0, Minimum_Freight__c &lt; 0)
+)</errorConditionFormula>
+    <errorDisplayField>Base_Freight__c</errorDisplayField>
+    <errorMessage>Freight rates cannot be negative.</errorMessage>
+</ValidationRule>

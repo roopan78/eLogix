@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SHP_Delivered_Requires_Delivery_Date</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    AND(ISPICKVAL(Status__c, &quot;Delivered&quot;), ISBLANK(Actual_Delivery_Date__c))
+)</errorConditionFormula>
+    <errorDisplayField>Actual_Delivery_Date__c</errorDisplayField>
+    <errorMessage>A delivered shipment must have an actual delivery date.</errorMessage>
+</ValidationRule>

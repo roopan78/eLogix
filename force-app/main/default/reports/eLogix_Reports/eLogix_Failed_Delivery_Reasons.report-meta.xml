@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>Shipment__c$Name</field>
+    </columns>
+    <columns>
+        <field>Shipment__c$Customer__c</field>
+    </columns>
+    <columns>
+        <field>Shipment__c.Deliveries__r$Attempt_Number__c</field>
+    </columns>
+    <columns>
+        <field>Shipment__c.Deliveries__r$Delivered_By__c</field>
+    </columns>
+    <description
+  >Failed delivery attempts grouped by failure reason.</description>
+    <filter>
+        <criteriaItems>
+            <column>Shipment__c.Deliveries__r$Delivery_Status__c</column>
+            <isUnlocked>true</isUnlocked>
+            <operator>equals</operator>
+            <value>Failed</value>
+        </criteriaItems>
+        <language>en_US</language>
+    </filter>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Shipment__c.Deliveries__r$Failure_Reason__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Failed Delivery Reasons</name>
+    <reportType>eLogix_Shipment_Delivery_Attempts__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+</Report>

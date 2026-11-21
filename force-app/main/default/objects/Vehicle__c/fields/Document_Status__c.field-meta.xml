@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Document_Status__c</fullName>
+    <formula>IF(OR(ISBLANK(Registration_Expiry__c), ISBLANK(Insurance_Expiry__c)), &quot;Missing&quot;, IF(OR(Registration_Expiry__c &lt; TODAY(), Insurance_Expiry__c &lt; TODAY(), AND(NOT(ISBLANK(Fitness_Expiry__c)), Fitness_Expiry__c &lt; TODAY())), &quot;Expired&quot;, IF(OR(Registration_Expiry__c &lt;= TODAY() + $CustomMetadata.eLogix_Setting__mdt.Document_Expiry_Warning_Days.Number_Value__c, Insurance_Expiry__c &lt;= TODAY() + $CustomMetadata.eLogix_Setting__mdt.Document_Expiry_Warning_Days.Number_Value__c, AND(NOT(ISBLANK(Fitness_Expiry__c)), Fitness_Expiry__c &lt;= TODAY() + $CustomMetadata.eLogix_Setting__mdt.Document_Expiry_Warning_Days.Number_Value__c)), &quot;Expiring Soon&quot;, &quot;Valid&quot;)))</formula>
+    <inlineHelpText>Missing, Expired, Expiring Soon (within the eLogix setting Document_Expiry_Warning_Days) or Valid, across registration, insurance and fitness.</inlineHelpText>
+    <label>Document Status</label>
+    <type>Text</type>
+</CustomField>

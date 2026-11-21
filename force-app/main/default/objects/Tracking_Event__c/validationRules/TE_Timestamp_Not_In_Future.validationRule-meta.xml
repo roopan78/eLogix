@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>TE_Timestamp_Not_In_Future</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    Event_Timestamp__c &gt; NOW() + (1/24)
+)</errorConditionFormula>
+    <errorDisplayField>Event_Timestamp__c</errorDisplayField>
+    <errorMessage>Event timestamp cannot be more than one hour in the future.</errorMessage>
+</ValidationRule>

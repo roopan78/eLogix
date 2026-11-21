@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DEL_Attempt_Number_Positive</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    Attempt_Number__c &lt; 1
+)</errorConditionFormula>
+    <errorDisplayField>Attempt_Number__c</errorDisplayField>
+    <errorMessage>Attempt number must be 1 or greater.</errorMessage>
+</ValidationRule>

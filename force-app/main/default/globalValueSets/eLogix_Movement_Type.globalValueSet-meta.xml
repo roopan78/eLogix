@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Inbound Receipt</fullName>
+        <default>true</default>
+        <label>Inbound Receipt</label>
+    </customValue>
+    <customValue>
+        <fullName>Outbound Dispatch</fullName>
+        <default>false</default>
+        <label>Outbound Dispatch</label>
+    </customValue>
+    <customValue>
+        <fullName>Transfer In</fullName>
+        <default>false</default>
+        <label>Transfer In</label>
+    </customValue>
+    <customValue>
+        <fullName>Transfer Out</fullName>
+        <default>false</default>
+        <label>Transfer Out</label>
+    </customValue>
+    <customValue>
+        <fullName>Reservation</fullName>
+        <default>false</default>
+        <label>Reservation</label>
+    </customValue>
+    <customValue>
+        <fullName>Reservation Release</fullName>
+        <default>false</default>
+        <label>Reservation Release</label>
+    </customValue>
+    <customValue>
+        <fullName>Return Restock</fullName>
+        <default>false</default>
+        <label>Return Restock</label>
+    </customValue>
+    <customValue>
+        <fullName>Adjustment</fullName>
+        <default>false</default>
+        <label>Adjustment</label>
+    </customValue>
+    <customValue>
+        <fullName>Damage Write Off</fullName>
+        <default>false</default>
+        <label>Damage Write Off</label>
+    </customValue>
+    <masterLabel>eLogix Stock Movement Type</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<SharingRules xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sharingOwnerRules>
+        <fullName>eLogix_Quotation_To_Operations_Executive</fullName>
+        <accessLevel>Read</accessLevel>
+        <description
+    >All quotations owned by eLogix roles, read-only for the role. Object permissions still limit what the role can do.</description>
+        <label>eLogix Quotations to Operations Executive</label>
+        <sharedFrom>
+            <roleAndSubordinates>eLogix_Logistics_Manager</roleAndSubordinates>
+        </sharedFrom>
+        <sharedTo>
+            <role>eLogix_Operations_Executive</role>
+        </sharedTo>
+    </sharingOwnerRules>
+    <sharingOwnerRules>
+        <fullName>eLogix_Quotation_To_Customer_Service_Executive</fullName>
+        <accessLevel>Read</accessLevel>
+        <description
+    >All quotations owned by eLogix roles, read-only for the role. Object permissions still limit what the role can do.</description>
+        <label>eLogix Quotations to Customer Service Executive</label>
+        <sharedFrom>
+            <roleAndSubordinates>eLogix_Logistics_Manager</roleAndSubordinates>
+        </sharedFrom>
+        <sharedTo>
+            <role>eLogix_Customer_Service_Executive</role>
+        </sharedTo>
+    </sharingOwnerRules>
+</SharingRules>

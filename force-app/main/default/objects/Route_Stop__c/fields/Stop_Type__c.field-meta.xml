@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Stop_Type__c</fullName>
+    <label>Stop Type</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Checkpoint</fullName>
+                <default>true</default>
+                <label>Checkpoint</label>
+            </value>
+            <value>
+                <fullName>Pickup</fullName>
+                <default>false</default>
+                <label>Pickup</label>
+            </value>
+            <value>
+                <fullName>Drop</fullName>
+                <default>false</default>
+                <label>Drop</label>
+            </value>
+            <value>
+                <fullName>Hub</fullName>
+                <default>false</default>
+                <label>Hub</label>
+            </value>
+            <value>
+                <fullName>Fuel Stop</fullName>
+                <default>false</default>
+                <label>Fuel Stop</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

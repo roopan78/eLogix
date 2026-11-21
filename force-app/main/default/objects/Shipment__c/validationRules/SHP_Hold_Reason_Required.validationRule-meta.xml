@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SHP_Hold_Reason_Required</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    AND(ISPICKVAL(Status__c, &quot;On Hold&quot;), ISBLANK(Hold_Reason__c))
+)</errorConditionFormula>
+    <errorDisplayField>Hold_Reason__c</errorDisplayField>
+    <errorMessage>Enter a hold reason before placing the shipment on hold.</errorMessage>
+</ValidationRule>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>QTL_Amount_Sign_Matches_Type</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    OR(
+        Amount__c = 0,
+        AND(Amount__c &lt; 0, NOT(ISPICKVAL(Charge_Type__c, &quot;Discount&quot;))),
+        AND(Amount__c &gt; 0, ISPICKVAL(Charge_Type__c, &quot;Discount&quot;))
+    )
+)</errorConditionFormula>
+    <errorDisplayField>Amount__c</errorDisplayField>
+    <errorMessage>Amount must be non-zero. Discount lines must be negative and all other charge types positive.</errorMessage>
+</ValidationRule>

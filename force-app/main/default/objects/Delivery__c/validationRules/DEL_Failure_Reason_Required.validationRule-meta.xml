@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DEL_Failure_Reason_Required</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    AND(ISPICKVAL(Delivery_Status__c, &quot;Failed&quot;), ISBLANK(TEXT(Failure_Reason__c)))
+)</errorConditionFormula>
+    <errorDisplayField>Failure_Reason__c</errorDisplayField>
+    <errorMessage>Select a failure reason for a failed delivery attempt.</errorMessage>
+</ValidationRule>

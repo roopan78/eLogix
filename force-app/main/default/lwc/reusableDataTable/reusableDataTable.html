@@ -1,0 +1,55 @@
+<template>
+  <template lwc:if={isLoading}>
+    <c-loading-indicator></c-loading-indicator>
+  </template>
+  <template lwc:elseif={hasError}>
+    <div
+      class="slds-scoped-notification slds-theme_error elogix-error"
+      role="alert"
+    >
+      <div class="slds-media slds-media_center">
+        <div class="slds-media__figure">
+          <lightning-icon
+            icon-name="utility:error"
+            alternative-text={errorTitle}
+            size="small"
+            variant="inverse"
+          ></lightning-icon>
+        </div>
+        <div class="slds-media__body">
+          <p>{errorText}</p>
+        </div>
+        <div class="slds-media__figure slds-media__figure_reverse">
+          <lightning-button
+            class="elogix-retry"
+            label={retryLabel}
+            onclick={handleRetry}
+          ></lightning-button>
+        </div>
+      </div>
+    </div>
+  </template>
+  <template lwc:elseif={isEmpty}>
+    <div
+      class="slds-box slds-theme_shade slds-text-align_center slds-text-color_weak elogix-empty"
+      role="status"
+    >
+      {emptyText}
+    </div>
+  </template>
+  <template lwc:elseif={hasRows}>
+    <lightning-datatable
+      key-field={keyField}
+      data={rows}
+      columns={columns}
+      aria-label={tableLabel}
+      hide-checkbox-column={hideCheckboxColumn}
+      max-row-selection={maxRowSelection}
+      sorted-by={sortedBy}
+      sorted-direction={sortDirection}
+      onsort={handleSort}
+      onrowaction={handleRowAction}
+      onrowselection={handleRowSelection}
+    ></lightning-datatable>
+  </template>
+</template>

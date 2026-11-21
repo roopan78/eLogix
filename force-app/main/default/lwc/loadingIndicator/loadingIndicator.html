@@ -1,0 +1,20 @@
+<template>
+  <div
+    class="slds-is-relative slds-p-around_large elogix-loading"
+    aria-busy="true"
+  >
+    <lightning-spinner
+      alternative-text={spinnerText}
+      size={size}
+      variant={variant}
+    ></lightning-spinner>
+    <template lwc:if={message}>
+      <p
+        class="slds-text-align_center slds-text-color_weak slds-p-top_xx-large"
+        aria-live="polite"
+      >
+        {message}
+      </p>
+    </template>
+  </div>
+</template>

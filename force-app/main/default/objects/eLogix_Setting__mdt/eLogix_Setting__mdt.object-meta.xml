@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Named configuration values for eLogix business rules. Read through a single settings service so that no business threshold is hardcoded in Apex.</description>
+    <label>eLogix Setting</label>
+    <pluralLabel>eLogix Settings</pluralLabel>
+    <visibility>Public</visibility>
+</CustomObject>

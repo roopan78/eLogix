@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ACC_Credit_Values_Non_Negative</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    OR(Credit_Limit__c &lt; 0, Credit_Terms_Days__c &lt; 0)
+)</errorConditionFormula>
+    <errorDisplayField>Credit_Limit__c</errorDisplayField>
+    <errorMessage>Credit limit and credit terms cannot be negative.</errorMessage>
+</ValidationRule>

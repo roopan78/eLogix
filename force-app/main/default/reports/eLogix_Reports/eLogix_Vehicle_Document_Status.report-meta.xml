@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>Vehicle__c$Vehicle_Number__c</field>
+    </columns>
+    <columns>
+        <field>Vehicle__c$Status__c</field>
+    </columns>
+    <columns>
+        <field>Vehicle__c$Registration_Expiry__c</field>
+    </columns>
+    <columns>
+        <field>Vehicle__c$Insurance_Expiry__c</field>
+    </columns>
+    <description
+  >Vehicles by registration, insurance and fitness document status.</description>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Vehicle__c$Document_Status__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Vehicle Document Status</name>
+    <reportType>eLogix_Vehicles__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+</Report>

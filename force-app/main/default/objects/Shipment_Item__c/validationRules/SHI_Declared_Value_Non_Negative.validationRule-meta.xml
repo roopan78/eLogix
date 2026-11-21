@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SHI_Declared_Value_Non_Negative</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    NOT($Permission.eLogix_Bypass_Validation_Rules),
+    Declared_Value__c &lt; 0
+)</errorConditionFormula>
+    <errorDisplayField>Declared_Value__c</errorDisplayField>
+    <errorMessage>Declared value cannot be negative.</errorMessage>
+</ValidationRule>

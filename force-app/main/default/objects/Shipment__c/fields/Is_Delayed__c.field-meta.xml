@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Delayed__c</fullName>
+    <formula>AND(NOT(ISBLANK(Expected_Delivery_Date__c)), NOT(ISPICKVAL(Status__c, &quot;Delivered&quot;)), NOT(ISPICKVAL(Status__c, &quot;Closed&quot;)), NOT(ISPICKVAL(Status__c, &quot;Cancelled&quot;)), Expected_Delivery_Date__c &lt; TODAY())</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Is Delayed</label>
+    <type>Checkbox</type>
+</CustomField>
