@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <classAccesses>
         <apexClass>GpsPingResource</apexClass>
@@ -8,7 +8,8 @@
         <enabled>true</enabled>
         <name>eLogix_Ingest_GPS</name>
     </customPermissions>
-    <description>For the GPS provider integration user (API only): submits GPS pings to the GPS ingestion endpoint. Reads shipments, vehicles and assignments; writes tracking events and integration logs.</description>
+    <description
+  >For the GPS provider integration user (API only): submits GPS pings to the GPS ingestion endpoint. Reads shipments, vehicles and assignments; writes tracking events and integration logs.</description>
     <fieldPermissions>
         <editable>false</editable>
         <field>Shipment__c.Shipment_Number__c</field>
@@ -112,6 +113,11 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Shipment__c.Transit_Days__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Shipment__c.Is_On_Time__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

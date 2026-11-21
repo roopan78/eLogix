@@ -402,6 +402,10 @@ export const OBJECTS = [
             formula('Is_Delayed__c', 'Checkbox', 'AND(NOT(ISBLANK(Expected_Delivery_Date__c)), NOT(ISPICKVAL(Status__c, "Delivered")), NOT(ISPICKVAL(Status__c, "Closed")), NOT(ISPICKVAL(Status__c, "Cancelled")), Expected_Delivery_Date__c < TODAY())'),
             formula('Is_Billable__c', 'Checkbox', 'OR(ISPICKVAL(Status__c, "Delivered"), ISPICKVAL(Status__c, "Closed"))'),
             formula('Transit_Days__c', 'Number', 'IF(OR(ISBLANK(Actual_Delivery_Date__c), ISBLANK(Pickup_Date__c)), null, Actual_Delivery_Date__c - Pickup_Date__c)', { scale: 0 }),
+            // Phase 8: delivery performance KPI (reports and dashboards).
+            formula('Is_On_Time__c', 'Checkbox', 'AND(NOT(ISBLANK(Actual_Delivery_Date__c)), NOT(ISBLANK(Expected_Delivery_Date__c)), Actual_Delivery_Date__c <= Expected_Delivery_Date__c)', {
+                helpText: 'Delivered on or before the expected delivery date.'
+            }),
             area('Hold_Reason__c'),
             area('Cancellation_Reason__c'),
             long('Special_Instructions__c', 2000, 4)

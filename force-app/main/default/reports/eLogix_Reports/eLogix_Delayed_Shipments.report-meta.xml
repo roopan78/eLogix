@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>Shipment__c$Name</field>
+    </columns>
+    <columns>
+        <field>Shipment__c$Status__c</field>
+    </columns>
+    <columns>
+        <field>Shipment__c$Origin__c</field>
+    </columns>
+    <columns>
+        <field>Shipment__c$Destination__c</field>
+    </columns>
+    <columns>
+        <field>Shipment__c$Expected_Delivery_Date__c</field>
+    </columns>
+    <columns>
+        <field>Shipment__c$Vehicle__c</field>
+    </columns>
+    <columns>
+        <field>Shipment__c$Latest_Location__c</field>
+    </columns>
+    <description
+  >Open shipments past their expected delivery date (Is_Delayed__c), by customer.</description>
+    <filter>
+        <criteriaItems>
+            <column>Shipment__c$Is_Delayed__c</column>
+            <isUnlocked>true</isUnlocked>
+            <operator>equals</operator>
+            <value>1</value>
+        </criteriaItems>
+        <language>en_US</language>
+    </filter>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Shipment__c$Customer__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Delayed Shipments</name>
+    <reportType>eLogix_Shipments__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>Shipment__c$CreatedDate</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>

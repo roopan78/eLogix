@@ -101,6 +101,8 @@ Expect `failures=0` in each `SMOKE SUMMARY` (11, 7 and 3 checks). Since Phase 5,
 sf apex run --file scripts/apex/verify-phase6-gps.apex --target-org eLogixDev           # checks=8: G1-G5
 ```
 
+Phase 8 (analytics): reports and dashboards are generated; the dashboards run as a fixed administrator set through `ELOGIX_DASHBOARD_RUNNING_USER` when generating. Generation, validation and the manual report and dashboard checks are in [ANALYTICS_IMPLEMENTATION.md](ANALYTICS_IMPLEMENTATION.md) section 6.
+
 Phase 7 (Lightning pages and screens): after deploying, the eLogix ERP app shows the Shipment, Fleet and Tracking Console tabs, and the eLogix Shipment and Quotation record pages are the app defaults on desktop. Nothing needs activating by hand: the page assignments are in the app metadata (`actionOverrides`). If an org already had a different page activated for the app, Lightning App Builder → the page → **Activation** shows which one wins. Then run the manual UI checklist in [LWC_IMPLEMENTATION.md](LWC_IMPLEMENTATION.md) section 5. LWC unit tests run locally:
 
 ```bash

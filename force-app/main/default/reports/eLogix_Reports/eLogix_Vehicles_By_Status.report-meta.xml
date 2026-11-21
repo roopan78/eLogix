@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>Vehicle__c$Vehicle_Number__c</field>
+    </columns>
+    <columns>
+        <field>Vehicle__c$Vehicle_Type__c</field>
+    </columns>
+    <columns>
+        <field>Vehicle__c$Capacity__c</field>
+    </columns>
+    <columns>
+        <field>Vehicle__c$Business_Unit__c</field>
+    </columns>
+    <columns>
+        <field>Vehicle__c$Is_Allocatable__c</field>
+    </columns>
+    <columns>
+        <aggregateTypes>Sum</aggregateTypes>
+        <field>Vehicle__c$Capacity__c</field>
+    </columns>
+    <description>Fleet availability: vehicles by status.</description>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Vehicle__c$Status__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Vehicles by Status</name>
+    <reportType>eLogix_Vehicles__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+</Report>

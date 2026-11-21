@@ -36,6 +36,8 @@ import { EXPERIENCE, APPLICATION, APP_PAGES, RECORD_PAGES } from './model/elogix
 import { CUSTOM_PERMISSIONS, METADATA_TYPES } from './model/elogix-config.mjs';
 import { ADMIN, CONTROLLER_ACCESS, PERMISSION_SETS, PROTECTED_FIELDS } from './model/elogix-security.mjs';
 import { existsSync } from 'node:fs';
+import { REPORT_TYPES, REPORTS, DASHBOARDS, REPORT_FOLDER, DASHBOARD_FOLDER } from './model/elogix-analytics.mjs';
+import { emitAnalytics, isStandardField } from './lib/analytics-writer.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(here, '..', '..');
@@ -260,6 +262,57 @@ for (const [controller, objectApi] of Object.entries(CONTROLLER_ACCESS)) {
     if (!OBJECTS_BY_API.has(objectApi)) fail(`controller ${controller}: unknown object ${objectApi}`);
 }
 
+/* ---- Phase 8: report types, reports, dashboards ---- */
+
+const reportTypesByApi = new Map(REPORT_TYPES.map((t) => [t.api, t]));
+for (const type of REPORT_TYPES) {
+    if (!OBJECTS_BY_API.has(type.base)) fail(`report type ${type.api}: unknown object ${type.base}`);
+    for (const field of type.fields) {
+        if (!isStandardField(field) && !fieldOf(type.base, field)) fail(`report type ${type.api}: unknown field ${type.base}.${field}`);
+    }
+    if (type.join) {
+        const parentField = OBJECTS_BY_API.get(type.join.object)?.fields.find(
+            (f) => f.referenceTo === type.base && `${f.relationshipName}__r` === type.join.relationship
+        );
+        if (!parentField) fail(`report type ${type.api}: ${type.join.object} has no relationship ${type.join.relationship} to ${type.base}`);
+        for (const field of type.join.fields) {
+            if (!isStandardField(field) && !fieldOf(type.join.object, field)) fail(`report type ${type.api}: unknown field ${type.join.object}.${field}`);
+        }
+    }
+}
+const reportsByApi = new Map(REPORTS.map((r) => [r.api, r]));
+for (const report of REPORTS) {
+    const type = reportTypesByApi.get(report.type);
+    if (!type) {
+        fail(`report ${report.api}: unknown report type ${report.type}`);
+        continue;
+    }
+    const available = new Set([...type.fields, ...(type.join ? type.join.fields.map((f) => `${type.join.relationship}.${f}`) : [])]);
+    const used = [
+        ...report.groupBy.map((g) => g.field),
+        ...report.columns,
+        ...(report.sum ?? []),
+        ...(report.average ?? []),
+        ...(report.filters ?? []).map((f) => f.field)
+    ];
+    for (const field of used) if (!available.has(field)) fail(`report ${report.api}: ${field} is not in report type ${type.api}`);
+    if (!report.groupBy.length) fail(`report ${report.api}: summary reports need a grouping`);
+}
+for (const dashboard of DASHBOARDS) {
+    for (const component of dashboard.components) {
+        const report = reportsByApi.get(component.report);
+        if (!report) {
+            fail(`dashboard ${dashboard.api}: unknown report ${component.report}`);
+            continue;
+        }
+        if (component.summary !== 'RowCount') {
+            const [list, field] = component.summary.sum ? [report.sum, component.summary.sum] : [report.average, component.summary.average];
+            if (!(list ?? []).includes(field)) fail(`dashboard ${dashboard.api}: report ${report.api} does not aggregate ${field}`);
+        }
+        if (component.col + component.colSpan > 12) fail(`dashboard ${dashboard.api}: ${component.header} is wider than the grid`);
+    }
+}
+
 /* ---- custom metadata ---- */
 
 const shipmentStatuses = gvsByApi.get('eLogix_Shipment_Status').values.map(valueName);
@@ -396,6 +449,9 @@ const counts = {
     'page layouts': customObjects.length + METADATA_TYPES.length,
     tabs: OBJECTS.filter((o) => o.tab).length + APP_PAGES.length,
     'lightning pages': APP_PAGES.length + RECORD_PAGES.length,
+    'report types': REPORT_TYPES.length,
+    reports: REPORTS.length,
+    dashboards: DASHBOARDS.length,
     'global value sets': GLOBAL_VALUE_SETS.length,
     'custom metadata types': METADATA_TYPES.length,
     'custom metadata records': METADATA_TYPES.reduce((sum, t) => sum + t.records.length, 0),
@@ -483,6 +539,11 @@ if (dryRun) {
         ...emitCustomPermissions(CUSTOM_PERMISSIONS, sourceRoot),
         ...emitApplication(APPLICATION, sourceRoot),
         ...emitPages(APP_PAGES, RECORD_PAGES, sourceRoot),
+        ...emitAnalytics(
+            { reportTypes: REPORT_TYPES, reports: REPORTS, dashboards: DASHBOARDS, reportFolder: REPORT_FOLDER, dashboardFolder: DASHBOARD_FOLDER },
+            sourceRoot,
+            process.env.ELOGIX_DASHBOARD_RUNNING_USER
+        ),
         ...emitPermissionSets(resolvedSets, sourceRoot)
     ];
     const cataloguePath = join(projectRoot, 'docs', 'generated', 'DATA_MODEL_CATALOGUE.md');

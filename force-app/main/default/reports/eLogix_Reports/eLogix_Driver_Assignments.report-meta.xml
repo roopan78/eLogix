@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>Vehicle_Assignment__c$Name</field>
+    </columns>
+    <columns>
+        <field>Vehicle_Assignment__c$Vehicle__c</field>
+    </columns>
+    <columns>
+        <field>Vehicle_Assignment__c$Shipment__c</field>
+    </columns>
+    <columns>
+        <field>Vehicle_Assignment__c$Status__c</field>
+    </columns>
+    <columns>
+        <field>Vehicle_Assignment__c$Assignment_Start__c</field>
+    </columns>
+    <columns>
+        <aggregateTypes>Sum</aggregateTypes>
+        <field>Vehicle_Assignment__c$Duration_Hours__c</field>
+    </columns>
+    <description
+  >Trips and assigned hours per driver (planned, active and completed assignments).</description>
+    <filter>
+        <criteriaItems>
+            <column>Vehicle_Assignment__c$Status__c</column>
+            <isUnlocked>true</isUnlocked>
+            <operator>notEqual</operator>
+            <value>Cancelled</value>
+        </criteriaItems>
+        <language>en_US</language>
+    </filter>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Vehicle_Assignment__c$Driver__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Driver Assignments</name>
+    <reportType>eLogix_Vehicle_Assignments__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>Vehicle_Assignment__c$CreatedDate</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>

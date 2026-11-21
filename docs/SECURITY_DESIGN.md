@@ -59,6 +59,8 @@ Letters: **C**reate, **R**ead, **E**dit, **D**elete, **V**iew All, **M**odify Al
 
 The generator enforces the platform's permission dependencies at build time. Every grant includes Read. Delete requires Edit. Modify All requires Edit, Delete and View All. A detail object needs Read on its master, and View All or Modify All on the detail needs the same on the master. Contact needs Account.
 
+**Phase 8 analytics.** The eLogix Reports and eLogix Dashboards folders are shared View with all internal users. Reports run as the viewer (CRUD, FLS, sharing). Dashboards run as one fixed administrator, so their totals are org-wide for anyone who can open the folder; restricting the folder to manager roles is a Phase 9 task. Details: [ANALYTICS_IMPLEMENTATION.md](ANALYTICS_IMPLEMENTATION.md) section 5.
+
 **Phase 7 UI controllers.** Each role permission set gets Apex class access to a screen controller when it can read the screen's object (generated from `CONTROLLER_ACCESS`: Shipment, Quotation, Vehicle Assignment, Delivery, Tracking Event), and the Shipment, Fleet and Tracking Console tabs on the same basis. The controllers are thin, `with sharing`, read in user mode and delegate every write to the services, so the UI adds no access path. Details: [LWC_IMPLEMENTATION.md](LWC_IMPLEMENTATION.md) section 4.
 
 **`eLogix_GPS_Integration`** (Phase 6) is for the GPS provider's API-only integration user, and has no app.
