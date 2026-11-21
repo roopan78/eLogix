@@ -10,12 +10,19 @@ import LABEL_SUBMITTED from "@salesforce/label/c.eLogix_UI_Request_Submitted";
 const DRAFT = "Draft";
 const SUBMITTED = "Submitted";
 
+/** lightning-input-field reports a lookup value as an Id, or as a one-element array of Ids. */
+function lookupId(value) {
+  const id = Array.isArray(value) ? value[0] : value;
+  return id || null;
+}
+
 /**
  * Shipment booking: a Shipment_Request__c form (lightning-record-edit-form, so Lightning Data Service
- * applies CRUD, FLS and the request validation rules). "Save as draft" saves it as Draft; "Submit
- * request" saves it as Submitted, ready for quotation. On an Account record page the customer is
- * pre-filled. Raises "requestcreated" with the new record Id, then opens the new request, or clears
- * the form for the next booking when stay-on-page is set.
+ * applies CRUD, FLS and the request validation rules). Customer and Business Unit are the standard
+ * Salesforce lookups. "Save as draft" saves it as Draft; "Submit request" saves it as Submitted,
+ * ready for quotation. On an Account record page the customer is pre-filled. Raises "requestcreated"
+ * with the new record Id, then opens the new request, or clears the form for the next booking when
+ * stay-on-page is set.
  */
 export default class ShipmentBooking extends NavigationMixin(LightningElement) {
   /** Record context: on an Account page, the customer to pre-fill. */
@@ -31,10 +38,28 @@ export default class ShipmentBooking extends NavigationMixin(LightningElement) {
   };
 
   isSaving = false;
+  /** The lookup values; undefined until the user changes them. */
+  _customerId;
+  _unitId;
   _targetStatus = DRAFT;
 
   get customerId() {
+    if (this._customerId !== undefined) {
+      return this._customerId;
+    }
     return this.objectApiName === "Account" ? this.recordId : null;
+  }
+
+  get businessUnitId() {
+    return this._unitId === undefined ? null : this._unitId;
+  }
+
+  handleCustomerChange(event) {
+    this._customerId = lookupId(event.detail.value);
+  }
+
+  handleUnitChange(event) {
+    this._unitId = lookupId(event.detail.value);
   }
 
   handleSaveDraft() {
@@ -50,7 +75,9 @@ export default class ShipmentBooking extends NavigationMixin(LightningElement) {
     event.preventDefault();
     const fields = { ...event.detail.fields, Status__c: this._targetStatus };
     this.isSaving = true;
-    this.template.querySelector("lightning-record-edit-form").submit(fields);
+    this.template
+      .querySelector("lightning-record-edit-form.elogix-booking")
+      .submit(fields);
   }
 
   handleSuccess(event) {
@@ -83,8 +110,12 @@ export default class ShipmentBooking extends NavigationMixin(LightningElement) {
   }
 
   resetForm() {
+    this._customerId = undefined;
+    this._unitId = undefined;
     this.template
-      .querySelectorAll("lightning-input-field")
+      .querySelectorAll(
+        "lightning-record-edit-form.elogix-booking lightning-input-field"
+      )
       .forEach((field) => field.reset());
   }
 }

@@ -1,6 +1,7 @@
 <template>
   <lightning-card title={labels.title} icon-name="custom:custom98">
     <lightning-record-edit-form
+      class="elogix-booking"
       object-api-name="Shipment_Request__c"
       onsubmit={handleSubmit}
       onsuccess={handleSuccess}
@@ -14,13 +15,18 @@
         <div class="slds-grid slds-wrap slds-gutters_small">
           <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
             <lightning-input-field
+              class="elogix-customer"
               field-name="Customer__c"
               value={customerId}
               required
+              onchange={handleCustomerChange}
             ></lightning-input-field>
             <lightning-input-field
+              class="elogix-business-unit"
               field-name="Business_Unit__c"
+              value={businessUnitId}
               required
+              onchange={handleUnitChange}
             ></lightning-input-field>
             <lightning-input-field
               field-name="Route__c"
